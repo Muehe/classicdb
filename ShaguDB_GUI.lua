@@ -63,12 +63,32 @@ SDBG.minimapButton:SetHighlightTexture('Interface\\Minimap\\UI-Minimap-ZoomButto
 SDBG.minimapButton:SetPoint("TOPLEFT", Minimap, "TOPLEFT", 52-(80*cos(ShaguMinimapPosition)),(80*sin(ShaguMinimapPosition))-52)
 SDBG.minimapButton:SetScript("OnClick", function()
     if ( arg1 == "LeftButton" ) then
-      if (SDBG:IsShown()) then
-        SDBG:Hide()
-      else
-        SDBG:Show()
-      end
+        if (ShaguDB_Frame:IsShown()) then
+            ShaguDB_Frame:Hide()
+        else
+            ShaguDB_Frame:Show()
+        end
     end
+    if (arg1 == "RightButton") then
+        if IsShiftKeyDown() then
+            ShaguDB_ResetGui();
+        else
+            if (SDBG:IsShown()) then
+                SDBG:Hide();
+            else
+                SDBG:Show();
+            end
+        end
+    end
+  end)
+SDBG.minimapButton:SetScript("OnEnter", function()
+    ShaguDB_Tooltip:SetOwner(SDBG.minimapButton, "ANCHOR_BOTTOMLEFT");
+    ShaguDB_Tooltip:ClearLines();
+    ShaguDB_Tooltip:SetText("<LeftClick>: Toggle settings and controls.\n<RightClick>: Toggle search window.\n<Shift>+<RightClick>: Reset and show both windows.");
+    ShaguDB_Tooltip:Show();
+  end)
+SDBG.minimapButton:SetScript("OnLeave", function()
+    ShaguDB_Tooltip:Hide();
   end)
 
 SDBG.minimapButton.overlay = SDBG.minimapButton:CreateTexture(nil, 'OVERLAY')
@@ -288,7 +308,7 @@ function SDBG:SearchSpawn(search)
   local spawnCount = 1;
 
   local database = SDBG_Favs["spawn"]
-  if strlen(search) > 2 then database = spawnDB end
+  if strlen(search) > 2 then database = npcData end
 
   for spawn in pairs(database) do
     if (strfind(strlower(spawn), strlower(search))) or strlen(search) <= 3 then
@@ -396,9 +416,9 @@ function SDBG:SearchSpawn(search)
       end
     end
   end
-  
+
   if spawnCount >= 14 then spawnCount = "*" else spawnCount = spawnCount -1 end
-  if spawnCount == 0 then 
+  if spawnCount == 0 then
     SDBG.buttonSpawn.text:SetText("Mobs & Objects")
   else
     SDBG.buttonSpawn.text:SetText("Mobs & Objects |cffaaaaaa(" .. spawnCount .. ")")
@@ -421,9 +441,9 @@ function SDBG:SearchItem(search)
         GameTooltip:Hide()
 
 	    local _, itemLink, itemQuality, _, _, _, _, _, itemTexture = GetItemInfo(itemID)
-        if itemQuality then itemColor = "|c" .. string.format("%02x%02x%02x%02x", 255, 
-								    ITEM_QUALITY_COLORS[itemQuality].r * 255, 
-								    ITEM_QUALITY_COLORS[itemQuality].g * 255, 
+        if itemQuality then itemColor = "|c" .. string.format("%02x%02x%02x%02x", 255,
+								    ITEM_QUALITY_COLORS[itemQuality].r * 255,
+								    ITEM_QUALITY_COLORS[itemQuality].g * 255,
 								    ITEM_QUALITY_COLORS[itemQuality].b * 255)
         else itemColor = "|cffffffff" end
 
@@ -499,7 +519,7 @@ function SDBG:SearchItem(search)
           else
             _, _, npc, _ = strfind(itemDB[itemName][2], "(.*),(.*)");
           end
-          
+
           if spawnDB[npc] and spawnDB[npc]['type'] == "NPC" then
             SDBG.item.buttons[itemCount].loot.icon:SetTexture("Interface\\AddOns\\ShaguDB\\symbols\\icon_npc")
           else
@@ -588,7 +608,7 @@ function SDBG:SearchQuest(search)
   for questName in pairs(database) do
     if (strfind(strlower(questName), strlower(search))) or strlen(search) <= 3 then
       if questCount <= 14 and questDB[questName] then
-      
+
         SDBG.quest.buttons[questCount] = CreateFrame("Button","mybutton",SDBG.quest,"UIPanelButtonTemplate")
         SDBG.quest.buttons[questCount]:SetPoint("TOP", 0, -questCount*22+11)
         SDBG.quest.buttons[questCount]:SetWidth(450)
@@ -670,7 +690,7 @@ function SDBG:SearchQuest(search)
             SDBG.quest.buttons[questCount].alliance.icon:SetTexture("Interface\\AddOns\\ShaguDB\\symbols\\icon_alliance")
             SDBG.quest.buttons[questCount].alliance.icon:SetAllPoints(SDBG.quest.buttons[questCount].alliance)
           end
-  
+
         -- show fav button
         SDBG.quest.buttons[questCount].fav = CreateFrame("Button","mybutton",SDBG.quest.buttons[questCount],"UIPanelButtonTemplate")
         SDBG.quest.buttons[questCount].fav:SetPoint("LEFT", 5, 0)

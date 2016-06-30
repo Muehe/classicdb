@@ -1,0 +1,335 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\..\FrameXML\UI.xsd">
+    <Font name="RQP_Font" font="Fonts\FRIZQT__.TTF" virtual="true">
+        <FontHeight>
+            <AbsValue val="11"/>
+        </FontHeight>
+    </Font>
+    <Frame name="ShaguDB_Frame" parent="UIParent" movable="true" toplevel="true" enableMouse="true" frameStrata="HIGH" hidden="true">
+        <Size>
+            <AbsDimension x="180" y="116"/>
+        </Size>
+
+        <Anchors>
+            <Anchor point="CENTER"/>
+        </Anchors>
+
+        <Scripts>
+            <OnLoad>
+                ShaguDB_Init();
+            </OnLoad>
+            <OnEvent>
+                ShaguDB_Event(event);
+            </OnEvent>
+            <OnShow>
+
+            </OnShow>
+            <OnMouseDown>
+                ShaguDB_OnMouseDown(arg1);
+            </OnMouseDown>
+            <OnMouseUp>
+                ShaguDB_OnMouseUp(arg1);
+            </OnMouseUp>
+            <OnShow>
+                ShaguDB_OnFrameShow();
+            </OnShow>
+        </Scripts>
+
+        <Backdrop bgFile="Interface\AddOns\ShaguDB\img\background" edgeFile="Interface\AddOns\ShaguDB\img\border" tile="true">
+            <BackgroundInsets>
+                <AbsInset left="5" right="5" top="5" bottom="5"/>
+            </BackgroundInsets>
+            <TileSize>
+                <AbsValue val="32"/>
+            </TileSize>
+            <EdgeSize>
+                <AbsValue val="16"/>
+            </EdgeSize>
+        </Backdrop>
+
+        <Layers>
+            <Layer>
+                <FontString name="MapButtons" inherits="RQP_Font" text="Mapping:">
+                    <Anchors>
+                        <Anchor point="TOPLEFT">
+                            <Offset x="12" y="-12"/>
+                        </Anchor>
+                    </Anchors>
+                </FontString>
+                <FontString name="Settings" inherits="RQP_Font" text="Settings:">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeTo="MapButtons" relativePoint="BOTTOMLEFT">
+                            <Offset x="0" y="-28"/>
+                        </Anchor>
+                    </Anchors>
+                </FontString>
+                <FontString name="SetWaypoints" inherits="RQP_Font" text="Waypoints">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeTo="Settings" relativePoint="BOTTOMLEFT">
+                            <Offset x="20" y="-2"/>
+                        </Anchor>
+                    </Anchors>
+                </FontString>
+                <FontString name="SetAutoPlot" inherits="RQP_Font" text="Auto Plot">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeTo="SetWaypoints" relativePoint="BOTTOMLEFT">
+                            <Offset x="0" y="-2"/>
+                        </Anchor>
+                    </Anchors>
+                </FontString>
+                <FontString name="SetQuestStarts" inherits="RQP_Font" text="Quest Starts">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeTo="SetAutoPlot" relativePoint="BOTTOMLEFT">
+                            <Offset x="0" y="-2"/>
+                        </Anchor>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+
+        <Frames>
+            <Button name="CleanMap" inherits="OptionsButtonTemplate">
+                <Size>
+                    <AbsDimension x="24" y="24"/>
+                </Size>
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="MapButtons" relativePoint="BOTTOMLEFT">
+                        <Offset x="5" y="-2"/>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnClick>ShaguDB_DoCleanMap();</OnClick>
+                    <OnEnter>
+                        ShaguDB_Tooltip:SetOwner(CleanMap, "ANCHOR_TOPLEFT");
+                        ShaguDB_Tooltip:ClearLines();
+                        ShaguDB_Tooltip:SetText("Clean ShaguDB notes from map.");
+                        ShaguDB_Tooltip:Show();
+                    </OnEnter>
+                    <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
+                </Scripts>
+                <NormalTexture file="Interface\Addons\ShaguDB\symbols\Map"/>
+                <PushedTexture file="Interface\Addons\ShaguDB\symbols\MapPushed"/>
+            </Button>
+            <Button name="PlotAll" inherits="OptionsButtonTemplate">
+                <Size>
+                    <AbsDimension x="24" y="24"/>
+                </Size>
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="CleanMap" relativePoint="TOPRIGHT">
+                        <Offset x="2" y="0"/>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnClick>
+                        ShaguDB_PlotAllQuests();
+                        WorldMapFrame:Show();
+                    </OnClick>
+                    <OnEnter>
+                        ShaguDB_Tooltip:SetOwner(PlotAll, "ANCHOR_TOPLEFT");
+                        ShaguDB_Tooltip:ClearLines();
+                        ShaguDB_Tooltip:SetText("Show notes for all quests in the quest log.");
+                        ShaguDB_Tooltip:Show();
+                    </OnEnter>
+                    <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
+                </Scripts>
+                <NormalTexture file="Interface\Addons\ShaguDB\symbols\MarkMap"/>
+                <PushedTexture file="Interface\Addons\ShaguDB\symbols\MarkMapPushed"/>
+            </Button>
+            <Button name="PlotSelected" inherits="OptionsButtonTemplate">
+                <Size>
+                    <AbsDimension x="24" y="24"/>
+                </Size>
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="PlotAll" relativePoint="TOPRIGHT">
+                        <Offset x="2" y="0"/>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnClick>
+                        ShaguDB_GetSelectionQuestNotes()
+                        WorldMapFrame:Show();
+                    </OnClick>
+                    <OnEnter>
+                        ShaguDB_Tooltip:SetOwner(PlotSelected, "ANCHOR_TOPLEFT");
+                        ShaguDB_Tooltip:ClearLines();
+                        ShaguDB_Tooltip:SetText("Show notes for the quest which is\ncurrently selected in the quest log.");
+                        ShaguDB_Tooltip:Show();
+                    </OnEnter>
+                    <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
+                </Scripts>
+                <NormalTexture file="Interface\Addons\ShaguDB\symbols\Log"/>
+                <PushedTexture file="Interface\Addons\ShaguDB\symbols\LogPushed"/>
+            </Button>
+            <Button name="ShowSearch" inherits="OptionsButtonTemplate">
+                <Size>
+                    <AbsDimension x="24" y="24"/>
+                </Size>
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="PlotSelected" relativePoint="TOPRIGHT">
+                        <Offset x="2" y="0"/>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnClick>
+                        if (SDBG:IsShown()) then
+                            SDBG:Hide()
+                        else
+                            SDBG:Show()
+                        end
+                    </OnClick>
+                    <OnEnter>
+                        ShaguDB_Tooltip:SetOwner(ShowSearch, "ANCHOR_TOPLEFT");
+                        ShaguDB_Tooltip:ClearLines();
+                        ShaguDB_Tooltip:SetText("Toggle window for searching NPCs,\nobjects, items and quests.");
+                        ShaguDB_Tooltip:Show();
+                    </OnEnter>
+                    <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
+                </Scripts>
+                <NormalTexture file="Interface\Addons\ShaguDB\symbols\Glass"/>
+                <PushedTexture file="Interface\Addons\ShaguDB\symbols\GlassPushed"/>
+            </Button>
+            <Button name="ToggleCartographer" inherits="OptionsButtonTemplate">
+                <Size>
+                    <AbsDimension x="24" y="24"/>
+                </Size>
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="ShowSearch" relativePoint="TOPRIGHT">
+                        <Offset x="2" y="0"/>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnClick> Cartographer.options.args.Notes.args.toggle.set(); </OnClick>
+                    <OnEnter>
+                        ShaguDB_Tooltip:SetOwner(ToggleCartographer, "ANCHOR_TOPLEFT");
+                        ShaguDB_Tooltip:ClearLines();
+                        ShaguDB_Tooltip:SetText("Show/Hide Cartographer Notes.");
+                        ShaguDB_Tooltip:Show();
+                    </OnEnter>
+                    <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
+                </Scripts>
+                <NormalTexture file="Interface\Addons\ShaguDB\symbols\OnOff"/>
+                <PushedTexture file="Interface\Addons\ShaguDB\symbols\OnOffPushed"/>
+            </Button>
+            <Button name="CycleMap" inherits="OptionsButtonTemplate">
+                <Size>
+                    <AbsDimension x="24" y="24"/>
+                </Size>
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="ToggleCartographer" relativePoint="BOTTOMLEFT">
+                        <Offset x="0" y="2"/>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnClick> ShaguDB_CycleMarkedZones(); </OnClick>
+                    <OnEnter>
+                        ShaguDB_Tooltip:SetOwner(CycleMap, "ANCHOR_TOPLEFT");
+                        ShaguDB_Tooltip:ClearLines();
+                        ShaguDB_Tooltip:SetText("Cycle through marked zones.\n(Might miss first click)");
+                        ShaguDB_Tooltip:Show();
+                    </OnEnter>
+                    <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
+                </Scripts>
+                <NormalTexture file="Interface\Addons\ShaguDB\symbols\OnOff"/>
+                <PushedTexture file="Interface\Addons\ShaguDB\symbols\OnOffPushed"/>
+            </Button>
+            <Button name="ToggleQuestieNotes" inherits="OptionsButtonTemplate">
+                <Size>
+                    <AbsDimension x="24" y="24"/>
+                </Size>
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="ToggleCartographer" relativePoint="TOPRIGHT">
+                        <Offset x="2" y="0"/>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnLoad> if not Questie then ToggleQuestieNotes:Hide(); end </OnLoad>
+                    <OnClick> if Questie then Questie:Toggle(); else ShaguDB_Print("Questie not found."); end </OnClick>
+                    <OnEnter>
+                        ShaguDB_Tooltip:SetOwner(ToggleQuestieNotes, "ANCHOR_TOPLEFT");
+                        ShaguDB_Tooltip:ClearLines();
+                        ShaguDB_Tooltip:SetText("Toggle Questie.");
+                        ShaguDB_Tooltip:Show();
+                    </OnEnter>
+                    <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
+                </Scripts>
+                <NormalTexture file="Interface\Addons\ShaguDB\symbols\OnOff"/>
+                <PushedTexture file="Interface\Addons\ShaguDB\symbols\OnOffPushed"/>
+            </Button>
+            <CheckButton name="waypoints" inherits="OptionsCheckButtonTemplate">
+                <Size>
+                    <AbsDimension x="16" y="16"/>
+                </Size>
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="Settings" relativePoint="BOTTOMLEFT">
+                        <Offset x="5" y="-2"/>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnShow>
+                        ShaguDB_CheckSetting("waypoints");
+                    </OnShow>
+                    <OnClick>
+                        ShaguDB_SwitchSetting("waypoints");
+                    </OnClick>
+                    <OnEnter>
+                        ShaguDB_Tooltip:SetOwner(waypoints, "ANCHOR_TOPLEFT");
+                        ShaguDB_Tooltip:ClearLines();
+                        ShaguDB_Tooltip:SetText("Plot waypoints for marked NPCs.");
+                        ShaguDB_Tooltip:Show();
+                    </OnEnter>
+                    <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
+                </Scripts>
+            </CheckButton>
+            <CheckButton name="auto_plot" inherits="OptionsCheckButtonTemplate">
+                <Size>
+                    <AbsDimension x="16" y="16"/>
+                </Size>
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="SetAutoPlot">
+                        <Offset x="-16" y="1"/>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnShow>
+                        ShaguDB_CheckSetting("auto_plot");
+                    </OnShow>
+                    <OnClick>
+                        ShaguDB_SwitchSetting("auto_plot");
+                    </OnClick>
+                    <OnEnter>
+                        ShaguDB_Tooltip:SetOwner(auto_plot, "ANCHOR_TOPLEFT");
+                        ShaguDB_Tooltip:ClearLines();
+                        ShaguDB_Tooltip:SetText("Automatically update quest notes.");
+                        ShaguDB_Tooltip:Show();
+                    </OnEnter>
+                    <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
+                </Scripts>
+            </CheckButton>
+            <CheckButton name="questStarts" inherits="OptionsCheckButtonTemplate">
+                <Size>
+                    <AbsDimension x="16" y="16"/>
+                </Size>
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="SetQuestStarts">
+                        <Offset x="-16" y="1"/>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnShow>
+                        ShaguDB_CheckSetting("questStarts");
+                    </OnShow>
+                    <OnClick>
+                        ShaguDB_SwitchSetting("questStarts");
+                    </OnClick>
+                    <OnEnter>
+                        ShaguDB_Tooltip:SetOwner(questStarts, "ANCHOR_TOPLEFT");
+                        ShaguDB_Tooltip:ClearLines();
+                        ShaguDB_Tooltip:SetText("Show quest start notes.");
+                        ShaguDB_Tooltip:Show();
+                    </OnEnter>
+                    <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
+                </Scripts>
+            </CheckButton>
+        </Frames>
+    </Frame>
+    <GameTooltip name="ShaguDB_Tooltip" inherits="GameTooltipTemplate"/>
+</Ui>
