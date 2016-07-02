@@ -5,7 +5,8 @@
 ## Version: oooVersionooo-oooLocaleooo
 ## RequiredDeps: Cartographer
 ## OptionalDeps: ShaguQuest
-## SavedVariables: ShaguMinimapPosition ShaguMinimapEnabled SDBG_Favs ShaguDB_Settings ShaguDB_FinishedQuests
+## SavedVariables: ShaguMinimapPosition ShaguMinimapEnabled
+## SavedVariablesPerCharacter: SDBG_Favs ShaguDB_Settings ShaguDB_FinishedQuests
 
 # database
 db\zoneDB.lua
