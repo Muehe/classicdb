@@ -154,12 +154,12 @@ SDBG.inputField.updateSearch = function()
   local query = SDBG.inputField:GetText()
   if query ~= "Search" then
     SDBG:SearchSpawn(query)
-    SDBG:SearchItem(query)
-    SDBG:SearchQuest(query)
+    --SDBG:SearchItem(query)
+    --SDBG:SearchQuest(query)
   else
     SDBG:SearchSpawn("")
-    SDBG:SearchItem("")
-    SDBG:SearchQuest("")
+    --SDBG:SearchItem("")
+    --SDBG:SearchQuest("")
   end
 end
 
@@ -311,9 +311,10 @@ function SDBG:SearchSpawn(search)
   local database = SDBG_Favs["spawn"]
   if strlen(search) > 2 then database = npcData end
 
-  for spawn in pairs(database) do
-    if (strfind(strlower(spawn), strlower(search))) or strlen(search) <= 3 then
+  for id, spawn in pairs(database) do
+    if (strfind(strlower(spawn[DB_NAME]), strlower(search))) or strlen(search) <= 3 then
       if ( spawnCount <= 14) then
+        local name = spawn[DB_NAME];
         SDBG.spawn.buttons[spawnCount] = CreateFrame("Button","mybutton",SDBG.spawn,"UIPanelButtonTemplate")
         SDBG.spawn.buttons[spawnCount]:SetPoint("TOP", 0, -spawnCount*21+11)
         SDBG.spawn.buttons[spawnCount]:SetWidth(450)
@@ -333,16 +334,16 @@ function SDBG:SearchSpawn(search)
         end
 
         SDBG.spawn.buttons[spawnCount]:SetTextColor(1,1,1)
-        if spawnDB[spawn]['level'] ~= "" then
-          SDBG.spawn.buttons[spawnCount]:SetText(spawn .. " |cffaaaaaa(Lv." .. spawnDB[spawn]['level'] .. ")")
+        if spawn[DB_LEVEL] ~= "" then
+          SDBG.spawn.buttons[spawnCount]:SetText(name .. " |cffaaaaaa(Lv." .. spawn[DB_LEVEL] .. ")")
         else
-          SDBG.spawn.buttons[spawnCount]:SetText(spawn)
+          SDBG.spawn.buttons[spawnCount]:SetText(name)
         end
 
-        SDBG.spawn.buttons[spawnCount].spawnName = spawn
+        SDBG.spawn.buttons[spawnCount].spawnName = name
         SDBG.spawn.buttons[spawnCount]:SetScript("OnClick", function(self)
             ShaguDB_MAP_NOTES = {};
-            ShaguDB_searchMonster(this.spawnName,nil)
+            ShaguDB_MarkForPlotting(DB_NPC, this.spawnName, this.spawnName, "Spawnpoint", 0);
             ShaguDB_ShowMap();
           end)
 
@@ -358,8 +359,8 @@ function SDBG:SearchSpawn(search)
           end
         end)
 
-        -- show faction icons
-        local faction = spawnDB[SDBG.spawn.buttons[spawnCount].spawnName]['faction']
+        -- show faction icons (deactivated until faction is added to NPC data)
+        local faction = "HA" --spawnDB[SDBG.spawn.buttons[spawnCount].spawnName]['faction']
         if strfind(faction, "H") and faction ~= "HA" then
           SDBG.spawn.buttons[spawnCount].horde = CreateFrame("Frame", nil, SDBG.spawn.buttons[spawnCount])
           SDBG.spawn.buttons[spawnCount].horde:SetPoint("RIGHT", -5, 0)
@@ -395,7 +396,7 @@ function SDBG:SearchSpawn(search)
         SDBG.spawn.buttons[spawnCount].fav.icon = SDBG.spawn.buttons[spawnCount].fav:CreateTexture(nil,"BACKGROUND")
         SDBG.spawn.buttons[spawnCount].fav.icon:SetTexture("Interface\\AddOns\\ShaguDB\\img\\fav")
 
-        if SDBG_Favs["spawn"][spawn] then
+        if SDBG_Favs["spawn"][name] then
           SDBG.spawn.buttons[spawnCount].fav.icon:SetVertexColor(1,1,1,1)
         else
           SDBG.spawn.buttons[spawnCount].fav.icon:SetVertexColor(0,0,0,1)
