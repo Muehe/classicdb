@@ -4,7 +4,6 @@
 ## Notes: A Quest-, Item-, Vendor- and Spawn-database. Notes are shown via Cartographer.
 ## Version: oooVersionooo-oooLocaleooo
 ## RequiredDeps: Cartographer
-## OptionalDeps: ShaguQuest
 ## SavedVariables: ShaguMinimapPosition ShaguMinimapEnabled
 ## SavedVariablesPerCharacter: SDBG_Favs ShaguDB_Settings ShaguDB_FinishedQuests
 
