@@ -44,6 +44,7 @@ end
 SDBG.minimapButton:SetMovable(true)
 SDBG.minimapButton:EnableMouse(true)
 SDBG.minimapButton:RegisterForDrag('LeftButton')
+SDBG.minimapButton:RegisterForClicks("LeftButtonUp", "RightButtonUp");
 SDBG.minimapButton:SetScript("OnDragStop", function()
     local xpos,ypos = GetCursorPosition()
     local xmin,ymin = Minimap:GetLeft(), Minimap:GetBottom()
