@@ -36,13 +36,13 @@
 
         <Backdrop bgFile="Interface\AddOns\ShaguDB\img\background" edgeFile="Interface\AddOns\ShaguDB\img\border" tile="true">
             <BackgroundInsets>
-                <AbsInset left="5" right="5" top="5" bottom="5"/>
+                <AbsInset left="0" right="0" top="0" bottom="0"/>
             </BackgroundInsets>
             <TileSize>
-                <AbsValue val="32"/>
+                <AbsValue val="8"/>
             </TileSize>
             <EdgeSize>
-                <AbsValue val="16"/>
+                <AbsValue val="8"/>
             </EdgeSize>
         </Backdrop>
 
@@ -228,8 +228,8 @@
                     </OnEnter>
                     <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
                 </Scripts>
-                <NormalTexture file="Interface\Addons\ShaguDB\symbols\OnOff"/>
-                <PushedTexture file="Interface\Addons\ShaguDB\symbols\OnOffPushed"/>
+                <NormalTexture file="Interface\Addons\ShaguDB\symbols\MapCycle"/>
+                <PushedTexture file="Interface\Addons\ShaguDB\symbols\MapCyclePushed"/>
             </Button>
             <Button name="ToggleQuestieNotes" inherits="OptionsButtonTemplate">
                 <Size>
