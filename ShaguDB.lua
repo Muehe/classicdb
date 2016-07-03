@@ -1199,16 +1199,29 @@ function ShaguDB_GetObjID(objName)
     end
 end -- ShaguDB_GetObjID(objName)
 
-function ShaguDB_SwitchSetting(setting)
+function ShaguDB_SwitchSetting(setting, ...)
     text = {
-        ["waypoints"] = "Waypoint plotting",
-        ["auto_plot"] = "Auto plotting",
-        ["questStarts"] = "Quest start plotting",
-        ["questIds"] = "Quest IDs in tooltips"
+        ["waypoints"] = "Showing waypoints",
+        ["auto_plot"] = "Automatically tracking quests",
+        ["questStarts"] = "Showing quest starts",
+        ["reqLevel"] = "Showing required level in quest start tooltips",
+        ["filterReqLevel"] = "Filtering quest starts by required level",
+        ["questIds"] = "Showing quest IDs in tooltips",
+        ["dbMode"] = "DB Mode",
+        ["item_item"] = "Showing items dropped by items",
+        ["minDropChance"] = "Minimum drop chance for items to be shown",
     };
     if (ShaguDB_Settings[setting] == false) then
         ShaguDB_Settings[setting] = true;
         ShaguDB_Print(text[setting].." enabled.");
+    elseif (setting == "minDropChance") then
+        local number = tonumber(arg1);
+        if (number) and (number >= 0 and number <= 101) then
+            ShaguDB_Settings[setting] = number;
+            ShaguDB_Print(text[setting].." set to: "..number);
+        else
+            ShaguDB_Print(text[setting].." is: "..ShaguDB_Settings[setting]);
+        end
     else
         ShaguDB_Settings[setting] = false;
         ShaguDB_Print(text[setting].." disabled.");
@@ -1221,7 +1234,28 @@ function ShaguDB_SwitchSetting(setting)
     end
 end -- ShaguDB_SwitchSetting(setting)
 
+function ShaguDB_GetSetting(setting, ...)
+    text = {
+        ["waypoints"] = "Showing waypoints",
+        ["auto_plot"] = "Automatically tracking quests",
+        ["questStarts"] = "Showing quest starts",
+        ["reqLevel"] = "Showing required level in quest start tooltips",
+        ["filterReqLevel"] = "Filtering quest starts by required level",
+        ["questIds"] = "Showing quest IDs in tooltips",
+        ["dbMode"] = "DB Mode",
+        ["item_item"] = "Showing items dropped by items",
+    };
+    if (text[setting]) and (ShaguDB_Settings[setting]) then
+        return text[setting].."|cFF40C040 is enabled|r";
+    elseif (text[setting]) then
+        return text[setting].."|cFFFF1A1A is disabled|r";
+    end
+end
+
 function ShaguDB_CheckSetting(setting)
+    if (setting ~= "waypoints") and (setting ~= "auto_plot") and (setting ~= "questStarts") then
+        return;
+    end
     if (ShaguDB_Settings[setting] == true) then
         getglobal(setting):SetChecked(true);
     else
@@ -1682,7 +1716,7 @@ function ShaguDB_GetQuestStartComment(npcOrGoStarts)
                 tooltipText = tooltipText..colorString.."["..level.."] "..qData[questID][DB_NAME].."|r\n";
                 if ShaguDB_Settings.questIds and ShaguDB_Settings.reqLevel then
                     tooltipText = tooltipText.."|cFFa6a6a6(ID: "..questID..") | |r";
-                elseif ShaguDB_Settings.questIds and not toHigh then
+                elseif ShaguDB_Settings.questIds then
                     tooltipText = tooltipText.."|cFFa6a6a6(ID: "..questID..")|r\n";
                 end
                 if ShaguDB_Settings.reqLevel then
