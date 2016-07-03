@@ -9,9 +9,11 @@ local backdrop_noborder = {
   insets = {left = 0, right = 0, top = 0, bottom = 0},
 }
 
-if not SDBG_Favs then
-SDBG_Favs = { ["spawn"] = {}, ["item"] = {}, ["quest"] = {} }
-end
+if not SDBG_Favs then SDBG_Favs = {} end
+if not SDBG_Favs["spawn"] then SDBG_Favs["spawn"] = {} end
+if not SDBG_Favs["object"] then SDBG_Favs["object"] = {} end
+if not SDBG_Favs["item"] then SDBG_Favs["item"] = {} end
+if not SDBG_Favs["quest"] then SDBG_Favs["quest"] = {} end
 
 SDBG = CreateFrame("Frame",nil,UIParent)
 SDBG:RegisterEvent("PLAYER_ENTERING_WORLD");
@@ -154,10 +156,12 @@ SDBG.inputField.updateSearch = function()
   local query = SDBG.inputField:GetText()
   if query ~= "Search" then
     SDBG:SearchSpawn(query)
+    SDBG:SearchObject(query)
     --SDBG:SearchItem(query)
     --SDBG:SearchQuest(query)
   else
     SDBG:SearchSpawn("")
+    SDBG:SearchObject("")
     --SDBG:SearchItem("")
     --SDBG:SearchQuest("")
   end
@@ -195,7 +199,7 @@ SDBG.cleanButton:SetScript("OnClick", function()
 
 SDBG.buttonSpawn = CreateFrame("Button", nil, SDBG)
 --SDBG.buttonSpawn:ClearAllPoints()
-SDBG.buttonSpawn:SetWidth(150)
+SDBG.buttonSpawn:SetWidth(100)
 SDBG.buttonSpawn:SetHeight(25)
 SDBG.buttonSpawn:SetPoint("TOPLEFT", 13, -50)
 SDBG.buttonSpawn:SetBackdrop(backdrop_noborder)
@@ -204,23 +208,50 @@ SDBG.buttonSpawn.text:ClearAllPoints()
 SDBG.buttonSpawn.text:SetAllPoints(SDBG.buttonSpawn)
 SDBG.buttonSpawn.text:SetPoint("LEFT", 0, 0)
 SDBG.buttonSpawn.text:SetFontObject(GameFontWhite)
-SDBG.buttonSpawn.text:SetText("Mobs & Objects")
+SDBG.buttonSpawn.text:SetText("Mobs")
 SDBG.buttonSpawn:SetBackdropColor(1,1,1,.05)
 SDBG.buttonSpawn:SetScript("OnClick", function()
   SDBG.buttonSpawn:SetBackdropColor(1,1,1,.15)
+  SDBG.buttonObject:SetBackdropColor(1,1,1,.05)
   SDBG.buttonItem:SetBackdropColor(1,1,1,.05)
   SDBG.buttonQuest:SetBackdropColor(1,1,1,.05)
 
   SDBG.spawn:Show()
+  SDBG.object:Hide()
+  SDBG.item:Hide()
+  SDBG.quest:Hide()
+end)
+
+SDBG.buttonObject = CreateFrame("Button", nil, SDBG)
+--SDBG.buttonObject:ClearAllPoints()
+SDBG.buttonObject:SetWidth(100)
+SDBG.buttonObject:SetHeight(25)
+SDBG.buttonObject:SetPoint("TOPLEFT", 113, -50)
+SDBG.buttonObject:SetBackdrop(backdrop_noborder)
+SDBG.buttonObject.text = SDBG.buttonObject:CreateFontString("Status", "LOW", "GameFontNormal")
+SDBG.buttonObject.text:ClearAllPoints()
+SDBG.buttonObject.text:SetAllPoints(SDBG.buttonObject)
+SDBG.buttonObject.text:SetPoint("LEFT", 0, 0)
+SDBG.buttonObject.text:SetFontObject(GameFontWhite)
+SDBG.buttonObject.text:SetText("Objects")
+SDBG.buttonObject:SetBackdropColor(1,1,1,.05)
+SDBG.buttonObject:SetScript("OnClick", function()
+  SDBG.buttonObject:SetBackdropColor(1,1,1,.15)
+  SDBG.buttonSpawn:SetBackdropColor(1,1,1,.05)
+  SDBG.buttonItem:SetBackdropColor(1,1,1,.05)
+  SDBG.buttonQuest:SetBackdropColor(1,1,1,.05)
+
+  SDBG.object:Show()
+  SDBG.spawn:Hide()
   SDBG.item:Hide()
   SDBG.quest:Hide()
 end)
 
 SDBG.buttonItem = CreateFrame("Button", nil, SDBG)
 --SDBG.buttonItem:ClearAllPoints()
-SDBG.buttonItem:SetWidth(150)
+SDBG.buttonItem:SetWidth(100)
 SDBG.buttonItem:SetHeight(25)
-SDBG.buttonItem:SetPoint("TOP", 0, -50)
+SDBG.buttonItem:SetPoint("TOPLEFT", 213, -50)
 SDBG.buttonItem:SetBackdrop(backdrop_noborder)
 SDBG.buttonItem.text = SDBG.buttonItem:CreateFontString("Status", "LOW", "GameFontNormal")
 SDBG.buttonItem.text:ClearAllPoints()
@@ -232,18 +263,20 @@ SDBG.buttonItem:SetBackdropColor(1,1,1,.15)
 SDBG.buttonItem:SetScript("OnClick", function()
   SDBG.buttonItem:SetBackdropColor(1,1,1,.15)
   SDBG.buttonSpawn:SetBackdropColor(1,1,1,.05)
+  SDBG.buttonObject:SetBackdropColor(1,1,1,.05)
   SDBG.buttonQuest:SetBackdropColor(1,1,1,.05)
 
   SDBG.item:Show()
+  SDBG.object:Hide()
   SDBG.spawn:Hide()
   SDBG.quest:Hide()
 end)
 
 SDBG.buttonQuest = CreateFrame("Button", nil, SDBG)
 --SDBG.buttonQuest:ClearAllPoints()
-SDBG.buttonQuest:SetWidth(150)
+SDBG.buttonQuest:SetWidth(100)
 SDBG.buttonQuest:SetHeight(25)
-SDBG.buttonQuest:SetPoint("TOPRIGHT", -13, -50)
+SDBG.buttonQuest:SetPoint("TOPLEFT", 313, -50)
 SDBG.buttonQuest:SetBackdrop(backdrop_noborder)
 SDBG.buttonQuest.text = SDBG.buttonQuest:CreateFontString("Status", "LOW", "GameFontNormal")
 SDBG.buttonQuest.text:ClearAllPoints()
@@ -255,9 +288,11 @@ SDBG.buttonQuest:SetBackdropColor(1,1,1,.05)
 SDBG.buttonQuest:SetScript("OnClick", function()
   SDBG.buttonQuest:SetBackdropColor(1,1,1,.15)
   SDBG.buttonSpawn:SetBackdropColor(1,1,1,.05)
+  SDBG.buttonObject:SetBackdropColor(1,1,1,.05)
   SDBG.buttonItem:SetBackdropColor(1,1,1,.05)
 
   SDBG.quest:Show()
+  SDBG.object:Hide()
   SDBG.item:Hide()
   SDBG.spawn:Hide()
 end)
@@ -271,6 +306,16 @@ SDBG.spawn:SetBackdropColor(1,1,1,.15)
 --SDBG.spawn:SetFrameStrata("DIALOG")
 SDBG.spawn:Hide()
 SDBG.spawn.buttons = {}
+
+SDBG.object = CreateFrame("Frame",nil,SDBG)
+SDBG.object:SetPoint("TOP", 0, -75)
+SDBG.object:SetWidth(475)
+SDBG.object:SetHeight(315)
+SDBG.object:SetBackdrop(backdrop_noborder)
+SDBG.object:SetBackdropColor(1,1,1,.15)
+--SDBG.object:SetFrameStrata("DIALOG")
+SDBG.object:Hide()
+SDBG.object.buttons = {}
 
 SDBG.item = CreateFrame("Frame",nil,SDBG)
 SDBG.item:SetPoint("TOP", 0, -75)
@@ -296,6 +341,9 @@ function SDBG.HideButtons()
     if (SDBG.spawn.buttons[i]) then
       SDBG.spawn.buttons[i]:Hide();
     end
+      if (SDBG.object.buttons[i]) then
+        SDBG.object.buttons[i]:Hide();
+      end
     if (SDBG.item.buttons[i]) then
       SDBG.item.buttons[i]:Hide();
     end
@@ -421,13 +469,136 @@ function SDBG:SearchSpawn(search)
 
   if spawnCount >= 14 then spawnCount = "*" else spawnCount = spawnCount -1 end
   if spawnCount == 0 then
-    SDBG.buttonSpawn.text:SetText("Mobs & Objects")
+    SDBG.buttonSpawn.text:SetText("Mobs")
   else
-    SDBG.buttonSpawn.text:SetText("Mobs & Objects |cffaaaaaa(" .. spawnCount .. ")")
+    SDBG.buttonSpawn.text:SetText("Mobs |cffaaaaaa(" .. spawnCount .. ")")
   end
 
 end
--- }}}
+
+function SDBG:SearchObject(search)
+  local objectCount = 1;
+
+  local database = SDBG_Favs["object"]
+  if strlen(search) > 2 then database = objData end
+
+  for id, object in pairs(database) do
+    if (strfind(strlower(object[DB_NAME]), strlower(search))) or strlen(search) <= 3 then
+      if ( objectCount <= 14) then
+        local name = object[DB_NAME];
+        SDBG.object.buttons[objectCount] = CreateFrame("Button","mybutton",SDBG.object,"UIPanelButtonTemplate")
+        SDBG.object.buttons[objectCount]:SetPoint("TOP", 0, -objectCount*21+11)
+        SDBG.object.buttons[objectCount]:SetWidth(450)
+        SDBG.object.buttons[objectCount]:SetHeight(20)
+        SDBG.object.buttons[objectCount]:SetFont("Fonts\\FRIZQT__.TTF", 10)
+        SDBG.object.buttons[objectCount]:SetTextColor(1,1,1,1)
+        SDBG.object.buttons[objectCount]:SetNormalTexture(nil)
+        SDBG.object.buttons[objectCount]:SetPushedTexture(nil)
+        SDBG.object.buttons[objectCount]:SetHighlightTexture(nil)
+        SDBG.object.buttons[objectCount]:SetBackdrop(backdrop_noborder)
+        if math.mod(objectCount,2) == 0 then
+          SDBG.object.buttons[objectCount]:SetBackdropColor(1,1,1,.05)
+          SDBG.object.buttons[objectCount].even = true
+        else
+          SDBG.object.buttons[objectCount]:SetBackdropColor(1,1,1,.10)
+          SDBG.object.buttons[objectCount].even = false
+        end
+
+        SDBG.object.buttons[objectCount]:SetTextColor(1,1,1)
+        if object[DB_LEVEL] ~= "" then
+          SDBG.object.buttons[objectCount]:SetText(name .. " |cffaaaaaa(Lv." .. object[DB_LEVEL] .. ")")
+        else
+          SDBG.object.buttons[objectCount]:SetText(name)
+        end
+
+        SDBG.object.buttons[objectCount].objectName = name
+        SDBG.object.buttons[objectCount]:SetScript("OnClick", function(self)
+            ShaguDB_MAP_NOTES = {};
+            ShaguDB_MarkForPlotting(DB_OBJ, this.objectName, this.objectName, "Spawnpoint", 0);
+            ShaguDB_ShowMap();
+          end)
+
+        SDBG.object.buttons[objectCount]:SetScript("OnEnter", function(self)
+          this:SetBackdropColor(1,1,1,.25)
+        end)
+
+        SDBG.object.buttons[objectCount]:SetScript("OnLeave", function(self)
+          if this.even == true then
+            this:SetBackdropColor(1,1,1,.05)
+          else
+            this:SetBackdropColor(1,1,1,.10)
+          end
+        end)
+
+        -- show faction icons (deactivated - do objects even have a faction?)
+        local faction = "HA" --objectDB[SDBG.object.buttons[objectCount].objectName]['faction']
+        if strfind(faction, "H") and faction ~= "HA" then
+          SDBG.object.buttons[objectCount].horde = CreateFrame("Frame", nil, SDBG.object.buttons[objectCount])
+          SDBG.object.buttons[objectCount].horde:SetPoint("RIGHT", -5, 0)
+          SDBG.object.buttons[objectCount].horde:SetWidth(20)
+          SDBG.object.buttons[objectCount].horde:SetHeight(20)
+          SDBG.object.buttons[objectCount].horde.icon = SDBG.object.buttons[objectCount].horde:CreateTexture(nil,"BACKGROUND")
+          SDBG.object.buttons[objectCount].horde.icon:SetTexture("Interface\\AddOns\\ShaguDB\\symbols\\icon_horde")
+          SDBG.object.buttons[objectCount].horde.icon:SetAllPoints(SDBG.object.buttons[objectCount].horde)
+        end
+
+        if strfind(faction, "A") and faction ~= "HA" then
+          SDBG.object.buttons[objectCount].alliance = CreateFrame("Frame", nil, SDBG.object.buttons[objectCount])
+          if SDBG.object.buttons[objectCount].horde then
+          SDBG.object.buttons[objectCount].alliance:SetPoint("RIGHT", -30, 0)
+          else
+          SDBG.object.buttons[objectCount].alliance:SetPoint("RIGHT", -5, 0)
+          end
+          SDBG.object.buttons[objectCount].alliance:SetWidth(20)
+          SDBG.object.buttons[objectCount].alliance:SetHeight(20)
+          SDBG.object.buttons[objectCount].alliance.icon = SDBG.object.buttons[objectCount].alliance:CreateTexture(nil,"BACKGROUND")
+          SDBG.object.buttons[objectCount].alliance.icon:SetTexture("Interface\\AddOns\\ShaguDB\\symbols\\icon_alliance")
+          SDBG.object.buttons[objectCount].alliance.icon:SetAllPoints(SDBG.object.buttons[objectCount].alliance)
+        end
+
+        -- show fav button
+        SDBG.object.buttons[objectCount].fav = CreateFrame("Button","mybutton",SDBG.object.buttons[objectCount],"UIPanelButtonTemplate")
+        SDBG.object.buttons[objectCount].fav:SetPoint("LEFT", 5, 0)
+        SDBG.object.buttons[objectCount].fav:SetWidth(20)
+        SDBG.object.buttons[objectCount].fav:SetHeight(20)
+        SDBG.object.buttons[objectCount].fav:SetNormalTexture(nil)
+        SDBG.object.buttons[objectCount].fav:SetPushedTexture(nil)
+        SDBG.object.buttons[objectCount].fav:SetHighlightTexture(nil)
+        SDBG.object.buttons[objectCount].fav.icon = SDBG.object.buttons[objectCount].fav:CreateTexture(nil,"BACKGROUND")
+        SDBG.object.buttons[objectCount].fav.icon:SetTexture("Interface\\AddOns\\ShaguDB\\img\\fav")
+
+        if SDBG_Favs["object"][name] then
+          SDBG.object.buttons[objectCount].fav.icon:SetVertexColor(1,1,1,1)
+        else
+          SDBG.object.buttons[objectCount].fav.icon:SetVertexColor(0,0,0,1)
+        end
+
+        SDBG.object.buttons[objectCount].fav.icon:SetAllPoints(SDBG.object.buttons[objectCount].fav)
+
+        SDBG.object.buttons[objectCount].fav:SetScript("OnClick", function(self)
+          if SDBG_Favs["object"][this:GetParent().objectName] then
+            SDBG_Favs["object"][this:GetParent().objectName] = nil
+            this.icon:SetVertexColor(0,0,0,1)
+            SDBG.inputField:updateSearch()
+          else
+            SDBG_Favs["object"][this:GetParent().objectName] = true
+            this.icon:SetVertexColor(1,1,1,1)
+          end
+        end)
+        objectCount = objectCount + 1
+      end
+    end
+  end
+
+  if objectCount >= 14 then objectCount = "*" else objectCount = objectCount -1 end
+  if objectCount == 0 then
+    SDBG.buttonObject.text:SetText("Objects")
+  else
+    SDBG.buttonObject.text:SetText("Objects |cffaaaaaa(" .. objectCount .. ")")
+  end
+
+end
+
 -- {{{ SearchItem
 function SDBG:SearchItem(search)
   local itemCount = 1;
