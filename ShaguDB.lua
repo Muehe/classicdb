@@ -304,7 +304,7 @@ function ShaguDB_Init()
         elseif (arg1 == "vendor") then
             local itemName = arg2;
             ShaguDB_MAP_NOTES = {};
-            ShaguDB_searchVendor(itemName,nil);
+            ShaguDB_PrepareItemNotes(itemName, "Vendors for: "..itemName, "Sells: "..itemName, "Vendor", {DB_VENDOR});
             ShaguDB_ShowMap();
         elseif (arg1 == "spawn") then
             local monsterName = arg2;
