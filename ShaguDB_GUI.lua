@@ -955,7 +955,7 @@ function SDBG:SearchItem(search)
                     SDBG.item.buttons[itemCount].lootNpc.icon:SetAllPoints(SDBG.item.buttons[itemCount].lootNpc)
                     SDBG.item.buttons[itemCount].lootNpc:SetScript("OnClick", function(self)
                         ShaguDB_MAP_NOTES = {};
-                        ShaguDB_PrepareItemNotes(this:GetParent().itemID, "Location for: "..this:GetParent().itemName, this:GetParent().itemName, cMark);
+                        ShaguDB_PrepareItemNotes(this:GetParent().itemID, "Location for: "..this:GetParent().itemName, "Drops item: "..this:GetParent().itemName, cMark, {DB_NPC});
                         ShaguDB_NextCMark();
                         ShaguDB_ShowMap();
                     end)
@@ -978,7 +978,7 @@ function SDBG:SearchItem(search)
                     SDBG.item.buttons[itemCount].lootObj.icon:SetAllPoints(SDBG.item.buttons[itemCount].lootObj)
                     SDBG.item.buttons[itemCount].lootObj:SetScript("OnClick", function(self)
                         ShaguDB_MAP_NOTES = {};
-                        ShaguDB_PrepareItemNotes(this:GetParent().itemID, "Location for: "..this:GetParent().itemName, this:GetParent().itemName, cMark);
+                        ShaguDB_PrepareItemNotes(this:GetParent().itemID, "Location for: "..this:GetParent().itemName, "Contains item: "..this:GetParent().itemName, "Object", {DB_OBJ});
                         ShaguDB_NextCMark();
                         ShaguDB_ShowMap();
                     end)
@@ -1003,7 +1003,7 @@ function SDBG:SearchItem(search)
                     SDBG.item.buttons[itemCount].vendor.icon:SetAllPoints(SDBG.item.buttons[itemCount].vendor)
                     SDBG.item.buttons[itemCount].vendor:SetScript("OnClick", function(self)
                         ShaguDB_MAP_NOTES = {};
-                        ShaguDB_PrepareItemNotes(this:GetParent().itemID, "Location for: "..this:GetParent().itemName, this:GetParent().itemName, cMark);
+                        ShaguDB_PrepareItemNotes(this:GetParent().itemID, "Location for: "..this:GetParent().itemName, "Sells item: "..this:GetParent().itemName, "Vendor", {DB_VENDOR});
                         ShaguDB_NextCMark();
                         ShaguDB_ShowMap();
                     end)

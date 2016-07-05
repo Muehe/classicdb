@@ -89,6 +89,12 @@ function ShaguDB_Event(event, arg1)
             width = 16,
             height = 16,
         })
+        Cartographer_Notes:RegisterIcon("Object", {
+            text = "Vendor",
+            path = "Interface\\AddOns\\ShaguDB\\symbols\\icon_object",
+            width = 16,
+            height = 16,
+        })
 
         -- Switched 3 and 7 for better contrast of colors follwing each other
         Cartographer_Notes:RegisterIcon("mk1", {
@@ -1353,7 +1359,7 @@ function ShaguDB_GetObjNotes(objNameOrID, commentTitle, comment, icon)
     return false;
 end -- ShaguDB_GetObjNotes(objNameOrID, commentTitle, comment, icon)
 
-function ShaguDB_PrepareItemNotes(itemNameOrID, commentTitle, comment, icon)
+function ShaguDB_PrepareItemNotes(itemNameOrID, commentTitle, comment, icon, types)
     ShaguDB_Debug_Print(2, "ShaguDB_PrepareItemNotes("..itemNameOrID..") called");
     local itemID = 0;
     if (type(itemNameOrID) == "number") then
@@ -1370,9 +1376,21 @@ function ShaguDB_PrepareItemNotes(itemNameOrID, commentTitle, comment, icon)
             end
         end
     end
+    local showType = {};
+    if type(types) == "table" then
+        ShaguDB_Debug_Print(2, types);
+        for _, type in pairs(types) do
+            showType[type] = true;
+        end
+    elseif types == true then
+        showType[DB_NPC] = true;
+        showType[DB_OBJ] = true;
+        showType[DB_ITM] = true;
+        showType[DB_VENDOR] = true;
+    end
     if (itemData[itemID]) then
         local showMap = false;
-        if (itemData[itemID][DB_NPC]) then
+        if (itemData[itemID][DB_NPC]) and ((showType == nil) or (showType[DB_NPC])) then
             for key, value in pairs(itemData[itemID][DB_NPC]) do
                 if npcData[value[1]] then
                     local show = true;
@@ -1386,7 +1404,7 @@ function ShaguDB_PrepareItemNotes(itemNameOrID, commentTitle, comment, icon)
                 end
             end
         end
-        if (itemData[itemID][DB_OBJ]) then
+        if (itemData[itemID][DB_OBJ]) and ((showType == nil) or (showType[DB_OBJ])) then
             for key, value in pairs(itemData[itemID][DB_OBJ]) do
                 if objData[value[1]] then
                     local show = true;
@@ -1400,7 +1418,7 @@ function ShaguDB_PrepareItemNotes(itemNameOrID, commentTitle, comment, icon)
                 end
             end
         end
-        if (itemData[itemID][DB_ITM]) and (ShaguDB_Settings.item_item) then
+        if (itemData[itemID][DB_ITM]) and (ShaguDB_Settings.item_item) and ((showType == nil) or (showType[DB_ITM])) then
             for key, value in pairs(itemData[itemID][DB_ITM]) do
                 local show = true;
                 if (ShaguDB_Settings.minDropChance > 0) and (value[2] < ShaguDB_Settings.minDropChance) then
@@ -1408,11 +1426,11 @@ function ShaguDB_PrepareItemNotes(itemNameOrID, commentTitle, comment, icon)
                 end
                 if show then
                     local dropComment = "|cFF00FF00"..value[2].."% chance of containing "..commentTitle.."|r\n"
-                    showMap = ShaguDB_PrepareItemNotes(value[1], commentTitle, dropComment..comment, icon) or showMap;
+                    showMap = ShaguDB_PrepareItemNotes(value[1], commentTitle, dropComment..comment, icon, true) or showMap;
                 end
             end
         end
-        if (itemData[itemID][DB_VENDOR]) then
+        if (itemData[itemID][DB_VENDOR]) and ((showType == nil) or (showType[DB_VENDOR])) then
             for key, value in pairs(itemData[itemID][DB_VENDOR]) do
                 local npc, maxcount, increaseTime = value[1], value[2], value[3];
                 if npcData[npc] then
@@ -1432,7 +1450,7 @@ function ShaguDB_PrepareItemNotes(itemNameOrID, commentTitle, comment, icon)
     else
         return false;
     end
-end -- ShaguDB_PrepareItemNotes(itemNameOrID, commentTitle, comment, icon)
+end -- ShaguDB_PrepareItemNotes(itemNameOrID, commentTitle, comment, icon, types)
 
 function ShaguDB_GetTimeString(seconds)
     local hour, minute, second;
@@ -1519,7 +1537,7 @@ function ShaguDB_GetQuestNotes(questLogID)
                         local itemID = itemLookup[itemName];
                         if (itemID and (itemData[itemID])) then
                             local comment = "|cFF00FF00"..itemName..": "..numItems.."/"..numNeeded.."|r"
-                            showMap = ShaguDB_PrepareItemNotes(itemID, title, comment, cMark) or showMap;
+                            showMap = ShaguDB_PrepareItemNotes(itemID, title, comment, cMark, true) or showMap;
                         end
                     elseif (objectiveType == "object") then
                         ShaguDB_Debug_Print(2, "    type = object");
@@ -1534,7 +1552,7 @@ function ShaguDB_GetQuestNotes(questLogID)
                                         else
                                             comment = comment..objectiveText..": "..numItems.."/"..numNeeded.."|r\n";
                                         end
-                                        showMap = ShaguDB_MarkForPlotting(DB_OBJ, objectId, title, comment, cMark) or showMap;
+                                        ShaguDB_MarkForPlotting(DB_OBJ, objectId, title, comment, "Object");
                                     end
                                 end
                             end
@@ -1550,7 +1568,7 @@ function ShaguDB_GetQuestNotes(questLogID)
                                             else
                                                 comment = comment..objectiveText..": "..numItems.."/"..numNeeded.."|r\n";
                                             end
-                                            showMap = ShaguDB_MarkForPlotting(DB_OBJ, objectId, title, comment, cMark) or showMap;
+                                            ShaguDB_MarkForPlotting(DB_OBJ, objectId, title, comment, "Object");
                                         end
                                     end
                                 end
@@ -1579,7 +1597,7 @@ function ShaguDB_GetQuestNotes(questLogID)
                 if qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_ITM] then
                     for k, itemID in pairs(qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_ITM]) do
                         local comment = "Drop for quest related item:\n"..itemData[itemID][DB_ITM_NAME];
-                        showMap = ShaguDB_PrepareItemNotes(itemID, title, comment, cMark) or showMap;
+                        showMap = ShaguDB_PrepareItemNotes(itemID, title, comment, cMark, true) or showMap;
                     end
                 end
             end
@@ -1589,7 +1607,7 @@ function ShaguDB_GetQuestNotes(questLogID)
                     if qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_ITM] then
                         for k, itemID in pairs(qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_ITM]) do
                             local comment = "Drop for quest related item:\n"..itemData[itemID][DB_ITM_NAME];
-                            showMap = ShaguDB_PrepareItemNotes(itemID, title, comment, cMark) or showMap;
+                            showMap = ShaguDB_PrepareItemNotes(itemID, title, comment, cMark, true) or showMap;
                         end
                     end
                 end
@@ -1864,7 +1882,7 @@ function ShaguDB_MarkForPlotting(kind, nameOrId, title, comment, icon, ...)
             itmID = itemLookup[nameOrId];
         end
         if itmID and itmID ~=0 then
-            ShaguDB_PrepareItemNotes(itmID, title, comment, icon);
+            ShaguDB_PrepareItemNotes(itmID, title, comment, icon, true);
             return true;
         end
     end
