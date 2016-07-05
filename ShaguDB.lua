@@ -16,8 +16,8 @@ DB_NAME, DB_NPC, NOTE_TITLE = 1, 1, 1;
 DB_STARTS, DB_OBJ, NOTE_COMMENT, DB_MIN_LEVEL_HEALTH = 2, 2, 2, 2;
 DB_ENDS, DB_ITM, NOTE_ICON, DB_TRIGGER_MARKED, DB_MAX_LEVEL_HEALTH = 3, 3, 3, 3, 3;
 DB_MIN_LEVEL, DB_ZONES, DB_VENDOR, DB_OBJ_SPAWNS = 4, 4, 4, 4;
-DB_LEVEL, DB_ITM_NAME = 5, 5;
-DB_REQ_RACE, DB_RANK = 6, 6;
+DB_LEVEL, DB_ITM_QUEST_REW = 5, 5;
+DB_REQ_RACE, DB_RANK, DB_ITM_NAME = 6, 6, 6;
 DB_REQ_CLASS, DB_NPC_SPAWNS = 7, 7;
 DB_OBJECTIVES, DB_NPC_WAYPOINTS = 8, 8;
 DB_TRIGGER, DB_ZONE = 9, 9;
@@ -1499,6 +1499,9 @@ function ShaguDB_GetQuestNotes(questLogID)
                     if (objectiveType == "monster") then
                         ShaguDB_Debug_Print(2, "    type = monster");
                         local i, j, monsterName = strfind(itemName, "(.*) slain");
+                        if i == nil then
+                            i, j, monsterName = strfind(itemName, "(.*) getötet");
+                        end
                         if monsterName then
                             local npcID = ShaguDB_GetNPCID(monsterName);
                             if npcID then
@@ -1575,6 +1578,7 @@ function ShaguDB_GetQuestNotes(questLogID)
                 end
             end
             if (type(qIDs) == "number") then
+                ShaguDB_Debug_Print(2, "    Quest related drop for: "..qIDs)
                 if qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_ITM] then
                     for k, itemID in pairs(qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_ITM]) do
                         local comment = "Drop for quest related item:\n"..itemData[itemID][DB_ITM_NAME];
@@ -1584,6 +1588,7 @@ function ShaguDB_GetQuestNotes(questLogID)
             end
             if (type(qIDs) == "table") then
                 for k, qID in pairs(qIDs) do
+                    ShaguDB_Debug_Print(2, "    Quest related drop for: "..qID)
                     if qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_ITM] then
                         for k, itemID in pairs(qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_ITM]) do
                             local comment = "Drop for quest related item:\n"..itemData[itemID][DB_ITM_NAME];
@@ -1870,11 +1875,11 @@ function ShaguDB_MarkForPlotting(kind, nameOrId, title, comment, icon, ...)
 end
 
 function ShaguDB_FillPrepare(tab, title, comment, icon)
-    ShaguDB_Debug_Print(2, title.." - "..comment.." - "..icon..tostring(tab))
+    ShaguDB_Debug_Print(2, "ShaguDB_FillPrepare("..title.." - "..comment.." - "..icon..tostring(tab)..")")
     if tab then
         local added = false;
         for k, v in tab do
-            if v[NOTE_TITLE] == title then
+            if (v[NOTE_TITLE] == title) and (not strfind(strlower(v[NOTE_COMMENT]), strlower(comment))) and (comment ~= v[NOTE_COMMENT]) then
                 if v[NOTE_ICON] ~= icon then
                     if (v[NOTE_ICON] == 2) or (icon == 2) then
                         v[NOTE_ICON] = 2;
@@ -1883,6 +1888,8 @@ function ShaguDB_FillPrepare(tab, title, comment, icon)
                     end
                 end
                 v[NOTE_COMMENT] = v[NOTE_COMMENT].."\n"..comment;
+                added = true;
+            elseif (strfind(strlower(v[NOTE_COMMENT]), strlower(comment))) or (comment == v[NOTE_COMMENT]) then
                 added = true;
             end
         end
