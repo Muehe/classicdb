@@ -1070,9 +1070,27 @@ function SDBG:SearchQuest(search)
                     SDBG.quest.buttons[questCount].even = false
                 end
                 SDBG.quest.buttons[questCount].questName = name
+                SDBG.quest.buttons[questCount].questId = id
+                -- linefeed for tooltip
+                -- simplest method choosen for performance reasons
+                if quest[DB_OBJECTIVES] then
+                    SDBG.quest.buttons[questCount].questObjectives = "";
+                    local rest = quest[DB_OBJECTIVES];
+                    while string.len(rest) > 100 do
+                        SDBG.quest.buttons[questCount].questObjectives = SDBG.quest.buttons[questCount].questObjectives..string.sub(rest, 1, 99).."-\n";
+                        rest = string.sub(rest, 100)
+                    end
+                    SDBG.quest.buttons[questCount].questObjectives = SDBG.quest.buttons[questCount].questObjectives..rest;
+                end
                 SDBG.quest.buttons[questCount]:SetText("|cffffcc00["..quest[DB_LEVEL].."] |Hquest:0:0:0:0|h["..name.."]|h|r|r (ID:"..id..")")
                 SDBG.quest.buttons[questCount]:SetScript("OnEnter", function(self)
                     this:SetBackdropColor(1,1,1,.25)
+                    if this.questObjectives then
+                        ShaguDB_Tooltip:SetOwner(this, "ANCHOR_TOPLEFT");
+                        ShaguDB_Tooltip:ClearLines();
+                        ShaguDB_Tooltip:SetText(this:GetText().."\n|cFFffffffObjectives:|r\n|cFFa6a6a6"..this.questObjectives.."|r");
+                        ShaguDB_Tooltip:Show();
+                    end
                 end)
                 SDBG.quest.buttons[questCount]:SetScript("OnLeave", function(self)
                     if this.even == true then
@@ -1080,6 +1098,7 @@ function SDBG:SearchQuest(search)
                     else
                         this:SetBackdropColor(1,1,1,.10)
                     end
+                    if this.questObjectives then ShaguDB_Tooltip:Hide(); end
                 end)
                 SDBG.quest.buttons[questCount]:SetScript("OnClick", function(self)
                     if IsShiftKeyDown() then
@@ -1089,11 +1108,7 @@ function SDBG:SearchQuest(search)
                         ChatFrameEditBox:Insert("|cffffff00|Hquest:0:0:0:0|h["..this.questName.."]|h|r")
                     else
                         ShaguDB_MAP_NOTES = {};
-                        if (questDB[this.questName] ~= nil) then
-                            for monsterName, monsterDrop in pairs(questDB[this.questName]) do
-                                ShaguDB_searchMonster(monsterName,this.questName,true);
-                            end
-                        end
+                        ShaguDB_GetQuestNotesById(this.questId)
                         ShaguDB_NextCMark();
                         ShaguDB_ShowMap();
                     end

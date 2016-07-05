@@ -2,8 +2,8 @@
 ShaguDB_QuestZoneInfo = {};
 cMark = "mk1";
 ShaguDB_Debug = 2;
-ShaguDB_PREPARE = {{},{},{}};
-ShaguDB_MARKED = {{},{},{}};
+ShaguDB_PREPARE = {{},{},{},{}};
+ShaguDB_MARKED = {{},{},{},{}};
 ShaguDB_MARKED_ZONES = {};
 ShaguDB_MARKED_ZONE = "";
 ShaguDB_QUEST_START_ZONES = {};
@@ -14,8 +14,8 @@ ShaguDB_InEvent = false;
 -- DB keys
 DB_NAME, DB_NPC, NOTE_TITLE = 1, 1, 1;
 DB_STARTS, DB_OBJ, NOTE_COMMENT, DB_MIN_LEVEL_HEALTH = 2, 2, 2, 2;
-DB_ENDS, DB_ITM, NOTE_ICON, DB_TRIGGER_MARKED, DB_MAX_LEVEL_HEALTH = 3, 3, 3, 3, 3;
-DB_MIN_LEVEL, DB_ZONES, DB_VENDOR, DB_OBJ_SPAWNS = 4, 4, 4, 4;
+DB_ENDS, DB_ITM, NOTE_ICON, DB_MAX_LEVEL_HEALTH = 3, 3, 3, 3;
+DB_MIN_LEVEL, DB_ZONES, DB_VENDOR, DB_OBJ_SPAWNS, DB_TRIGGER_MARKED = 4, 4, 4, 4, 4;
 DB_LEVEL, DB_ITM_QUEST_REW = 5, 5;
 DB_REQ_RACE, DB_RANK, DB_ITM_NAME = 6, 6, 6;
 DB_REQ_CLASS, DB_NPC_SPAWNS = 7, 7;
@@ -258,7 +258,7 @@ function ShaguDB_Init()
             ShaguDB_Print("/shagu starts |cffaaaaaa Toggle: Automatically show quest starts on changing map.");
             ShaguDB_Print("/shagu quests <zone name> |cffaaaaaa - Show quest starts for a zone (the current one if no zone name is given).");
             ShaguDB_Print("/shagu hide <quest ID> |cffaaaaaa Prevent the given quest ID from being plotted to quest starts.");
-            ShaguDB_Print("/shagu quest <quest name> |cffaaaaaa - Show specific questgiver."); -- might change this to plot a full quest
+            ShaguDB_Print("/shagu quest <quest name | quest ID> |cffaaaaaa - Show all points for quest, by either name or ID (name is case-sensitiv).");
             ShaguDB_Print("/shagu clean |cffaaaaaa - Clean the map.");
             ShaguDB_Print("/shagu minimap |cffaaaaaa - Toggle: Minimap icon.");
             ShaguDB_Print("/shagu auto |cffaaaaaa Toggle: Automatically plot uncompleted objectives on map.");
@@ -335,14 +335,22 @@ function ShaguDB_Init()
             ShaguDB_ShowMap();
         elseif (arg1 == "quest") then
             local questTitle = arg2;
-
             ShaguDB_MAP_NOTES = {};
-            if (questDB[questTitle] ~= nil) then
-                for monsterName, monsterDrop in pairs(questDB[questTitle]) do
-                    ShaguDB_searchMonster(monsterName,questTitle,true);
+            local qIDs;
+            if type(tonumber(questTitle)) == "number" then
+                qIDs = tonumber(questTitle);
+            elseif type(questTitle) == "string" then
+                qIDs = ShaguDB_GetQuestIDs(questTitle);
+            end
+            if type(qIDs) == "number" then
+                ShaguDB_GetQuestNotesById(qIDs);
+                ShaguDB_NextCMark();
+            elseif type(qIDs) == "table" then
+                for _, qID in pairs(qIDs) do
+                    ShaguDB_GetQuestNotesById(qID);
+                    ShaguDB_NextCMark();
                 end
             end
-            ShaguDB_NextCMark();
             ShaguDB_ShowMap();
         elseif (arg1 == "clean") then
             ShaguDB_CleanMap();
@@ -452,6 +460,24 @@ function ShaguDB_ShowMap()
     end
 end -- ShaguDB_ShowMap()
 
+function ShaguDB_CheckIcons(a, b)
+    if a ~= -1 then
+        if a ~= b then
+            if (a == 2 or b == 2 or a == "QuestionMark" or b == "QuestionMark") then
+                a = 2;
+            elseif (a == 5 or b == 5 or a == "ExclamationMark" or b == "ExclamationMark") then
+                a = 5;
+            else
+                a = 0;
+            end
+            return a;
+        end
+    else
+        a = b;
+    end
+    return a;
+end
+
 function ShaguDB_PlotNotesOnMap()
     ShaguDB_Debug_Print(2, "ShaguDB_PlotNotesOnMap() called");
 
@@ -462,17 +488,7 @@ function ShaguDB_PlotNotesOnMap()
                 noteTitle = npcData[k][DB_NAME];
                 for key, note in pairs(npcMarks) do
                     comment = comment.."\n"..note[NOTE_TITLE].."\n"..note[NOTE_COMMENT].."\n";
-                    if icon ~= -1 then
-                        if icon ~= note[NOTE_ICON] then
-                            if (icon == 2 or note[NOTE_ICON] == 2) then
-                                icon = 2;
-                            else
-                                icon = 0;
-                            end
-                        end
-                    else
-                        icon = note[NOTE_ICON];
-                    end
+                    icon = ShaguDB_CheckIcons(icon, note[NOTE_ICON])
                 end
                 if (icon ~= 2) and (icon ~= 5) and (icon ~= 6) then
                     comment = ShaguDB_GetNPCStatsComment(k, true)..comment;
@@ -498,17 +514,7 @@ function ShaguDB_PlotNotesOnMap()
                 noteTitle = objData[k][DB_NAME];
                 for key, note in pairs(objMarks) do
                     comment = comment.."\n"..note[NOTE_TITLE].."\n"..note[NOTE_COMMENT].."\n";
-                    if icon ~= -1 then
-                        if icon ~= note[NOTE_ICON] then
-                            if (icon == 2 or note[NOTE_ICON] == 2) then
-                                icon = 2;
-                            else
-                                icon = 0;
-                            end
-                        end
-                    else
-                        icon = note[NOTE_ICON];
-                    end
+                    icon = ShaguDB_CheckIcons(icon, note[NOTE_ICON])
                 end
                 ShaguDB_GetObjNotes(k, noteTitle, comment, icon);
             else
@@ -532,7 +538,7 @@ function ShaguDB_PlotNotesOnMap()
         end
     end
     ShaguDB_MARKED = ShaguDB_PREPARE;
-    ShaguDB_PREPARE = {{},{},{}};
+    ShaguDB_PREPARE = {{},{},{},{}};
 
     if ShaguDB_MAP_NOTES == {} then
         return false, false, false;
@@ -1011,7 +1017,7 @@ function ShaguDB_DoCleanMap()
     ShaguDB_CleanMap();
     ShaguDB_MARKED_ZONES = {};
     ShaguDB_QUEST_START_ZONES = {};
-    ShaguDB_MARKED = {{},{},{}};
+    ShaguDB_MARKED = {{},{},{},{}};
 end -- ShaguDB_DoCleanMap()
 
 function ShaguDB_SearchEndNPC(questID)
@@ -1367,6 +1373,9 @@ function ShaguDB_PrepareItemNotes(itemNameOrID, commentTitle, comment, icon, typ
         itemID = itemNameOrID;
     elseif (type(itemNameOrID) == "string") then
         itemID = itemLookup[itemNameOrID];
+    end
+    if itemID ~= 0 then
+        ShaguDB_PREPARE[DB_ITM][itemID] = true;
     end
     -- if recursively called
     if (type(commentTitle) == "number") then
@@ -1842,7 +1851,7 @@ function ShaguDB_GetDifficultyColor(level1, ...)
     else
         return "|cFFC0C0C0"; -- Grey
     end
-    return "|cFFffffff";
+    return "|cFFffffff"; --white
 end
 
 function ShaguDB_GetGreyLevel(level)
@@ -1904,13 +1913,7 @@ function ShaguDB_FillPrepare(tab, title, comment, icon)
         local added = false;
         for k, v in tab do
             if (v[NOTE_TITLE] == title) and (not strfind(strlower(v[NOTE_COMMENT]), strlower(comment))) and (comment ~= v[NOTE_COMMENT]) then
-                if v[NOTE_ICON] ~= icon then
-                    if (v[NOTE_ICON] == 2) or (icon == 2) then
-                        v[NOTE_ICON] = 2;
-                    else
-                        v[NOTE_ICON] = 0;
-                    end
-                end
+                v[NOTE_ICON] = ShaguDB_CheckIcons(v[NOTE_ICON], icon);
                 v[NOTE_COMMENT] = v[NOTE_COMMENT].."\n"..comment;
                 added = true;
             elseif (strfind(strlower(v[NOTE_COMMENT]), strlower(comment))) or (comment == v[NOTE_COMMENT]) then
@@ -1924,4 +1927,65 @@ function ShaguDB_FillPrepare(tab, title, comment, icon)
         tab = {{title, comment, icon}};
     end
     return true;
+end
+function ShaguDB_GetQuestNotesById(questId)
+    if qData[questId] then
+        local quest = qData[questId];
+        local title = ShaguDB_GetDifficultyColor(quest[DB_LEVEL]).."["..quest[DB_LEVEL].."] "..quest[DB_NAME].." (ID: "..questId..")|r";
+        for k, v in pairs(quest[DB_STARTS]) do
+            if v then
+                for _, id in pairs(v) do
+                    ShaguDB_Debug_Print(2, "    starts"..id)
+                    local comment = "-";
+                    local icon = "ExclamationMark";
+                    if k == DB_NPC then comment = "|cFFa6a6a6Creature|r "..npcData[id][DB_NAME].." |cFFa6a6a6starts the quest|r";
+                    elseif k == DB_OBJ then comment = "|cFFa6a6a6Object|r "..objData[id][DB_NAME].." |cFFa6a6a6starts the quest|r";
+                    elseif k == DB_ITM then comment = "|cFFa6a6a6Aquire item|r "..itemData[id][DB_ITM_NAME].." |cFFa6a6a6 to start the quest|r";
+                    end
+                    ShaguDB_MarkForPlotting(k, id, title, comment, icon);
+                end
+            end
+        end
+        for k, v in pairs(quest[DB_ENDS]) do
+            if v then
+                for _, id in pairs(v) do
+                    ShaguDB_Debug_Print(2, "    ends"..id)
+                    local comment = "+";
+                    local icon = "QuestionMark";
+                    if k == DB_NPC then comment = "|cFFa6a6a6Creature|r "..npcData[id][DB_NAME].." |cFFa6a6a6ends the quest|r";
+                    elseif k == DB_OBJ then comment = "|cFFa6a6a6Object|r "..objData[id][DB_NAME].." |cFFa6a6a6ends the quest|r";
+                    end
+                    ShaguDB_MarkForPlotting(k, id, title, comment, icon);
+                end
+            end
+        end
+        for k, v in pairs(quest[DB_REQ_NPC_OR_OBJ_OR_ITM]) do
+            if v then
+                for _, list in pairs(v) do
+                    if type(list) == "table" then
+                        ShaguDB_Debug_Print(2, "    tables2 ", list[1], list[2], " - type "..k)
+                        local id = list[1];
+                        local text = nil;
+                        if list[2] then
+                            text = list[2]
+                        end
+                        local comment, icon = ".", 4;
+                        if k == DB_NPC and text == nil then comment = "|cFFa6a6a6'Creature'-type objective:|r "..npcData[id][DB_NAME]; icon = cMark;
+                        elseif k == DB_NPC and text then comment = "|cFFa6a6a6'Creature'-type objective:|r "..text; icon = cMark;
+                        elseif k == DB_OBJ and text == nil then comment = "|cFFa6a6a6'Object'-type objective:|r "..objData[id][DB_NAME]; icon = "Object";
+                        elseif k == DB_OBJ and text then comment = "|cFFa6a6a6'Object'-type objective:|r "..text; icon = "Object";
+                        elseif k == DB_ITM and text == nil and id ~= quest[DB_SRC_ITM] then comment = "|cFFa6a6a6'Item'-type objective:|r "..itemData[id][DB_ITM_NAME]; icon = "Vendor";
+                        elseif k == DB_ITM and text then comment = "|cFFa6a6a6Item type objective:|r "..text; icon = "Vendor";
+                        end
+                        if comment ~= "." and icon ~= 4 then ShaguDB_MarkForPlotting(k, id, title, comment, icon); end
+                    end
+                end
+            end
+        end
+        if quest[DB_SRC_ITM] then
+            if not (ShaguDB_PREPARE[DB_ITM][quest[DB_SRC_ITM]] == true) and itemData[quest[DB_SRC_ITM]] then
+                ShaguDB_MarkForPlotting(DB_ITM, quest[DB_SRC_ITM], title, "|cFFa6a6a6Item related to quest:|r "..quest[DB_NAME], "Vendor");
+            end
+        end
+    end
 end
