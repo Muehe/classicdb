@@ -684,7 +684,7 @@ function SDBG:SearchSpawn(search)
                 end
                 SDBG.spawn.buttons[spawnCount]:SetTextColor(1,1,1)
                 if spawn[DB_LEVEL] ~= "" then
-                    SDBG.spawn.buttons[spawnCount]:SetText(name .. " |cffaaaaaa(Lv." .. spawn[DB_LEVEL] .. ")")
+                    SDBG.spawn.buttons[spawnCount]:SetText(name .. " |cffaaaaaa(Lv." .. spawn[DB_LEVEL] .. ", ID:" .. id .. ")")
                 else
                     SDBG.spawn.buttons[spawnCount]:SetText(name)
                 end
@@ -792,7 +792,7 @@ function SDBG:SearchObject(search)
                 end
                 SDBG.object.buttons[objectCount]:SetTextColor(1,1,1)
                 if object[DB_LEVEL] ~= "" then
-                    SDBG.object.buttons[objectCount]:SetText(name .. " |cffaaaaaa(Lv." .. object[DB_LEVEL] .. ")")
+                    SDBG.object.buttons[objectCount]:SetText(name .. " |cffaaaaaa(ID:" .. id .. ")")
                 else
                     SDBG.object.buttons[objectCount]:SetText(name)
                 end
@@ -1070,7 +1070,7 @@ function SDBG:SearchQuest(search)
                     SDBG.quest.buttons[questCount].even = false
                 end
                 SDBG.quest.buttons[questCount].questName = name
-                SDBG.quest.buttons[questCount]:SetText("|cffffcc00" .."|Hquest:0:0:0:0|h["..name.."]|h|r [ID: "..id.."]")
+                SDBG.quest.buttons[questCount]:SetText("|cffffcc00["..quest[DB_LEVEL].."] |Hquest:0:0:0:0|h["..name.."]|h|r|r (ID:"..id..")")
                 SDBG.quest.buttons[questCount]:SetScript("OnEnter", function(self)
                     this:SetBackdropColor(1,1,1,.25)
                 end)
