@@ -582,10 +582,7 @@ function ShaguDB_PlotNotesOnMap()
             ShaguDB_Print(notes.." notes plotted.");
             ShaguDB_Notes = notes;
         end
-        ShaguDB_Print("Marked zones:");
-        for k, v in pairs(ShaguDB_MARKED_ZONES) do
-            ShaguDB_Print(k);
-        end
+        ShaguDB_Print(ShaguDB_GetTableLength(ShaguDB_MARKED_ZONES).." zones marked.");
     end
     ShaguDB_MAP_NOTES = {}
     return zone, title, noteID;
