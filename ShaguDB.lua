@@ -255,9 +255,10 @@ function ShaguDB_Init()
             ShaguDB_Print("/shagu obj <object name> |cffaaaaaa Show object location on map.");
             ShaguDB_Print("/shagu item <item name> |cffaaaaaa Show item drop info on map (includes vendors).");
             ShaguDB_Print("/shagu min [0, 101] |cffaaaaaa Minimum drop chance for items. 0 shows all, 101 none.");
-            ShaguDB_Print("/shagu starts |cffaaaaaa Toggle: Plot quest starts on map.");
-            ShaguDB_Print("/shagu hide <questID> |cffaaaaaa Prevent the given quest ID from being plotted to quest starts.");
-            ShaguDB_Print("/shagu quest <questname> |cffaaaaaa - Show specific questgiver."); -- might change this to plot a full quest
+            ShaguDB_Print("/shagu starts |cffaaaaaa Toggle: Automatically show quest starts on changing map.");
+            ShaguDB_Print("/shagu quests <zone name> |cffaaaaaa - Show quest starts for a zone (the current one if no zone name is given).");
+            ShaguDB_Print("/shagu hide <quest ID> |cffaaaaaa Prevent the given quest ID from being plotted to quest starts.");
+            ShaguDB_Print("/shagu quest <quest name> |cffaaaaaa - Show specific questgiver."); -- might change this to plot a full quest
             ShaguDB_Print("/shagu clean |cffaaaaaa - Clean the map.");
             ShaguDB_Print("/shagu minimap |cffaaaaaa - Toggle: Minimap icon.");
             ShaguDB_Print("/shagu auto |cffaaaaaa Toggle: Automatically plot uncompleted objectives on map.");
@@ -330,7 +331,7 @@ function ShaguDB_Init()
                 zoneName = GetZoneText();
             end
             ShaguDB_MAP_NOTES = {};
-            ShaguDB_searchQuests(zoneName);
+            ShaguDB_GetQuestStartNotes(zoneName);
             ShaguDB_ShowMap();
         elseif (arg1 == "quest") then
             local questTitle = arg2;
