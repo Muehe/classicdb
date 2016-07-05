@@ -1741,7 +1741,15 @@ function ShaguDB_GetQuestStartComment(npcOrGoStarts)
                     tooltipText = tooltipText.."|cFFa6a6a6(ID: "..questID..")|r\n";
                 end
                 if ShaguDB_Settings.reqLevel then
-                    tooltipText = tooltipText.."|cFFa6a6a6Requires level: "..qData[questID][DB_MIN_LEVEL].."|r\n";
+                    local comment = "";
+                    if ShaguDB_GetGreyLevel(UnitLevel("player")) >= qData[questID][DB_MIN_LEVEL] then
+                        comment = qData[questID][DB_MIN_LEVEL];
+                    elseif qData[questID][DB_MIN_LEVEL] > UnitLevel("player") then
+                        comment = "|r|cFFFF1A1A"..qData[questID][DB_MIN_LEVEL]; -- red
+                    else
+                        comment = "|r|cFFFFFF00"..qData[questID][DB_MIN_LEVEL]; -- yellow
+                    end
+                    tooltipText = tooltipText.."|cFFa6a6a6Requires level: "..comment.."|r\n"; -- grey
                 end
             end
         end
