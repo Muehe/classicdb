@@ -101,7 +101,7 @@
                     <OnEnter>
                         ShaguDB_Tooltip:SetOwner(CleanMap, "ANCHOR_TOPLEFT");
                         ShaguDB_Tooltip:ClearLines();
-                        ShaguDB_Tooltip:SetText("Clean ShaguDB notes from map.");
+                        ShaguDB_Tooltip:SetText("Clean ShaguDB notes from map.\nDisable automatic quest start and objective plotting.");
                         ShaguDB_Tooltip:Show();
                     </OnEnter>
                     <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
@@ -151,7 +151,7 @@
                     <OnEnter>
                         ShaguDB_Tooltip:SetOwner(PlotSelected, "ANCHOR_TOPLEFT");
                         ShaguDB_Tooltip:ClearLines();
-                        ShaguDB_Tooltip:SetText("Show notes for the quest which is\ncurrently selected in the quest log.");
+                        ShaguDB_Tooltip:SetText("Show notes for the quest which is currently selected in the quest log.");
                         ShaguDB_Tooltip:Show();
                     </OnEnter>
                     <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
@@ -179,7 +179,7 @@
                     <OnEnter>
                         ShaguDB_Tooltip:SetOwner(ShowSearch, "ANCHOR_TOPLEFT");
                         ShaguDB_Tooltip:ClearLines();
-                        ShaguDB_Tooltip:SetText("Toggle window for searching NPCs,\nobjects, items and quests.");
+                        ShaguDB_Tooltip:SetText("Toggle window for searching NPCs, objects, items and quests.");
                         ShaguDB_Tooltip:Show();
                     </OnEnter>
                     <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
@@ -323,7 +323,7 @@
                     <OnEnter>
                         ShaguDB_Tooltip:SetOwner(questStarts, "ANCHOR_TOPLEFT");
                         ShaguDB_Tooltip:ClearLines();
-                        ShaguDB_Tooltip:SetText("Show quest start notes.");
+                        ShaguDB_Tooltip:SetText("Automatically show quest start notes upon changing map zone.");
                         ShaguDB_Tooltip:Show();
                     </OnEnter>
                     <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>

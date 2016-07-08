@@ -199,7 +199,7 @@ SDBG.cleanButton:SetBackdropColor(0,0,0,.15)
 SDBG.cleanButton:SetBackdropBorderColor(1,1,1,.25)
 
 SDBG.cleanButton:SetScript("OnClick", function()
-    ShaguDB_CleanMap()
+    ShaguDB_DoCleanMap();
 end)
 
 SDBG.buttonSpawn = CreateFrame("Button", nil, SDBG)

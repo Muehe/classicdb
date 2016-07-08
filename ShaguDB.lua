@@ -259,7 +259,7 @@ function ShaguDB_Init()
             ShaguDB_Print("/shagu quests <zone name> |cffaaaaaa - Show quest starts for a zone (the current one if no zone name is given).");
             ShaguDB_Print("/shagu hide <quest ID> |cffaaaaaa Prevent the given quest ID from being plotted to quest starts.");
             ShaguDB_Print("/shagu quest <quest name | quest ID> |cffaaaaaa - Show all points for quest, by either name or ID (name is case-sensitiv).");
-            ShaguDB_Print("/shagu clean |cffaaaaaa - Clean the map.");
+            ShaguDB_Print("/shagu clean |cffaaaaaa - Clean the map. Disable automatic quest start and objective plotting.");
             ShaguDB_Print("/shagu minimap |cffaaaaaa - Toggle: Minimap icon.");
             ShaguDB_Print("/shagu auto |cffaaaaaa Toggle: Automatically plot uncompleted objectives on map.");
             ShaguDB_Print("/shagu waypoint |cffaaaaaa Toggle: Plot waypoints on map.");
@@ -352,8 +352,6 @@ function ShaguDB_Init()
                 end
             end
             ShaguDB_ShowMap();
-        elseif (arg1 == "clean") then
-            ShaguDB_CleanMap();
         elseif (arg1 == "minimap") then
             if (SDBG.minimapButton:IsShown()) then
                 SDBG.minimapButton:Hide()
@@ -445,6 +443,11 @@ function ShaguDB_CleanMap()
         ShaguDBDB = {}; ShaguDBDBH = {};
         Cartographer_Notes:RegisterNotesDatabase("ShaguDB",ShaguDBDB,ShaguDBDBH);
     end
+    ShaguDB_MARKED_ZONES = {};
+    ShaguDB_MARKED_ZONE = "";
+    ShaguDB_QUEST_START_ZONES = {};
+    ShaguDB_MARKED = {{},{},{},{}};
+    ShaguDB_MAP_NOTES = {};
 end -- CleanMap()
 
 function ShaguDB_ShowMap()
@@ -806,9 +809,6 @@ function ShaguDB_DoCleanMap()
         ShaguDB_Print("Quest start plotting disabled.");
     end
     ShaguDB_CleanMap();
-    ShaguDB_MARKED_ZONES = {};
-    ShaguDB_QUEST_START_ZONES = {};
-    ShaguDB_MARKED = {{},{},{},{}};
 end -- DoCleanMap()
 
 function ShaguDB_SearchEndNPC(questID)
@@ -1591,42 +1591,6 @@ function ShaguDB_GetTableLength(tab)
     end
 end -- GetTableLength()
 
-function ShaguDB_CompareTables(tab1, tab2)
-    for k, v in pairs(tab1) do
-        if (type(v) == "table") then
-            if not ShaguDB_CompareTables(v, tab2[k]) then
-                return false;
-            end
-        else
-            if not (v == tab2[k]) then
-                return false;
-            end
-        end
-    end
-    return true;
-end -- CompareTables(tab1, tab2)
-
-function ShaguDB_PrintTable(tab, indent)
-    local iString = "";
-    local ind = indent;
-    while (ind > 0) do
-        iString = iString.."-";
-        ind = ind -1;
-    end
-    for k, v in pairs(tab) do
-        if (type(v) == "table") then
-            ShaguDB_Print(iString..k..":");
-            ShaguDB_PrintTable(v, indent+1);
-        else
-            if (v) then
-                ShaguDB_Print(iString..k..": "..v);
-            else
-                ShaguDB_Print(iString..k..": ".."nil");
-            end
-        end
-    end
-end -- PrintTable(tab, indent)
-
 function ShaguDB_GetDifficultyColor(level1, ...)
     if level1 == -1 then
         level1 = UnitLevel("player");
@@ -1785,3 +1749,41 @@ function ShaguDB_GetQuestNotesById(questId)
         end
     end
 end -- GetQuestNotesById(questId)
+
+-- Unused dev helper functions
+
+function ShaguDB_CompareTables(tab1, tab2)
+    for k, v in pairs(tab1) do
+        if (type(v) == "table") then
+            if not ShaguDB_CompareTables(v, tab2[k]) then
+                return false;
+            end
+        else
+            if not (v == tab2[k]) then
+                return false;
+            end
+        end
+    end
+    return true;
+end -- CompareTables(tab1, tab2)
+
+function ShaguDB_PrintTable(tab, indent)
+    local iString = "";
+    local ind = indent;
+    while (ind > 0) do
+        iString = iString.."-";
+        ind = ind -1;
+    end
+    for k, v in pairs(tab) do
+        if (type(v) == "table") then
+            ShaguDB_Print(iString..k..":");
+            ShaguDB_PrintTable(v, indent+1);
+        else
+            if (v) then
+                ShaguDB_Print(iString..k..": "..v);
+            else
+                ShaguDB_Print(iString..k..": ".."nil");
+            end
+        end
+    end
+end -- PrintTable(tab, indent)
