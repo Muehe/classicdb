@@ -1610,7 +1610,7 @@ function ShaguDB_GetQuestNotes(questLogID)
                     for k, item in pairs(qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_ITM]) do
                         if itemData[item[1]] then
                             local comment = "Drop for quest related item:\n"..itemData[item[1]][DB_ITM_NAME];
-                            showMap = ShaguDB_PrepareItemNotes(item, title, comment, cMark, true) or showMap;
+                            showMap = ShaguDB_PrepareItemNotes(item[1], title, comment, cMark, true) or showMap;
                         end
                     end
                 end
@@ -1622,7 +1622,7 @@ function ShaguDB_GetQuestNotes(questLogID)
                         for k, item in pairs(qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_ITM]) do
                             if itemData[item[1]] then
                                 local comment = "Drop for quest related item:\n"..itemData[item[1]][DB_ITM_NAME];
-                                showMap = ShaguDB_PrepareItemNotes(item, title, comment, cMark, true) or showMap;
+                                showMap = ShaguDB_PrepareItemNotes(item[1], title, comment, cMark, true) or showMap;
                             end
                         end
                     end
