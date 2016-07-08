@@ -709,6 +709,8 @@ end -- SetItemRef (link, text, button)
 --------------------------------------------------------
 
 function ShaguDB_CycleMarkedZones()
+    local currentlyShown = zoneData[ShaguDB_GetCurrentZoneID()];
+    if ShaguDB_MARKED_ZONE == "" and currentlyShown then ShaguDB_MARKED_ZONE = currentlyShown; end
     if ShaguDB_MARKED_ZONE ~= "" then
         local found = false;
         for k, v in pairs(ShaguDB_MARKED_ZONES) do
@@ -1569,7 +1571,7 @@ function ShaguDB_GetCurrentZoneID()
             return k;
         end
     end
-    return 0;
+    return false;
 end -- GetCurrentZoneID()
 
 -- called from xml

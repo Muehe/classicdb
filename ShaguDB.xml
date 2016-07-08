@@ -223,7 +223,7 @@
                     <OnEnter>
                         ShaguDB_Tooltip:SetOwner(CycleMap, "ANCHOR_TOPLEFT");
                         ShaguDB_Tooltip:ClearLines();
-                        ShaguDB_Tooltip:SetText("Cycle through marked zones.\n(Might miss first click)");
+                        ShaguDB_Tooltip:SetText("Cycle through marked zones.");
                         ShaguDB_Tooltip:Show();
                     </OnEnter>
                     <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
