@@ -960,6 +960,8 @@ function ShaguDB_Debug_Print(...)
             else
                 out = out .. "false";
             end
+        elseif (t == "nil") then
+        out = out .. "nil";
         else
             out = out .. "\"nil or table or smth\"";
         end
@@ -1605,9 +1607,11 @@ function ShaguDB_GetQuestNotes(questLogID)
             if (type(qIDs) == "number") then
                 ShaguDB_Debug_Print(2, "    Quest related drop for: "..qIDs)
                 if qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_ITM] then
-                    for k, itemID in pairs(qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_ITM]) do
-                        local comment = "Drop for quest related item:\n"..itemData[itemID][DB_ITM_NAME];
-                        showMap = ShaguDB_PrepareItemNotes(itemID, title, comment, cMark, true) or showMap;
+                    for k, item in pairs(qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_ITM]) do
+                        if itemData[item[1]] then
+                            local comment = "Drop for quest related item:\n"..itemData[item[1]][DB_ITM_NAME];
+                            showMap = ShaguDB_PrepareItemNotes(item, title, comment, cMark, true) or showMap;
+                        end
                     end
                 end
             end
@@ -1615,9 +1619,11 @@ function ShaguDB_GetQuestNotes(questLogID)
                 for k, qID in pairs(qIDs) do
                     ShaguDB_Debug_Print(2, "    Quest related drop for: "..qID)
                     if qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_ITM] then
-                        for k, itemID in pairs(qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_ITM]) do
-                            local comment = "Drop for quest related item:\n"..itemData[itemID][DB_ITM_NAME];
-                            showMap = ShaguDB_PrepareItemNotes(itemID, title, comment, cMark, true) or showMap;
+                        for k, item in pairs(qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_ITM]) do
+                            if itemData[item[1]] then
+                                local comment = "Drop for quest related item:\n"..itemData[item[1]][DB_ITM_NAME];
+                                showMap = ShaguDB_PrepareItemNotes(item, title, comment, cMark, true) or showMap;
+                            end
                         end
                     end
                 end
