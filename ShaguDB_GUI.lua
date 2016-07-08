@@ -783,7 +783,7 @@ function SDBG:SearchObject(search)
         else
             obj = object;
         end
-        if (strfind(strlower(obj[DB_NAME]), strlower(search))) or strlen(search) <= 3 then
+        if (strfind(strlower(obj[DB_NAME]), strlower(search))) or strlen(search) <= 2 then
             if ( objectCount <= 14) then
                 local name = obj[DB_NAME];
                 SDBG.object.buttons[objectCount] = CreateFrame("Button","mybutton",SDBG.object,"UIPanelButtonTemplate")
@@ -894,7 +894,7 @@ function SDBG:SearchItem(search)
         else
             itm = item;
         end
-        if (strfind(strlower(itm[DB_ITM_NAME]), strlower(search))) or strlen(search) <= 3 then
+        if (strfind(strlower(itm[DB_ITM_NAME]), strlower(search))) or strlen(search) <= 2 then
             if ( itemCount <= 14) then
                 local name = itm[DB_ITM_NAME];
                 local itemColor
@@ -1072,7 +1072,7 @@ function SDBG:SearchQuest(search)
         else
             q = quest;
         end
-        if (strfind(strlower(q[DB_NAME]), strlower(search))) or strlen(search) <= 3 then
+        if (strfind(strlower(q[DB_NAME]), strlower(search))) or strlen(search) <= 2 then
             if questCount <= 14 then
                 local name = q[DB_NAME];
                 SDBG.quest.buttons[questCount] = CreateFrame("Button","mybutton",SDBG.quest,"UIPanelButtonTemplate")
