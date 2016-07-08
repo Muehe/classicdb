@@ -1730,11 +1730,11 @@ function ShaguDB_GetQuestNotesById(questId)
                             text = list[2]
                         end
                         local comment, icon = ".", 4;
-                        if k == DB_NPC and text == nil then comment = "|cFFa6a6a6'Creature'-type objective:|r "..npcData[id][DB_NAME]; icon = cMark;
+                        if k == DB_NPC and text == nil and npcData[id] then comment = "|cFFa6a6a6'Creature'-type objective:|r "..npcData[id][DB_NAME]; icon = cMark;
                         elseif k == DB_NPC and text then comment = "|cFFa6a6a6'Creature'-type objective:|r "..text; icon = cMark;
-                        elseif k == DB_OBJ and text == nil then comment = "|cFFa6a6a6'Object'-type objective:|r "..objData[id][DB_NAME]; icon = "Object";
+                        elseif k == DB_OBJ and text == nil and objData[id] then comment = "|cFFa6a6a6'Object'-type objective:|r "..objData[id][DB_NAME]; icon = "Object";
                         elseif k == DB_OBJ and text then comment = "|cFFa6a6a6'Object'-type objective:|r "..text; icon = "Object";
-                        elseif k == DB_ITM and text == nil and id ~= quest[DB_SRC_ITM] then comment = "|cFFa6a6a6'Item'-type objective:|r "..itemData[id][DB_ITM_NAME]; icon = "Vendor";
+                        elseif k == DB_ITM and text == nil and id ~= quest[DB_SRC_ITM] and itemData[id] then comment = "|cFFa6a6a6'Item'-type objective:|r "..itemData[id][DB_ITM_NAME]; icon = "Vendor";
                         elseif k == DB_ITM and text then comment = "|cFFa6a6a6Item type objective:|r "..text; icon = "Vendor";
                         end
                         if comment ~= "." and icon ~= 4 then ShaguDB_MarkForPlotting(k, id, title, comment, icon); end
