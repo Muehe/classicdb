@@ -42,10 +42,10 @@ function ShaguDB_OnFrameShow()
     --
 end -- OnFrameShow()
 
-function ShaguDB_Event(event, arg1)
+function ShaguDB_Event(event, ...)
     ShaguDB_Debug_Print(2, "Event(event, arg1) called");
     if (event == "PLAYER_LOGIN") then
-        ShaguDB_Debug_Print(1, "Event: PLAYER_LOGIN");
+        ShaguDB_Debug_Print(1, "    "..event);
         if (Cartographer_Notes ~= nil) then
             ShaguDBDB = {}; ShaguDBDBH = {};
             Cartographer_Notes:RegisterNotesDatabase("ShaguDB",ShaguDBDB,ShaguDBDBH);
@@ -222,24 +222,66 @@ function ShaguDB_Event(event, arg1)
         ShaguDB_Frame:Show();
         ShaguDB_Print("ShaguDB Loaded.");
     elseif (event == "QUEST_LOG_UPDATE") then
+        ShaguDB_Debug_Print(2, "    "..event, arg1, arg2);
         if (ShaguDB_Settings.auto_plot) then
             ShaguDB_InEvent = true;
-            ShaguDB_Debug_Print(2, "Event: QUEST_LOG_UPDATE");
             ShaguDB_PlotAllQuests();
             ShaguDB_InEvent = false;
         end
     elseif (event == "WORLD_MAP_UPDATE") and (WorldMapFrame:IsVisible()) and (ShaguDB_Settings.questStarts) then
-        ShaguDB_Debug_Print(2, zone);
+        ShaguDB_Debug_Print(2, "    "..event, zone);
         ShaguDB_InEvent = true;
         ShaguDB_GetQuestStartNotes();
         ShaguDB_InEvent = false;
+    elseif (event == "QUEST_ACCEPTED") then
+        ShaguDB_Debug_Print(2, "    "..event, arg1, arg2, arg3, arg4);
+        local count = GetNumQuestLogEntries();
+        local questLogId = 1;
+        local acceptedTitle = GetTitleText()
+        for i in range(1, count) do
+            local questLogTitle, _ = GetQuestLogTitle(i)
+            if questLogTitle == finishingTitle then
+                questLogId = i;
+                break;
+            end
+        end
+        ShaguDB_Debug_Print(2, "    "..questLogId);
+    elseif (event == "QUEST_WATCH_UPDATE") then
+        ShaguDB_Debug_Print(2, "    "..event, arg1, arg2, arg3, arg4);
+    elseif (event == "QUEST_FINISHED") then
+        ShaguDB_Debug_Print(2, "    "..event, arg1, arg2, arg3, arg4);
+        local count = GetNumQuestLogEntries();
+        local questLogId = 1;
+        local finishingTitle = GetTitleText()
+        for i in range(1, count) do
+            local questLogTitle, _ = GetQuestLogTitle(i)
+            if questLogTitle == finishingTitle then
+                questLogId = i;
+                break;
+            end
+        end
+        ShaguDB_Debug_Print(2, "    "..questLogId);
     end
 end -- Event(event, arg1)
+
+function range(from, to, step)
+  step = step or 1
+  return function(_, lastvalue)
+    local nextvalue = lastvalue + step
+    if step > 0 and nextvalue <= to or step < 0 and nextvalue >= to or
+       step == 0
+    then
+      return nextvalue
+    end
+  end, nil, from - step
+end
 
 function ShaguDB_Init()
     this:RegisterEvent("PLAYER_LOGIN");
     this:RegisterEvent("QUEST_WATCH_UPDATE");
     this:RegisterEvent("QUEST_LOG_UPDATE");
+    this:RegisterEvent("QUEST_ACCEPTED");
+    this:RegisterEvent("QUEST_FINISHED");
     this:RegisterEvent("UNIT_QUEST_LOG_CHANGED");
     this:RegisterEvent("WORLD_MAP_UPDATE");
 
@@ -763,9 +805,9 @@ function ShaguDB_Debug_Print(...)
                 out = out .. "false";
             end
         elseif (t == "nil") then
-        out = out .. "nil";
+            out = out .. "nil";
         else
-            out = out .. "\"nil or table or smth\"";
+            out = out .. "\"table or smth\"";
         end
     end
     getglobal("ChatFrame"..debugWin):AddMessage(out, 1.0, 1.0, 0.3);
