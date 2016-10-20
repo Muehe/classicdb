@@ -10,7 +10,7 @@ local L = AceLibrary("AceLocale-2.2"):new("Cartographer-Notes")
 L:RegisterTranslations("enUS", function() return {
 	["Notes"] = true,
 	["Module which allows you to put notes on the map."] = true,
-	
+
 	["White"] = true,
 	["Gray"] = true,
 	["Red"] = true,
@@ -23,10 +23,10 @@ L:RegisterTranslations("enUS", function() return {
 	["Pale blue"] = true,
 	["Cyan"] = true,
 	["Purple"] = true,
-	
+
 	["Unknown"] = true,
 	["Custom icon"] = true,
-	
+
 	["Create a new note"] = true,
 	["New note"] = true,
 	["Delete note"] = true,
@@ -36,31 +36,31 @@ L:RegisterTranslations("enUS", function() return {
 	["Send to raid"] = true,
 	["Send to guild"] = true,
 	["Send to player"] = true,
-	
+
 	["Note: This may be blocked by Blizzard's spam filter and cause problems. It is recommended to send to your party/raid/guild instead."] = true,
-	
+
 	["X position"] = true,
 	["Y position"] = true,
 	["Title"] = true,
 	["Info line 1 (optional)"] = true,
 	["Info line 2 (optional)"] = true,
 	["Creator (optional)"] = true,
-	
+
 	["Ctrl-Right-Click on map to add a note"] = true,
-	
+
 	["%s from Guild"] = true,
 	["%s from Raid"] = true,
 	["%s from Party"] = true,
-	
+
 	["Error: %s sent you a note with an unknown zone: %q"] = true,
 	["Error: %s sent you a note at %q : %.1f, %.1f with the title %q created by %q, but you already have a note at this location."] = true,
 	["%s sent you a note at %q : %.1f, %.1f with the title %q created by %q."] = true,
 
 	["Created by"] = true,
-	
+
 	["Show note creator"] = true,
 	["Show the `Created By:' line in notes"] = true,
-	
+
 	["Icon size"] = true,
 	["Size of the icons on the map"] = true,
 } end)
@@ -68,7 +68,7 @@ L:RegisterTranslations("enUS", function() return {
 L:RegisterTranslations("koKR", function() return {
 	["Notes"] = "노트",
 	["Module which allows you to put notes on the map."] = "지도에 노트를 작성합니다.",
-	
+
 	["White"] = "흰색",
 	["Gray"] = "회색",
 	["Red"] = "빨강색",
@@ -81,10 +81,10 @@ L:RegisterTranslations("koKR", function() return {
 	["Pale blue"] = "연한 파랑색",
 	["Cyan"] = "청색",
 	["Purple"] = "심홍색",
-	
+
 	["Unknown"] = "알수없음",
 	["Custom icon"] = "사용자 아이콘",
-	
+
 	["Create a new note"] = "노트 작성",
 	["New note"] = "신규 노트",
 	["Delete note"] = "노트 삭제",
@@ -94,28 +94,28 @@ L:RegisterTranslations("koKR", function() return {
 	["Send to raid"] = "공격대에 보냄",
 	["Send to guild"] = "길드에 보냄",
 	["Send to player"] = "플레이어에게 보냄",
-	
+
 --	["Note: This may be blocked by Blizzard's spam filter and cause problems. It is recommended to send to your party/raid/guild instead."] = true,
-    
+
 	["X position"] = "X 위치",
 	["Y position"] = "Y 위치",
 	["Title"] = "제목",
 	["Info line 1 (optional)"] = "정보 라인 1 (선택)",
 	["Info line 2 (optional)"] = "정보 라인 2 (선택)",
 	["Creator (optional)"] = "신규 (선택)",
-	
+
 	["Ctrl-Right-Click on map to add a note"] = "Ctrl-오른쪽-클릭 : 맵 노트 추가",
-	
+
 	["%s from Guild"] = "길드로부터 %s 받음",
 	["%s from Raid"] = "공격대로부터 %s 받음",
 	["%s from Party"] = "파티로부터 %s 받음",
-	
+
 	["Error: %s sent you a note with an unknown zone: %q"] = "오류: %s|1이;가; 알려지지 않은 지역 노트를 보냈습니다: %q",
 --	["Error: %s sent you a note at %q : %.1f, %.1f with the title %q created by %q, but you already have a note at this location."] = true,
 --	["%s sent you a note at %q : %.1f, %.1f with the title %q created by %q."] = true,
 
 	["Created by"] = "작성자",
-	
+
 	["Show note creator"] = "작성자 보기",
 	["Show the `Created By:' line in notes"] = "노트에 '작성자:' 를 표시합니다.",
 
@@ -164,7 +164,7 @@ local function GetCursorMapLocation(button)
 	local width = button:GetWidth()
 	local height = button:GetHeight()
 	local scale = button:GetEffectiveScale()
-	
+
 	return (x/scale - left) / width, (top - y/scale) / height
 end
 
@@ -261,10 +261,10 @@ function Cartographer_Notes:OnInitialize()
 	end
 	self:RegisterMemoizations(memoizations)
 	memoizations = nil
-	
+
 	do
 		local x = { "Star", "Circle", "Diamond", "Triangle", "Moon", "Square", "Cross", "Skull" }
-		
+
 		for i = 1, 8 do
 			local t = UnitPopupButtons["RAID_TARGET_" .. i]
 			self:RegisterIcon(x[i], {
@@ -280,13 +280,13 @@ function Cartographer_Notes:OnInitialize()
 				showToUser = true,
 			})
 		end
-		
+
 		self:RegisterIcon("Unknown", {
 			text = L["Unknown"],
 			path = "Interface\\Icons\\INV_Misc_QuestionMark",
 		})
 	end
-	
+
 	self.db = Cartographer:AcquireDBNamespace("Notes")
 	Cartographer:RegisterDefaults("Notes", "account", {
 		pois = {
@@ -302,7 +302,7 @@ function Cartographer_Notes:OnInitialize()
 		showCreator = true,
 		iconSize = 1,
 	})
-	
+
 	-- REMOVE IN A FEW DAYS (2006-11-23) --
 	for k,zone in pairs(self.db.account.pois) do
 		for _,u in pairs(zone) do
@@ -313,7 +313,7 @@ function Cartographer_Notes:OnInitialize()
 		end
 	end
 	-- REMOVE IN A FEW DAYS (2006-11-23) --
-	
+
 	-- REMOVE IN A FEW DAYS (2006-11-26) --
 	for k,zone in pairs(self.db.account.pois) do
 		for _,u in pairs(zone) do
@@ -358,7 +358,7 @@ function Cartographer_Notes:OnInitialize()
 		end
 	end
 	-- REMOVE IN A FEW DAYS (2006-11-26) --
-	
+
 	Cartographer.options.args.Notes = {
 		name = L["Notes"],
 		desc = L["Module which allows you to put notes on the map."],
@@ -415,7 +415,7 @@ function Cartographer_Notes:OnEnable()
 	if WorldMapFrame:IsShown() then
 		self:RefreshMap(false)
 	end
-	
+
 	local func = function()
 		self:WorldMapButton_OnClick(arg1, WorldMapButton)
 	end
@@ -432,7 +432,7 @@ function Cartographer_Notes:OnEnable()
 	if lua51 then
 		WorldMapDeathRelease:SetScript("OnMouseUp", func)
 	end
-	
+
 	self:RegisterComm(self.commPrefix, "WHISPER")
 	self:RegisterComm(self.commPrefix, "GUILD")
 	self:RegisterComm(self.commPrefix, "PARTY")
@@ -465,12 +465,12 @@ Cartographer_Notes.OnCommReceive = {
 			-- bad data
 			return
 		end
-		
+
 		if not BZ:HasTranslation(zone) then
 			self:Print(L["Error: %s sent you a note with an unknown zone: %q"], fullSender, zone)
 			return
 		end
-		
+
 		local usingDB = self.externalDBs[creator] and creator or nil
 		if creator and not usingDB and type(data) == "string" then
 			data = {
@@ -479,7 +479,7 @@ Cartographer_Notes.OnCommReceive = {
 				creator = creator
 			}
 		end
-		
+
 		local fullSender = distribution == "GUILD" and string.format(L["%s from Guild"], sender) or distribution == "RAID" and string.format(L["%s from Raid"], sender) or distribution == "PARTY" and string.format(L["%s from Party"], sender) or sender
 		x, y = x/1000, y/1000
 		local id = getID(x, y)
@@ -499,11 +499,11 @@ function Cartographer_Notes:InstanceWorldMapButton_OnClick(frame, a1)
 	if mouseButton ~= "RightButton" or (not IsControlKeyDown() and (not self.developing or not IsAltKeyDown())) then
 		return self.hooks[frame].OnClick(frame, a1)
 	end
-	
+
 	if not Cartographer:GetCurrentEnglishZoneName() then
 		return
 	end
-	
+
 	return self:MapButton_OnClick(arg1, frame)
 end
 
@@ -511,15 +511,15 @@ function Cartographer_Notes:WorldMapButton_OnClick(mouseButton, button)
 	if mouseButton ~= "RightButton" or (not IsControlKeyDown() and (not self.developing or not IsAltKeyDown())) then
 		return self.hooks.WorldMapButton_OnClick(mouseButton, button)
 	end
-	
+
 	if not Cartographer:GetCurrentEnglishZoneName() then
 		return
 	end
-	
+
 	if not button then
 		button = this
 	end
-	
+
 	return self:MapButton_OnClick(mouseButton, button)
 end
 
@@ -575,7 +575,7 @@ local function GetNoteDialog()
 	if frame then
 		return frame
 	end
-	
+
 	frame = CreateFrame("Frame", "CartographerNotesNewNoteFrame", WorldMapFrame)
 	frame:SetPoint("CENTER", WorldMapFrame, "CENTER")
 	frame:SetWidth(500)
@@ -603,23 +603,23 @@ local function GetNoteDialog()
 		'tileSize', 32,
 		'edgeSize', 32
 	})
-	
+
 	local texture = frame:CreateTexture(nil, "ARTWORK")
 	texture:SetTexture("Interface\\DialogFrame\\UI-DialogBox-Header")
 	texture:SetWidth(256)
 	texture:SetHeight(64)
 	texture:SetPoint("TOP", frame, "TOP", 0, 12)
-	
+
 	local header = frame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
 	frame.header = header
 	header:SetText(L["New note"])
 	header:SetPoint("TOP", texture, "TOP", 0, -14)
-	
+
 	local okayButton = CreateFrame("Button", "CartographerNotesNewNoteFrameOkay", frame, "UIPanelButtonTemplate2")
 	okayButton:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 20, 20)
 	okayButton:SetText(OKAY or 'Okay')
 	okayButton:SetWidth(frame:GetWidth()/2 - 25)
-	
+
 	local cancelButton = CreateFrame("Button", "CartographerNotesNewNoteFrameCancel", frame, "UIPanelButtonTemplate2")
 	cancelButton:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -20, 20)
 	cancelButton:SetText(CANCEL or 'Cancel')
@@ -627,14 +627,14 @@ local function GetNoteDialog()
 	cancelButton:SetScript("OnClick", function()
 		frame:Hide()
 	end)
-	
+
 	local last
 	local isGood
-	
+
 	local OnEscapePressed = function()
 		this:ClearFocus()
 	end
-	
+
 	local OnTextChanged = function()
 		if isGood() then
 			okayButton:Enable()
@@ -642,7 +642,7 @@ local function GetNoteDialog()
 			okayButton:Disable()
 		end
 	end
-	
+
 	local function make(text, colorful)
 		local editBox = CreateFrame("EditBox", nil, frame)
 		editBox:SetFontObject(ChatFontNormal)
@@ -670,7 +670,7 @@ local function GetNoteDialog()
 		right:SetWidth(colorful and 125 or 140)
 		right:SetHeight(32)
 		right:SetPoint("RIGHT", editBox, "RIGHT", 10, 0)
-		
+
 		local label = frame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
 		label:SetPoint("RIGHT", editBox, "LEFT", -20, 0)
 		label:SetPoint("LEFT", frame, "LEFT", 20, 0)
@@ -678,7 +678,7 @@ local function GetNoteDialog()
 		label:SetPoint("BOTTOM", editBox, "BOTTOM")
 		label:SetJustifyH("RIGHT")
 		label:SetText(text)
-		
+
 		if colorful then
 			local button = CreateFrame("Button", nil, editBox)
 			button:SetPoint("LEFT", editBox, "RIGHT", 20, 0)
@@ -838,10 +838,10 @@ local function GetNoteDialog()
 				button:GetScript("OnClick")()
 			end)
 		end
-		
+
 		return editBox
 	end
-	
+
 	frame.xEditBox = make(L["X position"])
 	frame.yEditBox = make(L["Y position"])
 	frame.zone = make(ZONE or "Zone")
@@ -852,7 +852,7 @@ local function GetNoteDialog()
 	frame.info1 = make(L["Info line 1 (optional)"], true)
 	frame.info2 = make(L["Info line 2 (optional)"], true)
 	frame.creator = make(L["Creator (optional)"])
-	
+
 	frame.xEditBox:SetScript("OnTabPressed", function()
 		this:ClearFocus()
 		frame.yEditBox:SetFocus()
@@ -895,47 +895,47 @@ local function GetNoteDialog()
 		end
 		return true
 	end
-	
+
 	local icon = CreateFrame("Frame", "CartographerNotesNewNoteFrameIcon", frame)
 	frame.icon = icon
 	icon:SetPoint("TOPLEFT", frame.creator, "BOTTOMLEFT", -20, -10)
 	icon:SetWidth(frame:GetWidth()/2 - 25)
 	icon:SetHeight(30)
-	
+
 	local texture = icon:CreateTexture(nil, "ARTWORK")
 	texture:SetTexture("Interface\\Glues\\CharacterCreate\\CharacterCreate-LabelFrame")
 	texture:SetWidth(25)
 	texture:SetHeight(64)
 	texture:SetPoint("TOPLEFT", icon, "TOPLEFT", 0, 17)
 	texture:SetTexCoord(0, 0.1953125, 0, 1)
-	
+
 	local texture2 = icon:CreateTexture(nil, "ARTWORK")
 	texture2:SetTexture("Interface\\Glues\\CharacterCreate\\CharacterCreate-LabelFrame")
 	texture2:SetWidth(115)
 	texture2:SetHeight(64)
 	texture2:SetPoint("LEFT", texture, "RIGHT")
 	texture2:SetTexCoord(0.1953125, 0.8046875, 0, 1)
-	
+
 	local texture3 = icon:CreateTexture(nil, "ARTWORK")
 	texture3:SetTexture("Interface\\Glues\\CharacterCreate\\CharacterCreate-LabelFrame")
 	texture3:SetWidth(25)
 	texture3:SetHeight(64)
 	texture3:SetPoint("LEFT", texture2, "RIGHT")
 	texture3:SetTexCoord(0.8046875, 1, 0, 1)
-	
+
 	local fontstring = icon:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 	fontstring:SetJustifyH("RIGHT")
 	fontstring:SetWidth(0)
 	fontstring:SetHeight(10)
 	fontstring:SetPoint("RIGHT", texture3, "RIGHT", -43, 2)
-	
+
 	local image = icon:CreateTexture(nil, "OVERLAY")
 	image:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
 	image:SetWidth(16)
 	image:SetHeight(16)
 	image:SetTexCoord(0, 0.25, 0, 0.25)
 	image:SetPoint("LEFT", texture, "LEFT", 20, 0)
-	
+
 	local button = CreateFrame("Button", "CartographerNotesNewNoteFrameIconButton", icon)
 	button:SetWidth(24)
 	button:SetHeight(24)
@@ -1033,7 +1033,7 @@ local function GetNoteDialog()
 			Dewdrop:Close()
 		end
 	end)
-	
+
 	okayButton:SetScript("OnClick", function()
 		local r,g,b = frame.title:GetTextColor()
 		local r2,g2,b2 = frame.info1:GetTextColor()
@@ -1057,7 +1057,7 @@ local function GetNoteDialog()
 			'oldId', frame.id)
 		frame:Hide()
 	end)
-	
+
 	return frame
 end
 
@@ -1075,7 +1075,7 @@ function Cartographer_Notes:OpenNewNoteFrame(x, y, creator)
 	if y < 0 or y > 1 then
 		error(string.format("Argument #4 is expected to be [0, 1], got %s", y), 2)
 	end
-	
+
 	local frame = GetNoteDialog()
 	frame.header:SetText(L["New note"])
 	frame.id = nil
@@ -1124,7 +1124,7 @@ function Cartographer_Notes:ShowEditDialog(zone, x, y)
 		end
 		id = getID(x, y)
 	end
-	
+
 	local data, db = getrawpoi(zone, id)
 	if not data then
 		return
@@ -1163,11 +1163,11 @@ end
 local pois
 do
 	local cache = {}
-	
+
 	local num_pois = 0
-	
+
 	local OnMouseDown, OnMouseUp, OnEnter, OnLeave, OnClick
-	
+
 	local dummy
 	local function newpoi()
 		local x = next(cache)
@@ -1176,23 +1176,23 @@ do
 			x:Show()
 			return x
 		end
-		
+
 		num_pois = num_pois + 1
-		
+
 		local frame = CreateFrame("Button", "CartographerNotesPOI" .. num_pois, WorldMapButton)
-		
+
 		frame:EnableMouse(true)
 		frame:SetMovable(true)
 		frame:SetWidth(16)
 		frame:SetHeight(16)
 		frame:SetPoint("CENTER", WorldMapButton, "CENTER")
-		
+
 		local texture = frame:CreateTexture(nil, "OVERLAY")
 		frame.texture = texture
 		texture:SetAllPoints(frame)
 		texture:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
 		texture:SetTexCoord(0, 0.25, 0, 0.25)
-		
+
 		frame:SetFrameLevel(9); -- WHDB related. Normal note FrameLevel.
 		frame:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 		if not OnMouseDown then
@@ -1206,7 +1206,7 @@ do
 			end
 		end
 		frame:SetScript("OnMouseDown", OnMouseDown)
-		
+
 		if not OnMouseUp then
 			OnMouseUp = function()
         if not Dewdrop:IsOpen(this) then
@@ -1222,7 +1222,7 @@ do
               local height = parent:GetHeight()
               x = (x - left) / width
               y = (top - y) / height
-              
+
               x, y = round(x, 3), round(y, 3)
               if x > 1 then
                 x = 1
@@ -1258,7 +1258,7 @@ do
 			end
 		end
 		frame:SetScript("OnMouseUp", OnMouseUp)
-		
+
 		if not OnEnter then
 			local dummy
 			local currentFrame
@@ -1273,7 +1273,7 @@ do
 				else
 					anchor = "ANCHOR_RIGHT"
 				end
-				
+
 				WorldMapTooltip:SetOwner(this, anchor)
 				WorldMapTooltip:SetText(this.title, this.titleR, this.titleG, this.titleB)
 				if this.info then
@@ -1290,7 +1290,7 @@ do
 			end
 		end
 		frame:SetScript("OnEnter", OnEnter)
-		
+
 		if not OnLeave then
 			OnLeave = function()
 				WorldMapTooltip:Hide()
@@ -1298,7 +1298,7 @@ do
 			end
 		end
 		frame:SetScript("OnLeave", OnLeave)
-		
+
 		if not OnClick then
 			local poi
 			OnClick = function()
@@ -1348,6 +1348,26 @@ do
 												'func', editNoteFunc
 											)
 										end
+										if poi.creator == 'ShaguDB' then
+											local quests = {};
+											local i = 0;
+											local j = 0;
+											while true do
+												i, j = string.find(poi.info, 'ID: %d+', i+1);
+												if i == nil then break; end
+												table.insert(quests, tonumber(string.sub(poi.info, i+4, j)));
+												ShaguDB_Debug_Print(4, string.sub(poi.info, i+4, j));
+											end
+											for k, v in pairs(quests) do
+												Dewdrop:AddLine(
+													'text', "Finish quest '"..qData[v][1].."' ("..v..")",
+													'func', function (val)
+														ShaguDB_FinishQuest(val)
+													end,
+													'arg1', v
+												)
+											end
+										end
 										Dewdrop:AddLine(
 											'text', L["Delete note"],
 											'func', deleteNoteFunc
@@ -1387,11 +1407,11 @@ do
 												)
 												bit = true
 											end
-											
+
 											if bit then
 												Dewdrop:AddLine()
 											end
-											
+
 											Dewdrop:AddLine(
 												'text', L["Send to player"],
 												'tooltipTitle', L["Send to player"],
@@ -1421,16 +1441,16 @@ do
 			end
 		end
 		frame:SetScript("OnClick", OnClick)
-		
+
 		return frame
 	end
-	
+
 	local function delpoi(x)
 		x:Hide()
 		cache[x] = true
 		return nil
 	end
-	
+
 	pois = setmetatable({ del = function(self, id)
 		if id == 'del' then
 			return
@@ -1467,11 +1487,11 @@ function Cartographer_Notes:SetNote(zone, x, y, icon, creator, k1, v1, k2, v2, k
 	if y < 0 or y > 1 then
 		error(string.format("Argument #4 is expected to be [0, 1], got %s", y), 2)
 	end
-	
+
 	local usingDB = self.externalDBs[creator] and creator or nil
-	
+
 	local id = getID(x, y)
-	
+
 	if usingDB and not self.externalDBs[creator][zone] then
 		self.externalDBs[creator][zone] = {}
 	end
@@ -1664,7 +1684,7 @@ function Cartographer_Notes:GetNote(zone, x, y)
 	if not data then
 		return
 	end
-	
+
 	return zone, x, y, type(data) == "string" and data or data.icon, db
 end
 
@@ -1765,9 +1785,9 @@ function Cartographer_Notes:ShowNote(zone, id, creator)
 	if self.developing == creator then
 		poi.manual = true
 	end
-	
+
 	local button = zone == Cartographer:GetCurrentInstance() and Cartographer:GetInstanceWorldMapButton() or WorldMapButton
-	
+
 	poi:SetParent(button)
 	if string.find(icon, "^Interface\\") then
 		poi:SetWidth(16*self.db.profile.iconSize)
@@ -1792,7 +1812,7 @@ function Cartographer_Notes:ShowNote(zone, id, creator)
 		poi.texture:SetTexCoord(t.cLeft, t.cRight, t.cTop, t.cBottom)
 	end
 	poi:Show()
-	
+
 	poi:ClearAllPoints()
 	local x, y = getXY(id)
 	poi:SetPoint("CENTER", button, "TOPLEFT", x * button:GetWidth(), -y * button:GetHeight())
@@ -1852,7 +1872,7 @@ function Cartographer_Notes:RegisterNotesDatabase(name, db, handler)
 	if self.externalDBs[name] then
 		error("Cannot register a database already registered.", 2)
 	end
-	
+
 	-- REMOVE IN A FEW DAYS (2006-11-23) --
 	for k,zone in pairs(db) do
 		for _,u in pairs(zone) do
@@ -1863,7 +1883,7 @@ function Cartographer_Notes:RegisterNotesDatabase(name, db, handler)
 		end
 	end
 	-- REMOVE IN A FEW DAYS (2006-11-23) --
-	
+
 	-- REMOVE IN A FEW DAYS (2006-11-26) --
 	for k,zone in pairs(db) do
 		for l,u in pairs(zone) do
@@ -1912,10 +1932,10 @@ function Cartographer_Notes:RegisterNotesDatabase(name, db, handler)
 		end
 	end
 	-- REMOVE IN A FEW DAYS (2006-11-26) --
-	
+
 	self.externalDBs[name] = db
 	self.handlers[name] = handler
-	
+
 	if WorldMapFrame:IsShown() then
 		local zone = Cartographer:GetCurrentEnglishZoneName()
 		if rawget(db, zone) then
@@ -1948,10 +1968,10 @@ function Cartographer_Notes:EnableDevelopment(database)
 	end
 	AceLibrary.argCheck(self, database, 2, "string")
 	self.developing = database
-	
+
 	if Cartographer:IsActive(self) then
 		Cartographer:AddToMagnifyingGlass(string.format("Alt-Right-Click on map to add a default note to %q", database))
-		
+
 		self:RefreshMap()
 	end
 end
@@ -1977,24 +1997,24 @@ function Cartographer_Notes:SendNoteToPlayer(zone, x, y, player)
 	if not string.find(player, "^%a%a+$") then
 		error(string.format("Argument #5 in the wrong format, got %q", player), 2)
 	end
-	
+
 	local data, db = getrawpoi(zone, getID(x, y))
-	
+
 	if not data then
 		AceLibrary.error(self, "Cannot send note %q(%s,%s). Does not exist", zone, x*100, y*100)
 	end
-	
+
 	self:SendCommMessage("WHISPER", player, "NOTE", zone, round(x*1000, 0), round(y*1000, 0), db, data)
 	return true
 end
 
 local function sendNote(distribution, zone, x, y)
 	local data, db = getrawpoi(zone, getID(x, y))
-	
+
 	if not data then
 		AceLibrary.error("Cannot send note %q(%s,%s). Does not exist", zone, x*100, y*100)
 	end
-	
+
 	self:SendCommMessage(distribution, "NOTE", zone, round(x*1000, 0), round(y*1000, 0), db, data)
 	return true
 end
@@ -2116,18 +2136,18 @@ end
 local cache = {}
 local function iter(t)
 	t.id = t.id + 1
-	
+
 	local notes = t.notes
-	
+
 	local id = notes[t.id]
 	if id then
 		local data = t.zoneData[id]
-		
+
 		local x, y = getXY(id)
-		
+
 		return t.zone, x, y, type(data) == "string" and data or data.icon, t.creator
 	end
-	
+
 	cache[t] = true
 	for k in pairs(t) do
 		t[k] = nil
@@ -2163,7 +2183,7 @@ function Cartographer_Notes:IterateNearbyNotes(zone, x, y, radius, creator, max_
 	AceLibrary.argCheck(self, radius, 5, "number", "nil")
 	AceLibrary.argCheck(self, creator, 6, "string", "nil")
 	AceLibrary.argCheck(self, max_notes, 7, "number", "nil")
-	
+
 	if not BZ:HasTranslation(zone) then
 		if BZ:HasReverseTranslation(zone) then
 			zone = BZ:GetReverseTranslation(zone)
@@ -2186,14 +2206,14 @@ function Cartographer_Notes:IterateNearbyNotes(zone, x, y, radius, creator, max_
 	if creator and not self.externalDBs[creator] then
 		error(string.format("Database %q not registered.", creator), 2)
 	end
-	
+
 	local zoneData = creator and rawget(self.externalDBs[creator], zone) or rawget(self.db.account.pois, zone)
 	if not zoneData or not next(zoneData) then
 		return retNil
 	end
-	
+
 	local radius_2 = radius^2
-	
+
 	local notes = next(cache) or {}
 	cache[notes] = nil
 	for i, data in pairs(zoneData) do
@@ -2202,27 +2222,27 @@ function Cartographer_Notes:IterateNearbyNotes(zone, x, y, radius, creator, max_
 			table.insert(notes, i)
 		end
 	end
-	
+
 	current_x, current_y = x, y
 	table.sort(notes, my_sort)
 	current_x, current_y = nil, nil
-	
+
 	if max_notes and max_notes > table.getn(notes) then
 		for i = max_notes + 1, table.getn(notes) do
 			notes[i] = nil
 		end
 		table_setn(notes, max_notes)
 	end
-	
+
 	local t = next(cache) or {}
 	cache[t] = nil
-	
+
 	t.zoneData = zoneData
 	t.zone = zone
 	t.creator = creator
 	t.notes = notes
 	t.id = 0
-	
+
 	return iter, t, nil
 end
 
@@ -2232,7 +2252,7 @@ function Cartographer_Notes:GetNearbyNote(zone, x, y, radius, creator)
 	AceLibrary.argCheck(self, y, 4, "number")
 	AceLibrary.argCheck(self, radius, 5, "number", "nil")
 	AceLibrary.argCheck(self, creator, 6, "string", "nil")
-	
+
 	if not BZ:HasTranslation(zone) then
 		if BZ:HasReverseTranslation(zone) then
 			zone = BZ:GetReverseTranslation(zone)
@@ -2255,23 +2275,23 @@ function Cartographer_Notes:GetNearbyNote(zone, x, y, radius, creator)
 	if creator and not self.externalDBs[creator] then
 		error(string.format("Database %q not registered.", creator), 2)
 	end
-	
+
 	local zoneData = creator and rawget(self.externalDBs[creator], zone) or rawget(self.db.account.pois, zone)
 	if not zoneData or not next(zoneData) then
 		return
 	end
 	local radius_2 = radius^2
-	
+
 	local close_distance = 2
 	local close_id
-	
+
 	for id, data in pairs(zoneData) do
 		local x_p, y_p = getXY(id)
-		
+
 		local x_d, y_d = x_p - x, y_p - y
-		
+
 		local d_2 = x_d^2 + y_d^2
-		
+
 		if d_2 <= radius_2 and d_2 < close_distance then
 			close_distance = d_2
 			close_id = id

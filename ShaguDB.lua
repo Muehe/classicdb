@@ -1955,3 +1955,16 @@ function ShaguDB_GetQuestLogFootprint()
     end
     return {strlower(footprint), ids}
 end
+
+function ShaguDB_FinishQuest(questId)
+    if qData[questId] then
+        ShaguDB_FinishedQuests[questId] = true;
+    end
+    WorldMapFrame:Hide();
+    ShaguDB_CleanMap();
+    if (ShaguDB_Settings.auto_plot) then
+        ShaguDB_PlotAllQuests();
+    else
+        WorldMapFrame:Show();
+    end
+end
