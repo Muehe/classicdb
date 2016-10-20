@@ -8,7 +8,7 @@ cMark = "mk1";
 4 = event debug
 8 = advanced
 --]]
-ShaguDB_Debug = 15;
+ShaguDB_Debug = 7;
 -- This table is used to prepare new notes.
 -- It holds npcs, objects, items and marked area triggers.
 ShaguDB_PREPARE = {{},{},{},{}};
@@ -26,8 +26,9 @@ ShaguDB_MAP_NOTES = {};
 ShaguDB_Notes = 0;
 -- This variable is used to achieve different behaviour for quest start notes.
 ShaguDB_InEvent = false;
--- This variable is used to determine types Quest Log events by comparing it before/after.
-ShaguDB_QuestLogFootprint = "";
+-- These variables are used to determine types of Quest Log events (accept/abandon/finish).
+ShaguDB_QuestLogFootprint = {{},{}};
+ShaguDB_QuestAbandon = '';
 
 -- DB keys
 DB_NAME, DB_NPC, NOTE_TITLE = 1, 1, 1;
@@ -61,7 +62,7 @@ function ShaguDB_OnFrameShow()
 end -- OnFrameShow()
 
 function ShaguDB_Event(event, ...)
-    ShaguDB_Debug_Print(4, "Event() called", event, arg[1], arg[2], arg[3]);
+    ShaguDB_Debug_Print(4, "Event() called", event, arg1, arg2, arg3);
     if (event == "PLAYER_LOGIN") then
         if (Cartographer_Notes ~= nil) then
             ShaguDBDB = {}; ShaguDBDBH = {};
@@ -244,36 +245,59 @@ function ShaguDB_Event(event, ...)
         ShaguDB_GetQuestStartNotes();
         ShaguDB_InEvent = false;
     elseif (event == "QUEST_LOG_UPDATE") then
+        local footprint = ShaguDB_GetQuestLogFootprint(); -- {footprintString, questIdTable}
+        local count = GetNumQuestLogEntries();
+        -- NOTE: maybe ShaguDB_CompareTables(ShaguDB_QuestLogFootprint[2], footprint[2]) would catch more edge cases, making footprintString obsolete
+        if (ShaguDB_QuestLogFootprint[1] ~= footprint[1]) then
+            local added = 0;
+            for k, v in pairs(footprint[2]) do
+                if ShaguDB_QuestLogFootprint[2][k] == nil then
+                    added = k;
+                end
+            end
+            if added ~= 0 then
+                ShaguDB_Debug_Print(4, "    Quest accepted", added);
+                ShaguDB_FinishedQuests[added] = false;
+            end
+            local removed = 0;
+            for k, v in pairs(ShaguDB_QuestLogFootprint[2]) do
+                if footprint[2][k] == nil then
+                    removed = k;
+                end
+            end
+            if removed ~= 0 then
+                if ShaguDB_FinishedQuests[removed] == false then
+                    ShaguDB_Debug_Print(4, "    Quest finished", removed);
+                    ShaguDB_FinishedQuests[removed] = true;
+                else
+                    ShaguDB_Debug_Print(4, "    Quest abandoned", removed);
+                    ShaguDB_FinishedQuests[removed] = nil;
+                end
+            end
+            if (ShaguDB_Settings.auto_plot) then
+                ShaguDB_InEvent = true;
+                ShaguDB_PlotAllQuests();
+                ShaguDB_InEvent = false;
+            end
+        end
+        ShaguDB_Debug_Print(4, "    footprint", {footprint, count, change});
+    elseif (event == "QUEST_PROGRESS") then
         local footprint = ShaguDB_GetQuestLogFootprint();
         local count = GetNumQuestLogEntries();
-        ShaguDB_Debug_Print(4, "    footprint", footprint, count);
-        if (ShaguDB_Settings.auto_plot) then
+        ShaguDB_Debug_Print(4, "    footprint", {footprint, count});
+    elseif (event == "UNIT_QUEST_LOG_CHANGED") then
+        ShaguDB_QuestLogFootprint = ShaguDB_GetQuestLogFootprint();
+        local count = GetNumQuestLogEntries();
+        ShaguDB_Debug_Print(4, "    footprint", {ShaguDB_QuestLogFootprint, count});
+        if ((ShaguDB_Settings.auto_plot) and (ShaguDB_QuestLogFootprint[1] ~= footprint[1])) then
             ShaguDB_InEvent = true;
             ShaguDB_PlotAllQuests();
             ShaguDB_InEvent = false;
         end
-    elseif (event == "QUEST_ACCEPTED") then
-        local footprint = ShaguDB_GetQuestLogFootprint();
-        local count = GetNumQuestLogEntries();
-        ShaguDB_Debug_Print(4, "    footprint", footprint, count);
-        local questLogId = 1;
-        local acceptedTitle = GetTitleText()
-        for i in range(1, count) do
-            local questLogTitle, _ = GetQuestLogTitle(i)
-            if questLogTitle == finishingTitle then
-                questLogId = i;
-                break;
-            end
-        end
-        ShaguDB_Debug_Print(4, "    ", questLogId);
-    elseif (event == "UNIT_QUEST_LOG_CHANGED") then
-        local footprint = ShaguDB_GetQuestLogFootprint();
-        local count = GetNumQuestLogEntries();
-        ShaguDB_Debug_Print(4, "    footprint", footprint, count);
     elseif (event == "QUEST_FINISHED") then
         local footprint = ShaguDB_GetQuestLogFootprint();
         local count = GetNumQuestLogEntries();
-        ShaguDB_Debug_Print(4, "    footprint", footprint, count);
+        ShaguDB_Debug_Print(4, "    footprint", {footprint, count});
         local count = GetNumQuestLogEntries();
         local questLogId = 1;
         local finishingTitle = GetTitleText()
@@ -300,14 +324,31 @@ function range(from, to, step)
   end, nil, from - step
 end
 
+ -- Called from xml
 function ShaguDB_Init()
+    -- Register Events (some unused)
     this:RegisterEvent("PLAYER_LOGIN");
     this:RegisterEvent("QUEST_WATCH_UPDATE");
     this:RegisterEvent("QUEST_LOG_UPDATE");
-    this:RegisterEvent("QUEST_ACCEPTED");
+    this:RegisterEvent("QUEST_PROGRESS");
     this:RegisterEvent("QUEST_FINISHED");
     this:RegisterEvent("UNIT_QUEST_LOG_CHANGED");
     this:RegisterEvent("WORLD_MAP_UPDATE");
+
+    -- Hook buttons for abandoning quests.
+    -- Credit for this approach goes to Questie: https://github.com/AeroScripts/QuestieDev
+    QuestAbandonOnAccept = StaticPopupDialogs["ABANDON_QUEST"].OnAccept;
+    StaticPopupDialogs["ABANDON_QUEST"].OnAccept = function()
+        ShaguDB_QuestAbandon = GetAbandonQuestName();
+        ShaguDB_Debug_Print(4, "Abandon", ShaguDB_QuestAbandon);
+        QuestAbandonOnAccept();
+    end
+    QuestAbandonWithItemsOnAccept = StaticPopupDialogs["ABANDON_QUEST_WITH_ITEMS"].OnAccept;
+    StaticPopupDialogs["ABANDON_QUEST_WITH_ITEMS"].OnAccept = function()
+        ShaguDB_QuestAbandon = GetAbandonQuestName();
+        ShaguDB_Debug_Print(4, "Abandon", ShaguDB_QuestAbandon);
+        QuestAbandonOnAccept();
+    end
 
     -- Create the /shagu SlashCommand
     SLASH_SHAGU1 = "/shagu";
@@ -831,6 +872,7 @@ function ShaguDB_Debug_Print(...)
         elseif (t == "nil") then
             out = out .. "nil";
         elseif (t == "table") then
+            out = out .. "table (see above)";
             ShaguDB_PrintTable(arg[i]);
         else
             out = out .. t;
@@ -1374,6 +1416,7 @@ function ShaguDB_GetQuestNotes(questLogID)
             ShaguDB_Debug_Print(1, "Failed to find Quest ID for: ", questTitle)
             title = questTitle
         end
+        local itemList = {};
         if (numObjectives ~= nil) then
             for i=1, numObjectives, 1 do
                 local text, objectiveType, finished = GetQuestLogLeaderBoard(i, questLogID);
@@ -1406,6 +1449,7 @@ function ShaguDB_GetQuestNotes(questLogID)
                     elseif (objectiveType == "item") then
                         ShaguDB_Debug_Print(8, "    type = item");
                         local itemID = itemLookup[itemName];
+                        itemList[itemID] = true;
                         if (itemID and (itemData[itemID])) then
                             local comment = "|cFF00FF00"..itemName..": "..numItems.."/"..numNeeded.."|r"
                             showMap = ShaguDB_PrepareItemNotes(itemID, title, comment, cMark, true) or showMap;
@@ -1463,25 +1507,27 @@ function ShaguDB_GetQuestNotes(questLogID)
                     end
                 end
             end
-            if (type(qIDs) == "number") then
-                ShaguDB_Debug_Print(8, "    Quest related drop for: ", qIDs)
-                if qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_ITM] then
-                    for k, item in pairs(qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_ITM]) do
-                        if itemData[item[1]] then
-                            local comment = "Drop for quest related item:\n"..itemData[item[1]][DB_ITM_NAME];
-                            showMap = ShaguDB_PrepareItemNotes(item[1], title, comment, cMark, true) or showMap;
+            if ((not isComplete) and (numObjectives ~= 0)) then
+                if (type(qIDs) == "number") then
+                    ShaguDB_Debug_Print(8, "    Quest related drop for: ", qIDs)
+                    if qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_ITM] then
+                        for k, item in pairs(qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_ITM]) do
+                            if (itemData[item[1]] and itemList[item[1]] == nil) then
+                                local comment = "Drop for quest related item:\n"..itemData[item[1]][DB_ITM_NAME];
+                                showMap = ShaguDB_PrepareItemNotes(item[1], title, comment, cMark, true) or showMap;
+                            end
                         end
                     end
                 end
-            end
-            if (type(qIDs) == "table") then
-                for k, qID in pairs(qIDs) do
-                    ShaguDB_Debug_Print(8, "    Quest related drop for: ", qID)
-                    if qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_ITM] then
-                        for k, item in pairs(qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_ITM]) do
-                            if itemData[item[1]] then
-                                local comment = "Drop for quest related item:\n"..itemData[item[1]][DB_ITM_NAME];
-                                showMap = ShaguDB_PrepareItemNotes(item[1], title, comment, cMark, true) or showMap;
+                if (type(qIDs) == "table") then
+                    for k, qID in pairs(qIDs) do
+                        ShaguDB_Debug_Print(8, "    Quest related drop for: ", qID)
+                        if qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_ITM] then
+                            for k, item in pairs(qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_ITM]) do
+                                if itemData[item[1]] then
+                                    local comment = "Drop for quest related item:\n"..itemData[item[1]][DB_ITM_NAME];
+                                    showMap = ShaguDB_PrepareItemNotes(item[1], title, comment, cMark, true) or showMap;
+                                end
                             end
                         end
                     end
@@ -1599,7 +1645,7 @@ end -- GetQuestStartNotes(zoneName)
 function ShaguDB_GetQuestStartComment(npcOrGoStarts)
     local tooltipText = "";
     for key, questID in npcOrGoStarts do
-        if (qData[questID]) and (ShaguDB_FinishedQuests[questID] ~= true) then
+        if (qData[questID]) and (ShaguDB_FinishedQuests[questID] == nil) and (ShaguDB_FinishedQuests[questID] ~= true) then
             local tooHigh = false;
             if (ShaguDB_Settings.filterReqLevel == true) and (qData[questID][DB_MIN_LEVEL] > UnitLevel("player")) then
                 tooHigh = true;
@@ -1854,21 +1900,19 @@ function ShaguDB_PrintTable(tab, indent)
     end
     for k, v in pairs(tab) do
         if (type(v) == "table") then
-            getglobal("ChatFrame"..debugWin):AddMessage(iString..k..":", 1.0, 1.0, 0.3);
+            getglobal("ChatFrame"..debugWin):AddMessage(iString.."["..k.."] = ", 1.0, 1.0, 0.3);
             ShaguDB_PrintTable(v, indent+1);
         else
             if (v) then
                 local out = v;
                 if (type(v) == "boolean") then
-                    if v == false then
-                        out = "false";
-                    else
-                        out = "true";
-                    end
+                    out = "true";
                 end
-                getglobal("ChatFrame"..debugWin):AddMessage(iString..k..": "..out, 1.0, 1.0, 0.3);
+                getglobal("ChatFrame"..debugWin):AddMessage(iString.."["..k.."] = "..out, 1.0, 1.0, 0.3);
+            elseif v == false then
+                getglobal("ChatFrame"..debugWin):AddMessage(iString.."["..k.."] = ".."false", 1.0, 1.0, 0.3);
             else
-                getglobal("ChatFrame"..debugWin):AddMessage(iString..k..": ".."nil", 1.0, 1.0, 0.3);
+                getglobal("ChatFrame"..debugWin):AddMessage(iString.."["..k.."] = ".."nil", 1.0, 1.0, 0.3);
             end
         end
     end
@@ -1882,20 +1926,32 @@ function ShaguDB_GetQuestLogFootprint()
     while (GetQuestLogTitle(questLogID) ~= nil) do
         questLogID = questLogID + 1;
         local questTitle, level, questTag, isHeader, isCollapsed, isComplete = GetQuestLogTitle(questLogID);
-        ShaguDB_Debug_Print(4, "    ", questLogID, questTitle, level, questTag, isHeader, isCollapsed, isComplete);
         if (isHeader == nil) and (questTitle) then
+            ShaguDB_Debug_Print(4, "    logID, title, level, tag, isHeader, isComplete =", questLogID, questTitle, level, questTag, isHeader, isComplete);
             SelectQuestLogEntry(questLogID);
             local questDescription, questObjectives = GetQuestLogQuestText();
             local qIds = ShaguDB_GetQuestIDs(questTitle, questObjectives, level);
             local uId;
             if (type(qIds) == "number") then
                 uId = qIds;
-                table.insert(ids, qIds);
+                ids[qIds] = true;
+                if (ShaguDB_QuestAbandon == questTitle) then
+                    ShaguDB_FinishedQuests[qIds] = -1;
+                    ShaguDB_QuestAbandon = '';
+                end
             else
+                if type(qIds) == "table" then
+                    for k, qId in pairs(qIds) do
+                        ids[qId] = true;
+                    end
+                end
                 uId = "MULTI_OR_NONE"
             end
-            footprint = footprint.."'"..questTitle.."'#"..level.."#"..uId;
+            if (isComplete == nil) then
+                isComplete = 'nil';
+            end
+            footprint = footprint.."'"..questTitle.."'"..level.."#"..uId.."#"..isComplete;
         end
     end
-    return strlower(footprint)
+    return {strlower(footprint), ids}
 end
