@@ -285,8 +285,9 @@ function ShaguDB_Event(event, ...)
         local footprint = ShaguDB_GetQuestLogFootprint();
         local count = GetNumQuestLogEntries();
         ShaguDB_Debug_Print(4, "    footprint", {footprint, count});
+        ShaguDB_QuestLogFootprint = footprint;
     elseif (event == "UNIT_QUEST_LOG_CHANGED") then
-        ShaguDB_QuestLogFootprint = ShaguDB_GetQuestLogFootprint();
+        local footprint = ShaguDB_GetQuestLogFootprint();
         local count = GetNumQuestLogEntries();
         ShaguDB_Debug_Print(4, "    footprint", {ShaguDB_QuestLogFootprint, count});
         if ((ShaguDB_Settings.auto_plot) and (ShaguDB_QuestLogFootprint[1] ~= footprint[1])) then
@@ -294,6 +295,7 @@ function ShaguDB_Event(event, ...)
             ShaguDB_PlotAllQuests();
             ShaguDB_InEvent = false;
         end
+        ShaguDB_QuestLogFootprint = footprint;
     elseif (event == "QUEST_FINISHED") then
         local footprint = ShaguDB_GetQuestLogFootprint();
         local count = GetNumQuestLogEntries();
@@ -1449,8 +1451,8 @@ function ShaguDB_GetQuestNotes(questLogID)
                     elseif (objectiveType == "item") then
                         ShaguDB_Debug_Print(8, "    type = item");
                         local itemID = itemLookup[itemName];
-                        itemList[itemID] = true;
                         if (itemID and (itemData[itemID])) then
+                            itemList[itemID] = true;
                             local comment = "|cFF00FF00"..itemName..": "..numItems.."/"..numNeeded.."|r"
                             showMap = ShaguDB_PrepareItemNotes(itemID, title, comment, cMark, true) or showMap;
                         end
