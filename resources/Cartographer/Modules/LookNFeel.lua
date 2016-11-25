@@ -10,29 +10,29 @@ local L = AceLibrary("AceLocale-2.2"):new("Cartographer-LookNFeel")
 L:RegisterTranslations("enUS", function() return {
 	["Look 'n' Feel"] = true,
 	["Module which allows you to change the transparency, position, and scale of the world map."] = true,
-	
+
 	["Transparency"] = true,
 	["Transparency of the World Map"] = true,
-	
+
 	["Overlay transparency"] = true,
 	["Transparency of World Map overlays"] = true,
-	
+
 	["Scale"] = true,
 	["Scale of the World Map"] = true,
-	
+
 	["Tooltip scale"] = true,
 	["Scale of the World Map tooltip"] = true,
-	
+
 	["Shift-MouseWheel to change transparency"] = true,
 	["Ctrl-MouseWheel to change scale"] = true,
-	["Alt-MouseWheel to change note size"] = true,
+	["Ctrl-Alt-MouseWheel to change note size"] = true,
 	["Ctrl-Left-Click to move map"] = true,
-	
+
 	["Lock the World Map"] = true,
-	
+
 	["Close with escape"] = true,
 	["Close the World Map when pressing the escape button"] = true,
-	
+
 	["Large player arrow"] = true,
 	["Make the player's arrow on the World Map 1.5 times larger than normal"] = true,
 } end)
@@ -40,29 +40,29 @@ L:RegisterTranslations("enUS", function() return {
 L:RegisterTranslations("koKR", function() return {
 	["Look 'n' Feel"] = "모양",
 	["Module which allows you to change the transparency, position, and scale of the world map."] = "세계 지도의 투명도, 위치 그리고 크기등을 변경합니다.",
-	
+
 	["Transparency"] = "투명도",
 	["Transparency of the World Map"] = "세계 지도의 투명도를 설정합니다.",
-	
+
 	["Overlay transparency"] = "오버레이 투명도",
 	["Transparency of World Map overlays"] = "세계 지도 오버레이의 투명도를 설정합니다.",
-	
+
 	["Scale"] = "크기",
 	["Scale of the World Map"] = "세계 지도의 크기를 설정합니다.",
-	
+
 	["Tooltip scale"] = "툴팁 크기",
 	["Scale of the World Map tooltip"] = "세계 지도의 툴팁 크기를 설정합니다.",
-	
+
 	["Shift-MouseWheel to change transparency"] = "Shift-스크롤 : 투명도 변경",
 	["Ctrl-MouseWheel to change scale"] = "Ctrl-스크롤 : 크기 변경",
-	["Alt-MouseWheel to change note size"] = "Alt-스크롤 : change note size", -- TODO
+	["Ctrl-Alt-MouseWheel to change note size"] = "Ctrl-Alt-스크롤 : change note size", -- TODO
 	["Ctrl-Left-Click to move map"] = "Ctrl-왼쪽-클릭 : move map", -- TODO
-	
+
 	["Lock the World Map"] = "세계 지도의 위치를 잠금니다.",
-	
+
 	["Close with escape"] = "Esc 닫기",
 	["Close the World Map when pressing the escape button"] = "Esc 버튼을 누루면 세계 지도를 닫습니다.",
-	
+
 	["Large player arrow"] = "플레이어 위치 크게",
 	["Make the player's arrow on the World Map 1.5 times larger than normal"] = "1.5배 정도 플레이어 위치를 좀더 크게 표시합니다.",
 } end)
@@ -116,7 +116,7 @@ function Cartographer_LookNFeel:OnInitialize()
 	self.db = Cartographer:AcquireDBNamespace("LookNFeel")
 	self.name = L["Look 'n' Feel"]
 	self.title = L["Look 'n' Feel"]
-	
+
 	Cartographer:RegisterDefaults("LookNFeel", "profile", {
 		alpha = 0.8,
 		overlayAlpha = 1,
@@ -126,7 +126,7 @@ function Cartographer_LookNFeel:OnInitialize()
 		useEscape = true,
 		largePlayer = true,
 	})
-	
+
 	Cartographer.options.args.LookNFeel = {
 		name = L["Look 'n' Feel"],
 		desc = L["Module which allows you to change the transparency, position, and scale of the world map."],
@@ -208,11 +208,11 @@ function Cartographer_LookNFeel:OnInitialize()
 		},
 		handler = self,
 	}
-	
+
 	local orig = WorldMapFrame:GetScript("OnShow") or function() end
 	WorldMapFrame:SetScript("OnShow", function()
 		orig(this)
-		
+
 		if Cartographer:IsModuleActive(self) then
 			this:SetScale(self.db.profile.scale)
 			WorldMapTooltip:SetScale(self.db.profile.ttScale / self.db.profile.scale)
@@ -220,7 +220,7 @@ function Cartographer_LookNFeel:OnInitialize()
 			this:SetHeight(768)
 		end
 	end)
-	
+
 	for i = 1, 12 do
 		local tex = _G["WorldMapDetailTile" .. i]
 		local x = tex:GetLeft() - WorldMapDetailFrame:GetLeft()
@@ -243,10 +243,10 @@ local cities = {
 }
 
 function Cartographer_LookNFeel:OnEnable()
-	
+
 	Cartographer:AddToMagnifyingGlass(L["Ctrl-Left-Click to move map"]) -- WHDB related
 	Cartographer:AddToMagnifyingGlass(L["Ctrl-MouseWheel to change scale"])
-	Cartographer:AddToMagnifyingGlass(L["Alt-MouseWheel to change note size"]) -- WHDB related
+	Cartographer:AddToMagnifyingGlass(L["Ctrl-Alt-MouseWheel to change note size"]) -- WHDB related
 	Cartographer:AddToMagnifyingGlass(L["Shift-MouseWheel to change transparency"])
 	UIPanelWindows["WorldMapFrame"] = nil
 	WorldMapFrame:SetFrameStrata("HIGH")
@@ -263,7 +263,7 @@ function Cartographer_LookNFeel:OnEnable()
 	end)
 	WorldMapFrame:SetScript("OnDragStop", function()
 		this:StopMovingOrSizing()
-		
+
 		this:SetWidth(1024)
 		this:SetHeight(768)
 		local x,y = this:GetCenter()
@@ -293,7 +293,7 @@ function Cartographer_LookNFeel:OnEnable()
 	end)
 	WorldMapFrame:SetScript("OnMouseWheel", function()
 		local up = (arg1 == 1)
-		if IsControlKeyDown() then
+		if IsControlKeyDown() and not IsAltKeyDown() then
 			local scale = self:GetScale()
 			if up then
 				scale = scale + 0.1
@@ -321,7 +321,7 @@ function Cartographer_LookNFeel:OnEnable()
 				end
 			end
 			self:SetAlpha(alpha)
-		elseif IsAltKeyDown() then -- WHDB related.
+		elseif IsAltKeyDown() and IsControlKeyDown() then -- WHDB related.
 			local size = Cartographer_Notes:GetIconSize()
 			if up then
 				size = size + 0.05
@@ -370,7 +370,7 @@ function Cartographer_LookNFeel:OnEnable()
 		self.overlayHolder:SetFrameLevel(WorldMapDetailFrame:GetFrameLevel())
 	end
 	self.overlayHolder:Show()
-	
+
 	self.overlayHolder:SetAlpha(self.db.profile.overlayAlpha)
 	WorldMapButton:SetAlpha(self.db.profile.overlayAlpha)
 	for i,v in fake_ipairs(WorldMapFrame:GetChildren()) do
@@ -388,13 +388,13 @@ function Cartographer_LookNFeel:OnEnable()
 	end
 	self.playerModel:SetAlpha(self.db.profile.overlayAlpha)
 	self.playerModel:SetFrameLevel(11); -- WHDB related. Player Arrow > Normal notes. Not working right, need to investigate.
-	
+
 	if (GetCurrentMapZone() == 0 or cities[GetMapInfo()]) and self.db.profile.overlayAlpha > self.db.profile.alpha then
 		WorldMapDetailFrame:SetAlpha(self.db.profile.overlayAlpha)
 	else
 		WorldMapDetailFrame:SetAlpha(self.db.profile.alpha)
 	end
-	
+
 	for i = 1, 1000 do
 		local texture = _G["WorldMapOverlay" .. i]
 		if not texture then
@@ -402,7 +402,7 @@ function Cartographer_LookNFeel:OnEnable()
 		end
 		texture:SetParent(self.overlayHolder)
 	end
-	
+
 	WorldMapButton:SetScript("OnEnter", function()
 		WorldMapFrameAreaLabel:Show()
 	end)
@@ -420,7 +420,7 @@ function Cartographer_LookNFeel:OnEnable()
 	else
 		WorldMapFrameAreaLabel:Hide()
 	end
-	
+
 	local size = Cartographer_Notes:GetIconSize(); -- WHDB related.
 	if self.db.profile.largePlayer then
 		size = size*1.5;
@@ -429,7 +429,7 @@ function Cartographer_LookNFeel:OnEnable()
 		size = 2.5;
 	end
 	self.playerModel:SetModelScale(size);
-	
+
 	if WorldMapFrame:IsShown() then
 		ToggleWorldMap()
 		ToggleWorldMap()
@@ -533,7 +533,7 @@ end
 function Cartographer_LookNFeel:WorldMapDetailFrame_CreateTexture(WorldMapDetailFrame, name, layer)
 	if name and string.find(name, "^WorldMapOverlay%d+$") then
 		local frame = _G[name]
-		
+
 		frame:SetParent(self.overlayHolder)
 	end
 end
@@ -671,7 +671,7 @@ function Cartographer_LookNFeel:Cartographer_ChangeZone(zone)
 		local tex = newTexture()
 		tex:SetPoint(WorldMapDetailTile12:GetPoint(1))
 		tex:SetTexture(WorldMapDetailTile12:GetTexture())
-		
+
 		WorldMapDetailTile2:SetWidth(156)
 		WorldMapDetailTile2:SetTexCoord(100/256, 1, 0, 1)
 		WorldMapDetailTile2:SetPoint("TOPLEFT", WorldMapDetailFrame, "TOPLEFT", 356, 0)
@@ -696,7 +696,7 @@ function Cartographer_LookNFeel:Cartographer_ChangeZone(zone)
 		tex:SetTexCoord(0, 100/256, 0, 1)
 		tex:SetPoint("TOPLEFT", WorldMapDetailFrame, "TOPLEFT", 256, -512)
 		tex:SetTexture(WorldMapDetailTile10:GetTexture())
-		
+
 		WorldMapDetailTile3:SetWidth(100)
 		WorldMapDetailTile3:SetTexCoord(0, 100/256, 0, 1)
 		WorldMapDetailTile3:SetPoint("TOPLEFT", WorldMapDetailFrame, "TOPLEFT", 512, 0)
@@ -721,7 +721,7 @@ function Cartographer_LookNFeel:Cartographer_ChangeZone(zone)
 		tex:SetTexCoord(100/256, 1, 0, 1)
 		tex:SetPoint("TOPLEFT", WorldMapDetailFrame, "TOPLEFT", 612, -512)
 		tex:SetTexture(WorldMapDetailTile11:GetTexture())
-		
+
 		dirty = true
 	elseif zone == "Eye of the Storm" then
 		WorldMapDetailTile1:Hide()
@@ -748,7 +748,7 @@ function Cartographer_LookNFeel:Cartographer_ChangeZone(zone)
 		local tex = newTexture()
 		tex:SetPoint(WorldMapDetailTile12:GetPoint(1))
 		tex:SetTexture(WorldMapDetailTile12:GetTexture())
-		
+
 		WorldMapDetailTile2:SetHeight(156)
 		WorldMapDetailTile2:SetWidth(156)
 		WorldMapDetailTile2:SetTexCoord(100/256, 1, 100/256, 1)
@@ -787,8 +787,8 @@ function Cartographer_LookNFeel:Cartographer_ChangeZone(zone)
 		tex:SetTexCoord(100/256, 1, 32/256, 1)
 		tex:SetPoint("TOPLEFT", WorldMapDetailFrame, "TOPLEFT", 356, -544)
 		tex:SetTexture(WorldMapDetailTile10:GetTexture())
-		
-		
+
+
 		WorldMapDetailTile3:SetHeight(156)
 		WorldMapDetailTile3:SetWidth(100)
 		WorldMapDetailTile3:SetTexCoord(0, 100/256, 100/256, 1)
@@ -827,7 +827,7 @@ function Cartographer_LookNFeel:Cartographer_ChangeZone(zone)
 		tex:SetWidth(100)
 		tex:SetHeight(224)
 		tex:SetTexCoord(0, 100/256, 32/256, 1)
-		
+
 		dirty = true
 	end
 	self:SetAlpha(self:GetAlpha())
@@ -855,7 +855,7 @@ function Cartographer_LookNFeel:SetAlpha(value)
 				break
 			end
 		end
-		
+
 		self.overlayHolder:SetAlpha(self.db.profile.overlayAlpha)
 		for i,v in fake_ipairs(WorldMapFrame:GetChildren()) do
 			if v:GetName() and string.find(v:GetName(), "^Cartographer") then
@@ -904,7 +904,7 @@ end
 
 function Cartographer_LookNFeel:SetScale(value)
 	self.db.profile.scale = value
-	
+
 	if Cartographer:IsModuleActive(self) then
 		WorldMapFrame:SetScale(value)
 		WorldMapTooltip:SetScale(self.db.profile.ttScale / value)
@@ -917,7 +917,7 @@ end
 
 function Cartographer_LookNFeel:SetTooltipScale(value)
 	self.db.profile.ttScale = value
-	
+
 	if Cartographer:IsModuleActive(self) then
 		WorldMapTooltip:SetScale(value / self.db.profile.scale)
 	end
