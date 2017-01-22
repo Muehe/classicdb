@@ -13,7 +13,7 @@ If you want to test it, visit the following link or click on releases above:
 # Video
 If you want to see it in Action, here is a example video, showcasing the new features of ShaguDB 7.0
 
-[![Youtube Video](http://img.youtube.com/vi/h_SYrCEI_2Axg/0.jpg)](https://www.youtube.com/watch?v=SYrCEI_2Axg)
+[![Youtube Video](https://i.ytimg.com/vi/SYrCEI_2Axg/hqdefault.jpg?custom=true&w=392&h=220)](https://www.youtube.com/watch?v=SYrCEI_2Axg)
 
 # Build from git
 ~~If you're running a Linux Machine, just execute the "./build.sh" to create a deDE and enGB release.
