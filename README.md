@@ -1,47 +1,22 @@
 # ShaguDB
-ShaguDB is a database Addon for World of Warcraft Vanilla (1.12.1) Clients.
-It includes a huge amount of data which contains spawn,drop and quest stuff.
+ShaguDB is an Addon for World of Warcraft Classic (1.12.1) Clients, which helps you to find ingame stuff and getting your quests done. It draws spawn informations of gameobjects and npcs on your map. Also it allows you to search for quests, items and much more. It is based on the latest [cmangos classic-db](https://github.com/cmangos/classic-db), as well as [MangosZero_Localised](https://github.com/MangosExtras/MangosZero_Localised/tree/master/Translations) for deDE versions. Some parts of the Addon itself are taken from the amazing WHDB Addon. Cartographer is required and an enhanced version is included in the download.
 
-This data can be used to display all kind of informations on your map (Cartographer required).
-The following command will display all "Gold Ores" on your map.
-This can be used for all kind of NPCs or gameobjects too.
+Note: ShaguQuest is not meant to be a complete QuestHelper Clone (although it's slowly getting there). It's a database addon which offers some kind of quest integration via a simple UI. If you're searching for a real QuestHelper Addon you might want to checkout a project called [Questie](https://github.com/AeroScripts/QuestieDev) instead of ShaguQuest (or just use both together).
 
-		/shagu spawn Gold Ore
-
-If you are interested in displaying some drop informations, try out the following,
-it will display all kind of mobs, treasures and so on which the item can be obtained from.
-
-		/shagu item Black Pearl
-
-With version 5.0 a new feature was introduced. The "vendor" command.
-
-		/shagu vendor Jagged Arrow
-
-Will display all vendors selling "Jagged Arrow".
-
-Additionally ShaguDB includes a (poor) quest integration via ShaguQuest (Extended QuestLog).
-On every quest you'll see a "Show" button, which will display all known questrelated stuff on your map.
-The "Clean" button removes every ShaguDB note from the map.
-
-Due to classic Wow-API restrictions, this Addon is only available for enGB and deDE clients.
-
-It is based on the latest Mangos Zero Database, as well as GMDB.
-Some parts of the Addon itself are taken from the WHDB Addon. ShaguQuest is basically EQL3 with a few modifications.
-
-# Video
-If you want to see it in Action, here is a example video, showing the most common features of ShaguDB
-
-[![Youtube Video](http://img.youtube.com/vi/h_U3vbYcRpE/0.jpg)](https://www.youtube.com/watch?v=h_U3vbYcRpE)
+For more information visit our [website](http://shagu.org/shaguquest/) and [wiki](https://github.com/shagu/shaguquest/wiki).
 
 # Download
-If you want to test it, visit the following links:
+If you want to test it, visit the following link or click on releases above:
 
-[Official Website](http://shaguquest.ericmauser.de/)
+[Releases](https://github.com/shagu/shaguquest/releases)
 
-[Download of enGB Client](http://shaguquest.ericmauser.de/files/ShaguDB-6.1-enGB-complete.zip)
+# Video
+If you want to see it in Action, here is a example video, showcasing the new features of ShaguDB 7.0
 
-[Download of deDE Client](http://shaguquest.ericmauser.de/files/ShaguDB-6.1-deDE-complete.zip)
+[![Youtube Video](http://img.youtube.com/vi/h_SYrCEI_2Axg/0.jpg)](https://www.youtube.com/watch?v=SYrCEI_2Axg)
 
 # Build from git
-If you're running a Linux Machine, just execute the "./build.sh" to create a deDE and enGB release.
-The files will be placed in ./releases called ShaguDB-<version>-<locale>-complete.zip
+~~If you're running a Linux Machine, just execute the "./build.sh" to create a deDE and enGB release.
+The files will be placed in ./releases called `ShaguDB-<version>-<locale>-complete.zip`~~
+
+Currently not working.
