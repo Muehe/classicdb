@@ -7,8 +7,9 @@ cMark = "mk1";
 2 = most function calls
 4 = event debug
 8 = advanced
+16 = other event debug attempt
 --]]
-ShaguDB_Debug = 7;
+ShaguDB_Debug = 16;
 -- This table is used to prepare new notes.
 -- It holds npcs, objects, items and marked area triggers.
 ShaguDB_PREPARE = {{},{},{},{}};
@@ -29,6 +30,9 @@ ShaguDB_InEvent = false;
 -- These variables are used to determine types of Quest Log events (accept/abandon/finish).
 ShaguDB_QuestLogFootprint = {{},{}};
 ShaguDB_QuestAbandon = '';
+-- For debugging quest progress events
+ShaguDB_WatchUpdate = false;
+ShaguDB_WatchQuestLogID = 0;
 
 -- DB keys
 DB_NAME, DB_NPC, NOTE_TITLE = 1, 1, 1;
@@ -42,6 +46,11 @@ DB_OBJECTIVES, DB_NPC_WAYPOINTS = 8, 8;
 DB_TRIGGER, DB_ZONE = 9, 9;
 DB_REQ_NPC_OR_OBJ_OR_ITM, DB_NPC_STARTS = 10, 10;
 DB_SRC_ITM, DB_NPC_ENDS = 11, 11;
+DB_PRE_QUEST_GROUP = 12;
+DB_PRE_QUEST_SINGLE = 13;
+DB_SUB_QUESTS = 14;
+DB_QUEST_GROUP = 15;
+DB_EXCLUSIVE_QUEST_GROUP = 16;
 
 -- functions for the event handeling and control frame
 
@@ -62,7 +71,7 @@ function ShaguDB_OnFrameShow()
 end -- OnFrameShow()
 
 function ShaguDB_Event(event, ...)
-    ShaguDB_Debug_Print(4, "Event() called", event, arg1, arg2, arg3);
+    ShaguDB_Debug_Print(20, "Event() called", event, arg1, arg2, arg3);
     if (event == "PLAYER_LOGIN") then
         if (Cartographer_Notes ~= nil) then
             ShaguDBDB = {}; ShaguDBDBH = {};
@@ -193,6 +202,9 @@ function ShaguDB_Event(event, ...)
         if (ShaguDB_Settings["filterReqLevel"] == nil) then
             ShaguDB_Settings["filterReqLevel"] = true;
         end
+        if (ShaguDB_Settings["filterPreQuest"] == nil) then
+            ShaguDB_Settings["filterPreQuest"] = true;
+        end
         if (ShaguDB_Settings["questIds"] == nil) then
             ShaguDB_Settings["questIds"] = true;
         end
@@ -274,13 +286,48 @@ function ShaguDB_Event(event, ...)
                     ShaguDB_FinishedQuests[removed] = nil;
                 end
             end
-            if (ShaguDB_Settings.auto_plot) then
+            if (ShaguDB_Settings.questStarts == true) then
+                ShaguDB_CleanMap();
+            end
+            if (ShaguDB_Settings.auto_plot == true) then
                 ShaguDB_InEvent = true;
                 ShaguDB_PlotAllQuests();
                 ShaguDB_InEvent = false;
             end
         end
         ShaguDB_Debug_Print(4, "    footprint", {footprint, count, change});
+        if ShaguDB_WatchUpdate == true then
+            local questTitle, level, questTag, isHeader, isCollapsed, isComplete = GetQuestLogTitle(ShaguDB_WatchQuestLogID);
+            ShaguDB_Debug_Print(16, "    title", questTitle);
+            local numObjectives = GetNumQuestLeaderBoards(ShaguDB_WatchQuestLogID);
+            if (numObjectives ~= nil) then
+                for i=1, numObjectives, 1 do
+                    local text, objectiveType, finished = GetQuestLogLeaderBoard(i, ShaguDB_WatchQuestLogID);
+                    local i, j, itemName, numItems, numNeeded = strfind(text, "(.*):%s*([%d]+)%s*/%s*([%d]+)");
+                    ShaguDB_Debug_Print(16, "    objective, have, need", itemName, numItems, numNeeded);
+                end
+            end
+            ShaguDB_WatchUpdate = false;
+            ShaguDB_WatchQuestLogID = 0;
+        end
+    elseif (event == "QUEST_WATCH_UPDATE") then
+        if (ShaguDB_Settings.auto_plot == true) then
+            ShaguDB_InEvent = true;
+            ShaguDB_PlotAllQuests();
+            ShaguDB_InEvent = false;
+        end
+        local questTitle, level, questTag, isHeader, isCollapsed, isComplete = GetQuestLogTitle(arg1);
+        ShaguDB_Debug_Print(16, "    title", questTitle);
+        local numObjectives = GetNumQuestLeaderBoards(arg1);
+        if (numObjectives ~= nil) then
+            for i=1, numObjectives, 1 do
+                local text, objectiveType, finished = GetQuestLogLeaderBoard(i, arg1);
+                local i, j, itemName, numItems, numNeeded = strfind(text, "(.*):%s*([%d]+)%s*/%s*([%d]+)");
+                ShaguDB_Debug_Print(16, "    objective, have, need =", itemName, numItems, numNeeded);
+            end
+        end
+        ShaguDB_WatchUpdate = true;
+        ShaguDB_WatchQuestLogID = arg1;
     elseif (event == "QUEST_PROGRESS") then
         local footprint = ShaguDB_GetQuestLogFootprint();
         local count = GetNumQuestLogEntries();
@@ -296,6 +343,18 @@ function ShaguDB_Event(event, ...)
             ShaguDB_InEvent = false;
         end
         ShaguDB_QuestLogFootprint = footprint;
+        if ShaguDB_WatchUpdate == true then
+            local questTitle, level, questTag, isHeader, isCollapsed, isComplete = GetQuestLogTitle(ShaguDB_WatchQuestLogID);
+            ShaguDB_Debug_Print(16, "    title", questTitle);
+            local numObjectives = GetNumQuestLeaderBoards(ShaguDB_WatchQuestLogID);
+            if (numObjectives ~= nil) then
+                for i=1, numObjectives, 1 do
+                    local text, objectiveType, finished = GetQuestLogLeaderBoard(i, ShaguDB_WatchQuestLogID);
+                    local i, j, itemName, numItems, numNeeded = strfind(text, "(.*):%s*([%d]+)%s*/%s*([%d]+)");
+                    ShaguDB_Debug_Print(16, "    objective, have, need", itemName, numItems, numNeeded);
+                end
+            end
+        end
     elseif (event == "QUEST_FINISHED") then
         local footprint = ShaguDB_GetQuestLogFootprint();
         local count = GetNumQuestLogEntries();
@@ -1161,9 +1220,9 @@ function ShaguDB_GetSetting(setting, ...)
         ["item_item"] = "Showing items dropped by items",
     };
     if (text[setting]) and (ShaguDB_Settings[setting]) then
-        return text[setting].."|cFF40C040 is enabled|r";
+        return text[setting].." is|cFF40C040 enabled|r";
     elseif (text[setting]) then
-        return text[setting].."|cFFFF1A1A is disabled|r";
+        return text[setting].." is|cFFFF1A1A disabled|r";
     end
 end -- GetSetting(setting, ...)
 
@@ -1623,11 +1682,10 @@ function ShaguDB_GetQuestStartNotes(zoneName)
             ShaguDB_QUEST_START_ZONES[zoneID] = true;
         end
         ShaguDB_PREPARE = ShaguDB_MARKED;
-        -- TODO: add hide option to right click menu
         for id, data in pairs(npcData) do
             if (data[DB_NPC_SPAWNS][zoneID] ~= nil) and (data[DB_NPC_STARTS] ~= nil) then
                 local comment = ShaguDB_GetQuestStartComment(data[DB_NPC_STARTS]);
-                if (comment ~= "") then -- (comment == "") => other faction quest
+                if (comment ~= "") then -- (comment == "") => other faction quest, or quest is filtered
                     ShaguDB_MarkForPlotting(DB_NPC, id, data[DB_NAME], "Starts quests:\n"..comment, 5);
                 end
             end
@@ -1648,14 +1706,34 @@ function ShaguDB_GetQuestStartComment(npcOrGoStarts)
     local tooltipText = "";
     for key, questID in npcOrGoStarts do
         if (qData[questID]) and (ShaguDB_FinishedQuests[questID] == nil) and (ShaguDB_FinishedQuests[questID] ~= true) then
-            local tooHigh = false;
+            local skip = false;
             if (ShaguDB_Settings.filterReqLevel == true) and (qData[questID][DB_MIN_LEVEL] > UnitLevel("player")) then
-                tooHigh = true;
+                skip = true;
+            end
+            if (ShaguDB_Settings.filterPreQuest == true) then
+                if (qData[questID][DB_PRE_QUEST_GROUP] ~= nil) then
+                    for key2, questID2 in pairs(qData[questID][DB_PRE_QUEST_GROUP]) do
+                        if (ShaguDB_FinishedQuests[questID2] ~= true) then
+                            skip = true;
+                        end
+                    end
+                end
+                if (qData[questID][DB_PRE_QUEST_SINGLE] ~= nil) then
+                    local skip2 = true;
+                    for key2, questID2 in pairs(qData[questID][DB_PRE_QUEST_SINGLE]) do
+                        if (ShaguDB_FinishedQuests[questID2] == true) then
+                            skip2 = false;
+                        end
+                    end
+                    if (skip2 == true) then
+                        skip = true;
+                    end
+                end
             end
             local colorString = ShaguDB_GetDifficultyColor(qData[questID][DB_LEVEL]);
             local level = qData[questID][DB_LEVEL];
             if level == -1 then level = UnitLevel("player"); end
-            if not tooHigh then
+            if not skip then
                 tooltipText = tooltipText..colorString.."["..level.."] "..qData[questID][DB_NAME].."|r\n";
                 if ShaguDB_Settings.questIds and ShaguDB_Settings.reqLevel then
                     tooltipText = tooltipText.."|cFFa6a6a6(ID: "..questID..") | |r";

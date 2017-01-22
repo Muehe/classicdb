@@ -340,12 +340,13 @@ SDBG.buttonSettings:SetScript("OnClick", function()
     for i=1,14 do
         SDBG.settings.buttons[1]:SetText("DB Mode")
         SDBG.settings.buttons[2]:SetText("Show Quest Starts")
-        SDBG.settings.buttons[3]:SetText("Filter Quest Starts by required level")
-        SDBG.settings.buttons[4]:SetText("Show Quest IDs")
-        SDBG.settings.buttons[5]:SetText("Show required level")
-        SDBG.settings.buttons[6]:SetText("Items dropped by items")
-        SDBG.settings.buttons[7]:SetText("Waypoints")
-        SDBG.settings.buttons[8]:SetText("Auto Plot")
+        SDBG.settings.buttons[3]:SetText("Filter Quest Starts based on finished quests")
+        SDBG.settings.buttons[4]:SetText("Filter Quest Starts by required level")
+        SDBG.settings.buttons[5]:SetText("Show Quest IDs")
+        SDBG.settings.buttons[6]:SetText("Show required level")
+        SDBG.settings.buttons[7]:SetText("Items dropped by items")
+        SDBG.settings.buttons[8]:SetText("Waypoints")
+        SDBG.settings.buttons[9]:SetText("Auto Plot")
         if (SDBG.settings.buttons[i]) then
             SDBG.settings.buttons[i]:Show();
         end
@@ -515,19 +516,20 @@ SDBG.settings.buttons[3]:SetNormalTexture(nil)
 SDBG.settings.buttons[3]:SetPushedTexture(nil)
 SDBG.settings.buttons[3]:SetHighlightTexture(nil)
 SDBG.settings.buttons[3]:SetBackdrop(backdrop_noborder)
-SDBG.settings.buttons[3]:SetBackdropColor(1,1,1,.10)
+SDBG.settings.buttons[3]:SetBackdropColor(1,1,1,.05)
 SDBG.settings.buttons[3]:SetScript("OnEnter", function(self)
     this:SetBackdropColor(1,1,1,.25)
     ShaguDB_Tooltip:SetOwner(this, "ANCHOR_TOPLEFT");
     ShaguDB_Tooltip:ClearLines();
-    ShaguDB_Tooltip:SetText(ShaguDB_GetSetting("filterReqLevel")..
+    ShaguDB_Tooltip:SetText(ShaguDB_GetSetting("questStarts")..
                             "\n\n|cffffffff"..
-                            "When enabled, this option prevents quest starts from being marked\n"..
-                            "if the player doesn't meet the minimum level requirements.|r");
+                            "When enabled, this option shows notes for all quests starts\n"..
+                            "in the currently displayed zone. If it doesn't load immediately\n"..
+                            "reopen the map.|r");
     ShaguDB_Tooltip:Show();
 end)
 SDBG.settings.buttons[3]:SetScript("OnLeave", function(self)
-    this:SetBackdropColor(1,1,1,.10)
+    this:SetBackdropColor(1,1,1,.05)
     ShaguDB_Tooltip:Hide()
 end)
 SDBG.settings.buttons[3].enabled = CreateFrame("CheckButton","mycheckbutton",SDBG.settings.buttons[3],"UICheckButtonTemplate")
@@ -535,15 +537,15 @@ SDBG.settings.buttons[3].enabled:SetPoint("RIGHT", -25, 0)
 SDBG.settings.buttons[3].enabled:SetWidth(20)
 SDBG.settings.buttons[3].enabled:SetHeight(20)
 SDBG.settings.buttons[3].enabled:SetScript("OnShow", function(self)
-    if (ShaguDB_Settings.filterReqLevel ~= true) then
+    if (ShaguDB_Settings.questStarts ~= true) then
         SDBG.settings.buttons[3].enabled:SetChecked(false);
     else
         SDBG.settings.buttons[3].enabled:SetChecked(true);
     end
 end)
 SDBG.settings.buttons[3].enabled:SetScript("OnClick", function(self)
-    ShaguDB_SwitchSetting("filterReqLevel");
-    if (ShaguDB_Settings.filterReqLevel ~= true) then
+    ShaguDB_SwitchSetting("questStarts");
+    if (ShaguDB_Settings.questStarts ~= true) then
         SDBG.settings.buttons[3].enabled:SetChecked(false);
     else
         SDBG.settings.buttons[3].enabled:SetChecked(true);
@@ -559,19 +561,19 @@ SDBG.settings.buttons[4]:SetNormalTexture(nil)
 SDBG.settings.buttons[4]:SetPushedTexture(nil)
 SDBG.settings.buttons[4]:SetHighlightTexture(nil)
 SDBG.settings.buttons[4]:SetBackdrop(backdrop_noborder)
-SDBG.settings.buttons[4]:SetBackdropColor(1,1,1,.05)
+SDBG.settings.buttons[4]:SetBackdropColor(1,1,1,.10)
 SDBG.settings.buttons[4]:SetScript("OnEnter", function(self)
     this:SetBackdropColor(1,1,1,.25)
     ShaguDB_Tooltip:SetOwner(this, "ANCHOR_TOPLEFT");
     ShaguDB_Tooltip:ClearLines();
-    ShaguDB_Tooltip:SetText(ShaguDB_GetSetting("questIds")..
+    ShaguDB_Tooltip:SetText(ShaguDB_GetSetting("filterReqLevel")..
                             "\n\n|cffffffff"..
-                            "When enabled, this option shows the quest ID in the quest start tooltips.|r");
-                            -- TODO: Update text once this setting has been fixed. Quest IDs in quest start tooltips are needed for their context menu.
+                            "When enabled, this option prevents quest starts from being marked\n"..
+                            "if the player doesn't meet the minimum level requirements.|r");
     ShaguDB_Tooltip:Show();
 end)
 SDBG.settings.buttons[4]:SetScript("OnLeave", function(self)
-    this:SetBackdropColor(1,1,1,.05)
+    this:SetBackdropColor(1,1,1,.10)
     ShaguDB_Tooltip:Hide()
 end)
 SDBG.settings.buttons[4].enabled = CreateFrame("CheckButton","mycheckbutton",SDBG.settings.buttons[4],"UICheckButtonTemplate")
@@ -579,15 +581,15 @@ SDBG.settings.buttons[4].enabled:SetPoint("RIGHT", -25, 0)
 SDBG.settings.buttons[4].enabled:SetWidth(20)
 SDBG.settings.buttons[4].enabled:SetHeight(20)
 SDBG.settings.buttons[4].enabled:SetScript("OnShow", function(self)
-    if (ShaguDB_Settings.questIds ~= true) then
+    if (ShaguDB_Settings.filterReqLevel ~= true) then
         SDBG.settings.buttons[4].enabled:SetChecked(false);
     else
         SDBG.settings.buttons[4].enabled:SetChecked(true);
     end
 end)
 SDBG.settings.buttons[4].enabled:SetScript("OnClick", function(self)
-    ShaguDB_SwitchSetting("questIds");
-    if (ShaguDB_Settings.questIds ~= true) then
+    ShaguDB_SwitchSetting("filterReqLevel");
+    if (ShaguDB_Settings.filterReqLevel ~= true) then
         SDBG.settings.buttons[4].enabled:SetChecked(false);
     else
         SDBG.settings.buttons[4].enabled:SetChecked(true);
@@ -603,18 +605,19 @@ SDBG.settings.buttons[5]:SetNormalTexture(nil)
 SDBG.settings.buttons[5]:SetPushedTexture(nil)
 SDBG.settings.buttons[5]:SetHighlightTexture(nil)
 SDBG.settings.buttons[5]:SetBackdrop(backdrop_noborder)
-SDBG.settings.buttons[5]:SetBackdropColor(1,1,1,.10)
+SDBG.settings.buttons[5]:SetBackdropColor(1,1,1,.05)
 SDBG.settings.buttons[5]:SetScript("OnEnter", function(self)
     this:SetBackdropColor(1,1,1,.25)
     ShaguDB_Tooltip:SetOwner(this, "ANCHOR_TOPLEFT");
     ShaguDB_Tooltip:ClearLines();
-    ShaguDB_Tooltip:SetText(ShaguDB_GetSetting("reqLevel")..
+    ShaguDB_Tooltip:SetText(ShaguDB_GetSetting("questIds")..
                             "\n\n|cffffffff"..
-                            "When enabled, this option shows the required level in the quest start tooltips.|r");
+                            "When enabled, this option shows the quest ID in the quest start tooltips.|r");
+                            -- TODO: Update text once this setting has been fixed. Quest IDs in quest start tooltips are needed for their context menu.
     ShaguDB_Tooltip:Show();
 end)
 SDBG.settings.buttons[5]:SetScript("OnLeave", function(self)
-    this:SetBackdropColor(1,1,1,.10)
+    this:SetBackdropColor(1,1,1,.05)
     ShaguDB_Tooltip:Hide()
 end)
 SDBG.settings.buttons[5].enabled = CreateFrame("CheckButton","mycheckbutton",SDBG.settings.buttons[5],"UICheckButtonTemplate")
@@ -622,15 +625,15 @@ SDBG.settings.buttons[5].enabled:SetPoint("RIGHT", -25, 0)
 SDBG.settings.buttons[5].enabled:SetWidth(20)
 SDBG.settings.buttons[5].enabled:SetHeight(20)
 SDBG.settings.buttons[5].enabled:SetScript("OnShow", function(self)
-    if (ShaguDB_Settings.reqLevel ~= true) then
+    if (ShaguDB_Settings.questIds ~= true) then
         SDBG.settings.buttons[5].enabled:SetChecked(false);
     else
         SDBG.settings.buttons[5].enabled:SetChecked(true);
     end
 end)
 SDBG.settings.buttons[5].enabled:SetScript("OnClick", function(self)
-    ShaguDB_SwitchSetting("reqLevel");
-    if (ShaguDB_Settings.reqLevel ~= true) then
+    ShaguDB_SwitchSetting("questIds");
+    if (ShaguDB_Settings.questIds ~= true) then
         SDBG.settings.buttons[5].enabled:SetChecked(false);
     else
         SDBG.settings.buttons[5].enabled:SetChecked(true);
@@ -646,20 +649,18 @@ SDBG.settings.buttons[6]:SetNormalTexture(nil)
 SDBG.settings.buttons[6]:SetPushedTexture(nil)
 SDBG.settings.buttons[6]:SetHighlightTexture(nil)
 SDBG.settings.buttons[6]:SetBackdrop(backdrop_noborder)
-SDBG.settings.buttons[6]:SetBackdropColor(1,1,1,.05)
+SDBG.settings.buttons[6]:SetBackdropColor(1,1,1,.10)
 SDBG.settings.buttons[6]:SetScript("OnEnter", function(self)
     this:SetBackdropColor(1,1,1,.25)
     ShaguDB_Tooltip:SetOwner(this, "ANCHOR_TOPLEFT");
     ShaguDB_Tooltip:ClearLines();
-    ShaguDB_Tooltip:SetText(ShaguDB_GetSetting("item_item")..
+    ShaguDB_Tooltip:SetText(ShaguDB_GetSetting("reqLevel")..
                             "\n\n|cffffffff"..
-                            "When enabled, this option enables showing item drops from other items.|r\n"..
-                            "|cFFFF1A1A!WARNING! This option might be unstable!\n"..
-                            "It is recommended to leave it turned of if not needed.|r");
+                            "When enabled, this option shows the required level in the quest start tooltips.|r");
     ShaguDB_Tooltip:Show();
 end)
 SDBG.settings.buttons[6]:SetScript("OnLeave", function(self)
-    this:SetBackdropColor(1,1,1,.05)
+    this:SetBackdropColor(1,1,1,.10)
     ShaguDB_Tooltip:Hide()
 end)
 SDBG.settings.buttons[6].enabled = CreateFrame("CheckButton","mycheckbutton",SDBG.settings.buttons[6],"UICheckButtonTemplate")
@@ -667,15 +668,15 @@ SDBG.settings.buttons[6].enabled:SetPoint("RIGHT", -25, 0)
 SDBG.settings.buttons[6].enabled:SetWidth(20)
 SDBG.settings.buttons[6].enabled:SetHeight(20)
 SDBG.settings.buttons[6].enabled:SetScript("OnShow", function(self)
-    if (ShaguDB_Settings.item_item ~= true) then
+    if (ShaguDB_Settings.reqLevel ~= true) then
         SDBG.settings.buttons[6].enabled:SetChecked(false);
     else
         SDBG.settings.buttons[6].enabled:SetChecked(true);
     end
 end)
 SDBG.settings.buttons[6].enabled:SetScript("OnClick", function(self)
-    ShaguDB_SwitchSetting("item_item");
-    if (ShaguDB_Settings.item_item ~= true) then
+    ShaguDB_SwitchSetting("reqLevel");
+    if (ShaguDB_Settings.reqLevel ~= true) then
         SDBG.settings.buttons[6].enabled:SetChecked(false);
     else
         SDBG.settings.buttons[6].enabled:SetChecked(true);
@@ -691,20 +692,20 @@ SDBG.settings.buttons[7]:SetNormalTexture(nil)
 SDBG.settings.buttons[7]:SetPushedTexture(nil)
 SDBG.settings.buttons[7]:SetHighlightTexture(nil)
 SDBG.settings.buttons[7]:SetBackdrop(backdrop_noborder)
-SDBG.settings.buttons[7]:SetBackdropColor(1,1,1,.10)
+SDBG.settings.buttons[7]:SetBackdropColor(1,1,1,.05)
 SDBG.settings.buttons[7]:SetScript("OnEnter", function(self)
     this:SetBackdropColor(1,1,1,.25)
     ShaguDB_Tooltip:SetOwner(this, "ANCHOR_TOPLEFT");
     ShaguDB_Tooltip:ClearLines();
-    ShaguDB_Tooltip:SetText(ShaguDB_GetSetting("waypoints")..
+    ShaguDB_Tooltip:SetText(ShaguDB_GetSetting("item_item")..
                             "\n\n|cffffffff"..
-                            "When enabled, mob waypoints are shown on the map.\n"..
-                            "Due to script spawns not yet being included in the DB\n"..
-                            "this can be helpful in finding some special mobs.|r");
+                            "When enabled, this option enables showing item drops from other items.|r\n"..
+                            "|cFFFF1A1A!WARNING! This option might be unstable!\n"..
+                            "It is recommended to leave it turned of if not needed.|r");
     ShaguDB_Tooltip:Show();
 end)
 SDBG.settings.buttons[7]:SetScript("OnLeave", function(self)
-    this:SetBackdropColor(1,1,1,.10)
+    this:SetBackdropColor(1,1,1,.05)
     ShaguDB_Tooltip:Hide()
 end)
 SDBG.settings.buttons[7].enabled = CreateFrame("CheckButton","mycheckbutton",SDBG.settings.buttons[7],"UICheckButtonTemplate")
@@ -712,15 +713,15 @@ SDBG.settings.buttons[7].enabled:SetPoint("RIGHT", -25, 0)
 SDBG.settings.buttons[7].enabled:SetWidth(20)
 SDBG.settings.buttons[7].enabled:SetHeight(20)
 SDBG.settings.buttons[7].enabled:SetScript("OnShow", function(self)
-    if (ShaguDB_Settings.waypoints ~= true) then
+    if (ShaguDB_Settings.item_item ~= true) then
         SDBG.settings.buttons[7].enabled:SetChecked(false);
     else
         SDBG.settings.buttons[7].enabled:SetChecked(true);
     end
 end)
 SDBG.settings.buttons[7].enabled:SetScript("OnClick", function(self)
-    ShaguDB_SwitchSetting("waypoints");
-    if (ShaguDB_Settings.waypoints ~= true) then
+    ShaguDB_SwitchSetting("item_item");
+    if (ShaguDB_Settings.item_item ~= true) then
         SDBG.settings.buttons[7].enabled:SetChecked(false);
     else
         SDBG.settings.buttons[7].enabled:SetChecked(true);
@@ -736,8 +737,53 @@ SDBG.settings.buttons[8]:SetNormalTexture(nil)
 SDBG.settings.buttons[8]:SetPushedTexture(nil)
 SDBG.settings.buttons[8]:SetHighlightTexture(nil)
 SDBG.settings.buttons[8]:SetBackdrop(backdrop_noborder)
-SDBG.settings.buttons[8]:SetBackdropColor(1,1,1,.05)
+SDBG.settings.buttons[8]:SetBackdropColor(1,1,1,.10)
 SDBG.settings.buttons[8]:SetScript("OnEnter", function(self)
+    this:SetBackdropColor(1,1,1,.25)
+    ShaguDB_Tooltip:SetOwner(this, "ANCHOR_TOPLEFT");
+    ShaguDB_Tooltip:ClearLines();
+    ShaguDB_Tooltip:SetText(ShaguDB_GetSetting("waypoints")..
+                            "\n\n|cffffffff"..
+                            "When enabled, mob waypoints are shown on the map.\n"..
+                            "Due to script spawns not yet being included in the DB\n"..
+                            "this can be helpful in finding some special mobs.|r");
+    ShaguDB_Tooltip:Show();
+end)
+SDBG.settings.buttons[8]:SetScript("OnLeave", function(self)
+    this:SetBackdropColor(1,1,1,.10)
+    ShaguDB_Tooltip:Hide()
+end)
+SDBG.settings.buttons[8].enabled = CreateFrame("CheckButton","mycheckbutton",SDBG.settings.buttons[8],"UICheckButtonTemplate")
+SDBG.settings.buttons[8].enabled:SetPoint("RIGHT", -25, 0)
+SDBG.settings.buttons[8].enabled:SetWidth(20)
+SDBG.settings.buttons[8].enabled:SetHeight(20)
+SDBG.settings.buttons[8].enabled:SetScript("OnShow", function(self)
+    if (ShaguDB_Settings.waypoints ~= true) then
+        SDBG.settings.buttons[8].enabled:SetChecked(false);
+    else
+        SDBG.settings.buttons[8].enabled:SetChecked(true);
+    end
+end)
+SDBG.settings.buttons[8].enabled:SetScript("OnClick", function(self)
+    ShaguDB_SwitchSetting("waypoints");
+    if (ShaguDB_Settings.waypoints ~= true) then
+        SDBG.settings.buttons[8].enabled:SetChecked(false);
+    else
+        SDBG.settings.buttons[8].enabled:SetChecked(true);
+    end
+end)
+SDBG.settings.buttons[9] = CreateFrame("Button","mybutton",SDBG.settings,"UIPanelButtonTemplate")
+SDBG.settings.buttons[9]:SetPoint("TOP", 0, -9*21+11)
+SDBG.settings.buttons[9]:SetWidth(450)
+SDBG.settings.buttons[9]:SetHeight(20)
+SDBG.settings.buttons[9]:SetFont("Fonts\\FRIZQT__.TTF", 10)
+SDBG.settings.buttons[9]:SetTextColor(1,1,1,1)
+SDBG.settings.buttons[9]:SetNormalTexture(nil)
+SDBG.settings.buttons[9]:SetPushedTexture(nil)
+SDBG.settings.buttons[9]:SetHighlightTexture(nil)
+SDBG.settings.buttons[9]:SetBackdrop(backdrop_noborder)
+SDBG.settings.buttons[9]:SetBackdropColor(1,1,1,.05)
+SDBG.settings.buttons[9]:SetScript("OnEnter", function(self)
     this:SetBackdropColor(1,1,1,.25)
     ShaguDB_Tooltip:SetOwner(this, "ANCHOR_TOPLEFT");
     ShaguDB_Tooltip:ClearLines();
@@ -751,27 +797,27 @@ SDBG.settings.buttons[8]:SetScript("OnEnter", function(self)
                             "in your quest log.|r");
     ShaguDB_Tooltip:Show();
 end)
-SDBG.settings.buttons[8]:SetScript("OnLeave", function(self)
+SDBG.settings.buttons[9]:SetScript("OnLeave", function(self)
     this:SetBackdropColor(1,1,1,.05)
     ShaguDB_Tooltip:Hide()
 end)
-SDBG.settings.buttons[8].enabled = CreateFrame("CheckButton","mycheckbutton",SDBG.settings.buttons[8],"UICheckButtonTemplate")
-SDBG.settings.buttons[8].enabled:SetPoint("RIGHT", -25, 0)
-SDBG.settings.buttons[8].enabled:SetWidth(20)
-SDBG.settings.buttons[8].enabled:SetHeight(20)
-SDBG.settings.buttons[8].enabled:SetScript("OnShow", function(self)
+SDBG.settings.buttons[9].enabled = CreateFrame("CheckButton","mycheckbutton",SDBG.settings.buttons[9],"UICheckButtonTemplate")
+SDBG.settings.buttons[9].enabled:SetPoint("RIGHT", -25, 0)
+SDBG.settings.buttons[9].enabled:SetWidth(20)
+SDBG.settings.buttons[9].enabled:SetHeight(20)
+SDBG.settings.buttons[9].enabled:SetScript("OnShow", function(self)
     if (ShaguDB_Settings.auto_plot ~= true) then
-        SDBG.settings.buttons[8].enabled:SetChecked(false);
+        SDBG.settings.buttons[9].enabled:SetChecked(false);
     else
-        SDBG.settings.buttons[8].enabled:SetChecked(true);
+        SDBG.settings.buttons[9].enabled:SetChecked(true);
     end
 end)
-SDBG.settings.buttons[8].enabled:SetScript("OnClick", function(self)
+SDBG.settings.buttons[9].enabled:SetScript("OnClick", function(self)
     ShaguDB_SwitchSetting("auto_plot");
     if (ShaguDB_Settings.auto_plot ~= true) then
-        SDBG.settings.buttons[8].enabled:SetChecked(false);
+        SDBG.settings.buttons[9].enabled:SetChecked(false);
     else
-        SDBG.settings.buttons[8].enabled:SetChecked(true);
+        SDBG.settings.buttons[9].enabled:SetChecked(true);
     end
 end)
 function SDBG.HideButtons()
