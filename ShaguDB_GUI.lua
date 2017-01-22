@@ -63,7 +63,7 @@ SDBG.minimapButton:SetScript("OnDragStop", function()
     SDBG.minimapButton:SetPoint("TOPLEFT", Minimap, "TOPLEFT", 52-(80*cos(ShaguMinimapPosition)),(80*sin(ShaguMinimapPosition))-52)
 end)
 
-SDBG.minimapButton:SetFrameStrata('LOW')
+SDBG.minimapButton:SetFrameStrata('HIGH')
 SDBG.minimapButton:SetWidth(31)
 SDBG.minimapButton:SetHeight(31)
 SDBG.minimapButton:SetFrameLevel(9)
@@ -71,15 +71,14 @@ SDBG.minimapButton:SetHighlightTexture('Interface\\Minimap\\UI-Minimap-ZoomButto
 SDBG.minimapButton:SetPoint("TOPLEFT", Minimap, "TOPLEFT", 52-(80*cos(ShaguMinimapPosition)),(80*sin(ShaguMinimapPosition))-52)
 SDBG.minimapButton:SetScript("OnClick", function()
     if ( arg1 == "LeftButton" ) then
-        if (ShaguDB_Frame:IsShown()) then
-            ShaguDB_Frame:Hide()
-        else
-            ShaguDB_Frame:Show()
-        end
-    end
-    if (arg1 == "RightButton") then
         if IsShiftKeyDown() then
-            ShaguDB_ResetGui();
+            Cartographer_Notes:SetIconSize(1);
+            WorldMapFrame:SetScale(1);
+            WorldMapFrame:StartMoving();
+            WorldMapFrame:SetPoint("CENTER", 0, 0);
+            WorldMapFrame:StopMovingOrSizing();
+            WorldMapFrame:ClearAllPoints();
+            WorldMapFrame:SetAllPoints(UIParent);
         else
             if (SDBG:IsShown()) then
                 SDBG:Hide();
@@ -88,11 +87,22 @@ SDBG.minimapButton:SetScript("OnClick", function()
             end
         end
     end
+    if (arg1 == "RightButton") then
+        if IsShiftKeyDown() then
+            ShaguDB_ResetGui();
+        else
+            if (ShaguDB_Frame:IsShown()) then
+                ShaguDB_Frame:Hide()
+            else
+                ShaguDB_Frame:Show()
+            end
+        end
+    end
 end)
 SDBG.minimapButton:SetScript("OnEnter", function()
     ShaguDB_Tooltip:SetOwner(SDBG.minimapButton, "ANCHOR_BOTTOMLEFT");
     ShaguDB_Tooltip:ClearLines();
-    ShaguDB_Tooltip:SetText("<LeftClick>: Toggle settings and controls.\n<RightClick>: Toggle search window.\n<Shift>+<RightClick>: Reset and show both windows.");
+    ShaguDB_Tooltip:SetText("<LeftClick>: Toggle search window\n<RightClick>: Toggle control window\n<Shift>+<RightClick>: Reset Map and Icon Size\n<Shift>+<RightClick>: Reset and show both windows");
     ShaguDB_Tooltip:Show();
 end)
 SDBG.minimapButton:SetScript("OnLeave", function()
