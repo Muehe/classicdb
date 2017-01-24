@@ -1566,6 +1566,12 @@ function ShaguDB_GetQuestNotes(questLogID)
                     elseif (objectiveType ~= "item" and objectiveType ~= "monster" and objectiveType ~= "object" and objectiveType ~= "event") then
                         ShaguDB_Debug_Print(1, "    ", objectiveType, " quest objective-type not supported yet");
                     end
+                elseif (objectiveType == "item") then
+                    ShaguDB_Debug_Print(8, "    type = item");
+                    local itemID = itemLookup[itemName];
+                    if (itemID and (itemData[itemID])) then
+                        itemList[itemID] = true;
+                    end
                 end
             end
             if ((not isComplete) and (numObjectives ~= 0)) then
