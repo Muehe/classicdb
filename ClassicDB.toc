@@ -1,6 +1,6 @@
 ## Interface: 11200
-## Title: |cff33ffccShagu|cffffffffDB
-## Author: Eric (Shagu) Mauser, 2015 | Muehe, 2016
+## Title: |cff33ffccClassic|cffffffffDB
+## Author: Eric (Shagu) Mauser, 2015-2016 | Muehe, 2016-2017
 ## Notes: A Quest-, Item-, Vendor- and Spawn-database. Notes are shown via Cartographer.
 ## Version: oooVersionooo-oooLocaleooo
 ## RequiredDeps: Cartographer
@@ -15,6 +15,6 @@ db\questDB.lua
 db\objectDB.lua
 
 # addon
-ShaguDB.lua
-ShaguDB_GUI.lua
-ShaguDB.xml
+ClassicDB.lua
+ClassicDB_GUI.lua
+ClassicDB.xml
