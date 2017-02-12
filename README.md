@@ -1,22 +1,10 @@
-# ShaguDB
-ShaguDB is an Addon for World of Warcraft Classic (1.12.1) Clients, which helps you to find ingame stuff and getting your quests done. It draws spawn informations of gameobjects and npcs on your map. Also it allows you to search for quests, items and much more. It is based on the latest [cmangos classic-db](https://github.com/cmangos/classic-db), as well as [MangosZero_Localised](https://github.com/MangosExtras/MangosZero_Localised/tree/master/Translations) for deDE versions. Some parts of the Addon itself are taken from the amazing WHDB Addon. Cartographer is required and an enhanced version is included in the download.
+# ClassicDB
+ClassicDB is an addon for World of Warcraft (1.12.1), which helps you to find ingame stuff and getting your quests done. It draws spawn information of gameobjects and npcs on your map. Also it allows you to search for quests, items and much more. Cartographer is required and an enhanced version is included in the download.
 
-Note: ShaguQuest is not meant to be a complete QuestHelper Clone (although it's slowly getting there). It's a database addon which offers some kind of quest integration via a simple UI. If you're searching for a real QuestHelper Addon you might want to checkout a project called [Questie](https://github.com/AeroScripts/QuestieDev) instead of ShaguQuest (or just use both together).
+**Note:** ClassicDB is not meant to be a complete QuestHelper clone (although it's slowly getting there). It's a database, in the spirit of the amazing "Wow Head Data Base" addon and offers some kind of quest integration via a simple UI. If you're searching for a real QuestHelper addon you might want to checkout a project called [Questie](https://github.com/AeroScripts/QuestieDev) instead of ClassicDB (or just use both together).
 
-For more information visit our [website](http://shagu.org/shaguquest/) and [wiki](https://github.com/shagu/shaguquest/wiki).
+# Credits
+ClassicDB is a fork of [WHDB](https://wow.curseforge.com/projects/whdb) for TBC by UniRing, which was ported to classic WoW by Bërsërk in the RQP (Rapid Quest Pack) addon collection. It was merged together from two independently developed forks, [ShaguQuest](https://github.com/shagu/shaguquest) and [Continued WHDB](https://github.com/Muehe/WHDB). ClassicDB is based on data from [cmangos/classic-db](https://github.com/cmangos/classic-db), as well as [MangosZero_Localised](https://github.com/MangosExtras/MangosZero_Localised/tree/master/Translations) for translations used in deDE versions.
 
 # Download
-If you want to test it, visit the following link or click on releases above:
-
-[Releases](https://github.com/shagu/shaguquest/releases)
-
-# Video
-If you want to see it in Action, here is a example video, showcasing the new features of ShaguDB 7.0
-
-[![Youtube Video](https://i.ytimg.com/vi/SYrCEI_2Axg/hqdefault.jpg?custom=true&w=392&h=220)](https://www.youtube.com/watch?v=SYrCEI_2Axg)
-
-# Build from git
-~~If you're running a Linux Machine, just execute the "./build.sh" to create a deDE and enGB release.
-The files will be placed in ./releases called `ShaguDB-<version>-<locale>-complete.zip`~~
-
-Currently not working.
+If you want to test it, you can download it on the [Releases](https://github.com/Muehe/CDB/releases) page.
