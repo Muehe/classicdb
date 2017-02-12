@@ -179,79 +179,79 @@ function ShaguDB_Event(event, ...)
           SDBG.minimapButton:Hide()
         end
 
-        if (ShaguDB_FinishedQuests == nil) then
-            ShaguDB_FinishedQuests = {};
+        if (CdbFinishedQuests == nil) then
+            CdbFinishedQuests = {};
         end
-        if (ShaguDB_Settings == nil) then
-            ShaguDB_Settings = {};
+        if (CdbSettings == nil) then
+            CdbSettings = {};
         end
-        ShaguDB_Settings["auto_plot"] = false;
-        ShaguDB_Settings["item_item"] = false;
-        if (ShaguDB_Settings["minDropChance"] == nil) then
-            ShaguDB_Settings["minDropChance"] = 0;
+        CdbSettings["auto_plot"] = false;
+        CdbSettings["item_item"] = false;
+        if (CdbSettings["minDropChance"] == nil) then
+            CdbSettings["minDropChance"] = 0;
         end
-        if (ShaguDB_Settings["dbMode"] == nil) then
-            ShaguDB_Settings["dbMode"] = false;
+        if (CdbSettings["dbMode"] == nil) then
+            CdbSettings["dbMode"] = false;
         end
-        if (ShaguDB_Settings["waypoints"] == nil) then
-            ShaguDB_Settings["waypoints"] = false;
+        if (CdbSettings["waypoints"] == nil) then
+            CdbSettings["waypoints"] = false;
         end
-        if (ShaguDB_Settings["questStarts"] == nil) then
-            ShaguDB_Settings["questStarts"] = false;
+        if (CdbSettings["questStarts"] == nil) then
+            CdbSettings["questStarts"] = false;
         end
-        if (ShaguDB_Settings["filterReqLevel"] == nil) then
-            ShaguDB_Settings["filterReqLevel"] = true;
+        if (CdbSettings["filterReqLevel"] == nil) then
+            CdbSettings["filterReqLevel"] = true;
         end
-        if (ShaguDB_Settings["filterPreQuest"] == nil) then
-            ShaguDB_Settings["filterPreQuest"] = true;
+        if (CdbSettings["filterPreQuest"] == nil) then
+            CdbSettings["filterPreQuest"] = true;
         end
-        if (ShaguDB_Settings["questIds"] == nil) then
-            ShaguDB_Settings["questIds"] = true;
+        if (CdbSettings["questIds"] == nil) then
+            CdbSettings["questIds"] = true;
         end
-        if (ShaguDB_Settings["reqLevel"] == nil) then
-            ShaguDB_Settings["reqLevel"] = true;
+        if (CdbSettings["reqLevel"] == nil) then
+            CdbSettings["reqLevel"] = true;
         end
-        if (ShaguDB_Settings["player"] == nil) then
-            ShaguDB_Settings["player"] = UnitName("player");
+        if (CdbSettings["player"] == nil) then
+            CdbSettings["player"] = UnitName("player");
         end
-        if (ShaguDB_Settings["race"] == nil) then
-            ShaguDB_Settings["race"] = UnitRace("player");
+        if (CdbSettings["race"] == nil) then
+            CdbSettings["race"] = UnitRace("player");
         end
-        if (ShaguDB_Settings["sex"] == nil) then
+        if (CdbSettings["sex"] == nil) then
             local temp = UnitSex("player");
             if (temp == 3) then
-                ShaguDB_Settings["sex"] = "Female";
+                CdbSettings["sex"] = "Female";
             elseif (temp == 2) then
-                ShaguDB_Settings["sex"] = "Male";
+                CdbSettings["sex"] = "Male";
             else
-                ShaguDB_Settings["sex"] = nil;
+                CdbSettings["sex"] = nil;
             end
         end
-        if (ShaguDB_Settings["class"] == nil) then
-            ShaguDB_Settings["class"] = UnitClass("player");
+        if (CdbSettings["class"] == nil) then
+            CdbSettings["class"] = UnitClass("player");
         end
-        if (ShaguDB_Settings["faction"] == nil) then
+        if (CdbSettings["faction"] == nil) then
             local temp = UnitFactionGroup("player");
             if (temp) then
-                ShaguDB_Settings["faction"] = temp;
+                CdbSettings["faction"] = temp;
             end
         end
-        if (ShaguDB_Settings.faction == "Alliance" and not ShaguDB_Settings.dbMode) then
+        if (CdbSettings.faction == "Alliance" and not CdbSettings.dbMode) then
             deleteFaction("H");
             ShaguDB_Print("Horde data cleared.");
-        elseif (ShaguDB_Settings.faction == "Horde" and not ShaguDB_Settings.dbMode) then
+        elseif (CdbSettings.faction == "Horde" and not CdbSettings.dbMode) then
             deleteFaction("A");
             ShaguDB_Print("Alliance data cleared.");
         else
             ShaguDB_Print("DB Mode active, no quest data cleared.");
         end
-        if not ShaguDB_Settings.dbMode then
+        if not CdbSettings.dbMode then
             deleteClasses();
         end
         fillQuestLookup();
         ShaguDB_Frame:Show();
         ShaguDB_Print("ShaguDB Loaded.");
-    elseif (event == "WORLD_MAP_UPDATE") and (WorldMapFrame:IsVisible()) and (ShaguDB_Settings.questStarts) then
+    elseif (event == "WORLD_MAP_UPDATE") and (WorldMapFrame:IsVisible()) and (CdbSettings.questStarts) then
         ShaguDB_Debug_Print(4, "    ", zone);
         ShaguDB_InEvent = true;
         ShaguDB_GetQuestStartNotes();
@@ -269,7 +269,7 @@ function ShaguDB_Event(event, ...)
             end
             if added ~= 0 then
                 ShaguDB_Debug_Print(4, "    Quest accepted", added);
-                ShaguDB_FinishedQuests[added] = false;
+                CdbFinishedQuests[added] = false;
             end
             local removed = 0;
             for k, v in pairs(ShaguDB_QuestLogFootprint[2]) do
@@ -278,18 +278,18 @@ function ShaguDB_Event(event, ...)
                 end
             end
             if removed ~= 0 then
-                if ShaguDB_FinishedQuests[removed] == false then
+                if CdbFinishedQuests[removed] == false then
                     ShaguDB_Debug_Print(4, "    Quest finished", removed);
-                    ShaguDB_FinishedQuests[removed] = true;
+                    CdbFinishedQuests[removed] = true;
                 else
                     ShaguDB_Debug_Print(4, "    Quest abandoned", removed);
-                    ShaguDB_FinishedQuests[removed] = nil;
+                    CdbFinishedQuests[removed] = nil;
                 end
             end
-            if (ShaguDB_Settings.questStarts == true) then
+            if (CdbSettings.questStarts == true) then
                 ShaguDB_CleanMap();
             end
-            if (ShaguDB_Settings.auto_plot == true) then
+            if (CdbSettings.auto_plot == true) then
                 ShaguDB_InEvent = true;
                 ShaguDB_PlotAllQuests();
                 ShaguDB_InEvent = false;
@@ -311,7 +311,7 @@ function ShaguDB_Event(event, ...)
             ShaguDB_WatchQuestLogID = 0;
         end
     elseif (event == "QUEST_WATCH_UPDATE") then
-        if (ShaguDB_Settings.auto_plot == true) then
+        if (CdbSettings.auto_plot == true) then
             ShaguDB_InEvent = true;
             ShaguDB_PlotAllQuests();
             ShaguDB_InEvent = false;
@@ -337,7 +337,7 @@ function ShaguDB_Event(event, ...)
         local footprint = ShaguDB_GetQuestLogFootprint();
         local count = GetNumQuestLogEntries();
         ShaguDB_Debug_Print(4, "    footprint", {ShaguDB_QuestLogFootprint, count});
-        if ((ShaguDB_Settings.auto_plot) and (ShaguDB_QuestLogFootprint[1] ~= footprint[1])) then
+        if ((CdbSettings.auto_plot) and (ShaguDB_QuestLogFootprint[1] ~= footprint[1])) then
             ShaguDB_InEvent = true;
             ShaguDB_PlotAllQuests();
             ShaguDB_InEvent = false;
@@ -541,10 +541,10 @@ function ShaguDB_Init()
                 if value > 101 then
                     value = 101;
                 end
-                ShaguDB_Settings.minDropChance = value;
+                CdbSettings.minDropChance = value;
                 ShaguDB_Print("Minimum Drop Chance set to: "..value.."%");
             else
-                ShaguDB_Print("Minimum Drop Chance is: "..ShaguDB_Settings.minDropChance.."%");
+                ShaguDB_Print("Minimum Drop Chance is: "..CdbSettings.minDropChance.."%");
             end
         elseif (arg1 == "obj") then
             local objName = string.sub(input, 5);
@@ -569,12 +569,12 @@ function ShaguDB_Init()
         elseif (arg1 == "hide") then
             local questId = tonumber(string.sub(input, 6));
             if qData[questId] then
-                ShaguDB_FinishedQuests[questId] = true;
+                CdbFinishedQuests[questId] = true;
             end
         elseif (arg1 == "reset") then
             ShaguDB_ResetGui();
         elseif (arg1 == "clear") then
-            ShaguDB_Settings = nil;
+            CdbSettings = nil;
             ReloadUI();
         end
     end;
@@ -971,13 +971,13 @@ end -- PlotAllQuests()
 -- called from xml
 function ShaguDB_DoCleanMap()
     ShaguDB_Debug_Print(2, "DoCleanMap() called");
-    if (ShaguDB_Settings.auto_plot) then
-        ShaguDB_Settings.auto_plot = false;
+    if (CdbSettings.auto_plot) then
+        CdbSettings.auto_plot = false;
         ShaguDB_CheckSetting("auto_plot")
         ShaguDB_Print("Auto plotting disabled.");
     end
-    if (ShaguDB_Settings.questStarts) then
-        ShaguDB_Settings.questStarts = false;
+    if (CdbSettings.questStarts) then
+        CdbSettings.questStarts = false;
         ShaguDB_CheckSetting("questStarts")
         ShaguDB_Print("Quest start plotting disabled.");
     end
@@ -1185,25 +1185,25 @@ function ShaguDB_SwitchSetting(setting, ...)
         ["item_item"] = "Showing items dropped by items",
         ["minDropChance"] = "Minimum drop chance for items to be shown",
     };
-    if (ShaguDB_Settings[setting] == false) then
-        ShaguDB_Settings[setting] = true;
+    if (CdbSettings[setting] == false) then
+        CdbSettings[setting] = true;
         ShaguDB_Print(text[setting].." enabled.");
     elseif (setting == "minDropChance") then
         local number = tonumber(arg1);
         if (number) and (number >= 0 and number <= 101) then
-            ShaguDB_Settings[setting] = number;
+            CdbSettings[setting] = number;
             ShaguDB_Print(text[setting].." set to: "..number);
         else
-            ShaguDB_Print(text[setting].." is: "..ShaguDB_Settings[setting]);
+            ShaguDB_Print(text[setting].." is: "..CdbSettings[setting]);
         end
     else
-        ShaguDB_Settings[setting] = false;
+        CdbSettings[setting] = false;
         ShaguDB_Print(text[setting].." disabled.");
     end
     ShaguDB_CheckSetting(setting);
-    if (setting == "auto_plot") and (ShaguDB_Settings[setting]) then
+    if (setting == "auto_plot") and (CdbSettings[setting]) then
         ShaguDB_PlotAllQuests();
-    elseif (setting == "auto_plot") and (not ShaguDB_Settings[setting]) then
+    elseif (setting == "auto_plot") and (not CdbSettings[setting]) then
         ShaguDB_CleanMap();
     end
 end -- SwitchSetting(setting)
@@ -1219,7 +1219,7 @@ function ShaguDB_GetSetting(setting, ...)
         ["dbMode"] = "DB Mode",
         ["item_item"] = "Showing items dropped by items",
     };
-    if (text[setting]) and (ShaguDB_Settings[setting]) then
+    if (text[setting]) and (CdbSettings[setting]) then
         return text[setting].." is|cFF40C040 enabled|r";
     elseif (text[setting]) then
         return text[setting].." is|cFFFF1A1A disabled|r";
@@ -1230,7 +1230,7 @@ function ShaguDB_CheckSetting(setting)
     if (setting ~= "waypoints") and (setting ~= "auto_plot") and (setting ~= "questStarts") then
         return;
     end
-    if (ShaguDB_Settings[setting] == true) then
+    if (CdbSettings[setting] == true) then
         getglobal(setting):SetChecked(true);
     else
         getglobal(setting):SetChecked(false);
@@ -1249,7 +1249,7 @@ function ShaguDB_GetNPCNotes(npcNameOrID, commentTitle, comment, icon)
         end
         if (npcData[npcID] ~= nil) then
             local showMap = false;
-            if (npcData[npcID][DB_NPC_WAYPOINTS] and ShaguDB_Settings.waypoints == true) then
+            if (npcData[npcID][DB_NPC_WAYPOINTS] and CdbSettings.waypoints == true) then
                 for zoneID, coordsdata in pairs(npcData[npcID][DB_NPC_WAYPOINTS]) do
                     zoneName = zoneData[zoneID];
                     for cID, coords in pairs(coordsdata) do
@@ -1368,7 +1368,7 @@ function ShaguDB_PrepareItemNotes(itemNameOrID, commentTitle, comment, icon, typ
             for key, value in pairs(itemData[itemID][DB_NPC]) do
                 if npcData[value[1]] then
                     local show = true;
-                    if (ShaguDB_Settings.minDropChance > 0) and (value[2] < ShaguDB_Settings.minDropChance) then
+                    if (CdbSettings.minDropChance > 0) and (value[2] < CdbSettings.minDropChance) then
                         show = false;
                     end
                     if show then
@@ -1382,7 +1382,7 @@ function ShaguDB_PrepareItemNotes(itemNameOrID, commentTitle, comment, icon, typ
             for key, value in pairs(itemData[itemID][DB_OBJ]) do
                 if objData[value[1]] then
                     local show = true;
-                    if (ShaguDB_Settings.minDropChance > 0) and (value[2] < ShaguDB_Settings.minDropChance) then
+                    if (CdbSettings.minDropChance > 0) and (value[2] < CdbSettings.minDropChance) then
                         show = false;
                     end
                     if show then
@@ -1392,10 +1392,10 @@ function ShaguDB_PrepareItemNotes(itemNameOrID, commentTitle, comment, icon, typ
                 end
             end
         end
-        if (itemData[itemID][DB_ITM]) and (ShaguDB_Settings.item_item) and ((showType == nil) or (showType[DB_ITM])) then
+        if (itemData[itemID][DB_ITM]) and (CdbSettings.item_item) and ((showType == nil) or (showType[DB_ITM])) then
             for key, value in pairs(itemData[itemID][DB_ITM]) do
                 local show = true;
-                if (ShaguDB_Settings.minDropChance > 0) and (value[2] < ShaguDB_Settings.minDropChance) then
+                if (CdbSettings.minDropChance > 0) and (value[2] < CdbSettings.minDropChance) then
                     show = false;
                 end
                 if show then
@@ -1711,15 +1711,15 @@ end -- GetQuestStartNotes(zoneName)
 function ShaguDB_GetQuestStartComment(npcOrGoStarts)
     local tooltipText = "";
     for key, questID in npcOrGoStarts do
-        if (qData[questID]) and (ShaguDB_FinishedQuests[questID] == nil) and (ShaguDB_FinishedQuests[questID] ~= true) then
+        if (qData[questID]) and (CdbFinishedQuests[questID] == nil) and (CdbFinishedQuests[questID] ~= true) then
             local skip = false;
-            if (ShaguDB_Settings.filterReqLevel == true) and (qData[questID][DB_MIN_LEVEL] > UnitLevel("player")) then
+            if (CdbSettings.filterReqLevel == true) and (qData[questID][DB_MIN_LEVEL] > UnitLevel("player")) then
                 skip = true;
             end
-            if (ShaguDB_Settings.filterPreQuest == true) then
+            if (CdbSettings.filterPreQuest == true) then
                 if (qData[questID][DB_PRE_QUEST_GROUP] ~= nil) then
                     for key2, questID2 in pairs(qData[questID][DB_PRE_QUEST_GROUP]) do
-                        if (ShaguDB_FinishedQuests[questID2] ~= true) then
+                        if (CdbFinishedQuests[questID2] ~= true) then
                             skip = true;
                         end
                     end
@@ -1727,7 +1727,7 @@ function ShaguDB_GetQuestStartComment(npcOrGoStarts)
                 if (qData[questID][DB_PRE_QUEST_SINGLE] ~= nil) then
                     local skip2 = true;
                     for key2, questID2 in pairs(qData[questID][DB_PRE_QUEST_SINGLE]) do
-                        if (ShaguDB_FinishedQuests[questID2] == true) then
+                        if (CdbFinishedQuests[questID2] == true) then
                             skip2 = false;
                         end
                     end
@@ -1741,12 +1741,12 @@ function ShaguDB_GetQuestStartComment(npcOrGoStarts)
             if level == -1 then level = UnitLevel("player"); end
             if not skip then
                 tooltipText = tooltipText..colorString.."["..level.."] "..qData[questID][DB_NAME].."|r\n";
-                if ShaguDB_Settings.questIds and ShaguDB_Settings.reqLevel then
+                if CdbSettings.questIds and CdbSettings.reqLevel then
                     tooltipText = tooltipText.."|cFFa6a6a6(ID: "..questID..") | |r";
-                elseif ShaguDB_Settings.questIds then
+                elseif CdbSettings.questIds then
                     tooltipText = tooltipText.."|cFFa6a6a6(ID: "..questID..")|r\n";
                 end
-                if ShaguDB_Settings.reqLevel then
+                if CdbSettings.reqLevel then
                     local comment = "";
                     if ShaguDB_GetGreyLevel(UnitLevel("player")) >= qData[questID][DB_MIN_LEVEL] then
                         comment = qData[questID][DB_MIN_LEVEL];
@@ -2022,7 +2022,7 @@ function ShaguDB_GetQuestLogFootprint()
                 uId = qIds;
                 ids[qIds] = true;
                 if (ShaguDB_QuestAbandon == questTitle) then
-                    ShaguDB_FinishedQuests[qIds] = -1;
+                    CdbFinishedQuests[qIds] = -1;
                     ShaguDB_QuestAbandon = '';
                 end
             else
@@ -2044,11 +2044,11 @@ end
 
 function ShaguDB_FinishQuest(questId)
     if qData[questId] then
-        ShaguDB_FinishedQuests[questId] = true;
+        CdbFinishedQuests[questId] = true;
     end
     WorldMapFrame:Hide();
     ShaguDB_CleanMap();
-    if (ShaguDB_Settings.auto_plot) then
+    if (CdbSettings.auto_plot) then
         ShaguDB_PlotAllQuests();
     else
         WorldMapFrame:Show();

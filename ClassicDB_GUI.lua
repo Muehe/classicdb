@@ -14,16 +14,16 @@ local backdrop_noborder = {
     insets = {left = 0, right = 0, top = 0, bottom = 0},
 }
 
-if not SDBG_Favs then SDBG_Favs = {} end
-if not SDBG_Favs["spawn"] then SDBG_Favs["spawn"] = {} end
-if not SDBG_Favs["object"] then SDBG_Favs["object"] = {} end
-if not SDBG_Favs["item"] then SDBG_Favs["item"] = {} end
-if not SDBG_Favs["quest"] then SDBG_Favs["quest"] = {} end
+if not CdbFavourites then CdbFavourites = {} end
+if not CdbFavourites["spawn"] then CdbFavourites["spawn"] = {} end
+if not CdbFavourites["object"] then CdbFavourites["object"] = {} end
+if not CdbFavourites["item"] then CdbFavourites["item"] = {} end
+if not CdbFavourites["quest"] then CdbFavourites["quest"] = {} end
 
 SDBG = CreateFrame("Frame",nil,UIParent)
 SDBG:RegisterEvent("PLAYER_ENTERING_WORLD");
 SDBG:SetScript("OnEvent", function(self, event, ...)
-    SDBG.minimapButton:SetPoint("TOPLEFT", Minimap, "TOPLEFT", 52-(80*cos(ShaguMinimapPosition)),(80*sin(ShaguMinimapPosition))-52)
+    SDBG.minimapButton:SetPoint("TOPLEFT", Minimap, "TOPLEFT", 52-(80*cos(CdbMinimapPosition)),(80*sin(CdbMinimapPosition))-52)
 end)
 
 SDBG:Hide()
@@ -44,8 +44,8 @@ SDBG:SetScript("OnMouseUp",function()
 end)
 
 SDBG.minimapButton = CreateFrame('Button', "ShaguDB_Minimap", Minimap)
-if (ShaguMinimapPosition == nil) then
-    ShaguMinimapPosition = 125
+if (CdbMinimapPosition == nil) then
+    CdbMinimapPosition = 125
 end
 
 SDBG.minimapButton:SetMovable(true)
@@ -59,8 +59,8 @@ SDBG.minimapButton:SetScript("OnDragStop", function()
     xpos = xmin-xpos/UIParent:GetScale()+70
     ypos = ypos/UIParent:GetScale()-ymin-70
 
-    ShaguMinimapPosition = math.deg(math.atan2(ypos,xpos))
-    SDBG.minimapButton:SetPoint("TOPLEFT", Minimap, "TOPLEFT", 52-(80*cos(ShaguMinimapPosition)),(80*sin(ShaguMinimapPosition))-52)
+    CdbMinimapPosition = math.deg(math.atan2(ypos,xpos))
+    SDBG.minimapButton:SetPoint("TOPLEFT", Minimap, "TOPLEFT", 52-(80*cos(CdbMinimapPosition)),(80*sin(CdbMinimapPosition))-52)
 end)
 
 SDBG.minimapButton:SetFrameStrata('HIGH')
@@ -68,7 +68,7 @@ SDBG.minimapButton:SetWidth(31)
 SDBG.minimapButton:SetHeight(31)
 SDBG.minimapButton:SetFrameLevel(9)
 SDBG.minimapButton:SetHighlightTexture('Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight')
-SDBG.minimapButton:SetPoint("TOPLEFT", Minimap, "TOPLEFT", 52-(80*cos(ShaguMinimapPosition)),(80*sin(ShaguMinimapPosition))-52)
+SDBG.minimapButton:SetPoint("TOPLEFT", Minimap, "TOPLEFT", 52-(80*cos(CdbMinimapPosition)),(80*sin(CdbMinimapPosition))-52)
 SDBG.minimapButton:SetScript("OnClick", function()
     if ( arg1 == "LeftButton" ) then
         if IsShiftKeyDown() then
@@ -457,7 +457,7 @@ SDBG.settings.buttons[1].enabled:SetPoint("RIGHT", -25, 0)
 SDBG.settings.buttons[1].enabled:SetWidth(20)
 SDBG.settings.buttons[1].enabled:SetHeight(20)
 SDBG.settings.buttons[1].enabled:SetScript("OnShow", function(self)
-    if (ShaguDB_Settings.dbMode ~= true) then
+    if (CdbSettings.dbMode ~= true) then
         SDBG.settings.buttons[1].enabled:SetChecked(false);
     else
         SDBG.settings.buttons[1].enabled:SetChecked(true);
@@ -465,7 +465,7 @@ SDBG.settings.buttons[1].enabled:SetScript("OnShow", function(self)
 end)
 SDBG.settings.buttons[1].enabled:SetScript("OnClick", function(self)
     ShaguDB_SwitchSetting("dbMode");
-    if (ShaguDB_Settings.dbMode ~= true) then
+    if (CdbSettings.dbMode ~= true) then
         SDBG.settings.buttons[1].enabled:SetChecked(false);
     else
         SDBG.settings.buttons[1].enabled:SetChecked(true);
@@ -502,7 +502,7 @@ SDBG.settings.buttons[2].enabled:SetPoint("RIGHT", -25, 0)
 SDBG.settings.buttons[2].enabled:SetWidth(20)
 SDBG.settings.buttons[2].enabled:SetHeight(20)
 SDBG.settings.buttons[2].enabled:SetScript("OnShow", function(self)
-    if (ShaguDB_Settings.questStarts ~= true) then
+    if (CdbSettings.questStarts ~= true) then
         SDBG.settings.buttons[2].enabled:SetChecked(false);
     else
         SDBG.settings.buttons[2].enabled:SetChecked(true);
@@ -510,7 +510,7 @@ SDBG.settings.buttons[2].enabled:SetScript("OnShow", function(self)
 end)
 SDBG.settings.buttons[2].enabled:SetScript("OnClick", function(self)
     ShaguDB_SwitchSetting("questStarts");
-    if (ShaguDB_Settings.questStarts ~= true) then
+    if (CdbSettings.questStarts ~= true) then
         SDBG.settings.buttons[2].enabled:SetChecked(false);
     else
         SDBG.settings.buttons[2].enabled:SetChecked(true);
@@ -547,7 +547,7 @@ SDBG.settings.buttons[3].enabled:SetPoint("RIGHT", -25, 0)
 SDBG.settings.buttons[3].enabled:SetWidth(20)
 SDBG.settings.buttons[3].enabled:SetHeight(20)
 SDBG.settings.buttons[3].enabled:SetScript("OnShow", function(self)
-    if (ShaguDB_Settings.questStarts ~= true) then
+    if (CdbSettings.questStarts ~= true) then
         SDBG.settings.buttons[3].enabled:SetChecked(false);
     else
         SDBG.settings.buttons[3].enabled:SetChecked(true);
@@ -555,7 +555,7 @@ SDBG.settings.buttons[3].enabled:SetScript("OnShow", function(self)
 end)
 SDBG.settings.buttons[3].enabled:SetScript("OnClick", function(self)
     ShaguDB_SwitchSetting("questStarts");
-    if (ShaguDB_Settings.questStarts ~= true) then
+    if (CdbSettings.questStarts ~= true) then
         SDBG.settings.buttons[3].enabled:SetChecked(false);
     else
         SDBG.settings.buttons[3].enabled:SetChecked(true);
@@ -591,7 +591,7 @@ SDBG.settings.buttons[4].enabled:SetPoint("RIGHT", -25, 0)
 SDBG.settings.buttons[4].enabled:SetWidth(20)
 SDBG.settings.buttons[4].enabled:SetHeight(20)
 SDBG.settings.buttons[4].enabled:SetScript("OnShow", function(self)
-    if (ShaguDB_Settings.filterReqLevel ~= true) then
+    if (CdbSettings.filterReqLevel ~= true) then
         SDBG.settings.buttons[4].enabled:SetChecked(false);
     else
         SDBG.settings.buttons[4].enabled:SetChecked(true);
@@ -599,7 +599,7 @@ SDBG.settings.buttons[4].enabled:SetScript("OnShow", function(self)
 end)
 SDBG.settings.buttons[4].enabled:SetScript("OnClick", function(self)
     ShaguDB_SwitchSetting("filterReqLevel");
-    if (ShaguDB_Settings.filterReqLevel ~= true) then
+    if (CdbSettings.filterReqLevel ~= true) then
         SDBG.settings.buttons[4].enabled:SetChecked(false);
     else
         SDBG.settings.buttons[4].enabled:SetChecked(true);
@@ -635,7 +635,7 @@ SDBG.settings.buttons[5].enabled:SetPoint("RIGHT", -25, 0)
 SDBG.settings.buttons[5].enabled:SetWidth(20)
 SDBG.settings.buttons[5].enabled:SetHeight(20)
 SDBG.settings.buttons[5].enabled:SetScript("OnShow", function(self)
-    if (ShaguDB_Settings.questIds ~= true) then
+    if (CdbSettings.questIds ~= true) then
         SDBG.settings.buttons[5].enabled:SetChecked(false);
     else
         SDBG.settings.buttons[5].enabled:SetChecked(true);
@@ -643,7 +643,7 @@ SDBG.settings.buttons[5].enabled:SetScript("OnShow", function(self)
 end)
 SDBG.settings.buttons[5].enabled:SetScript("OnClick", function(self)
     ShaguDB_SwitchSetting("questIds");
-    if (ShaguDB_Settings.questIds ~= true) then
+    if (CdbSettings.questIds ~= true) then
         SDBG.settings.buttons[5].enabled:SetChecked(false);
     else
         SDBG.settings.buttons[5].enabled:SetChecked(true);
@@ -678,7 +678,7 @@ SDBG.settings.buttons[6].enabled:SetPoint("RIGHT", -25, 0)
 SDBG.settings.buttons[6].enabled:SetWidth(20)
 SDBG.settings.buttons[6].enabled:SetHeight(20)
 SDBG.settings.buttons[6].enabled:SetScript("OnShow", function(self)
-    if (ShaguDB_Settings.reqLevel ~= true) then
+    if (CdbSettings.reqLevel ~= true) then
         SDBG.settings.buttons[6].enabled:SetChecked(false);
     else
         SDBG.settings.buttons[6].enabled:SetChecked(true);
@@ -686,7 +686,7 @@ SDBG.settings.buttons[6].enabled:SetScript("OnShow", function(self)
 end)
 SDBG.settings.buttons[6].enabled:SetScript("OnClick", function(self)
     ShaguDB_SwitchSetting("reqLevel");
-    if (ShaguDB_Settings.reqLevel ~= true) then
+    if (CdbSettings.reqLevel ~= true) then
         SDBG.settings.buttons[6].enabled:SetChecked(false);
     else
         SDBG.settings.buttons[6].enabled:SetChecked(true);
@@ -723,7 +723,7 @@ SDBG.settings.buttons[7].enabled:SetPoint("RIGHT", -25, 0)
 SDBG.settings.buttons[7].enabled:SetWidth(20)
 SDBG.settings.buttons[7].enabled:SetHeight(20)
 SDBG.settings.buttons[7].enabled:SetScript("OnShow", function(self)
-    if (ShaguDB_Settings.item_item ~= true) then
+    if (CdbSettings.item_item ~= true) then
         SDBG.settings.buttons[7].enabled:SetChecked(false);
     else
         SDBG.settings.buttons[7].enabled:SetChecked(true);
@@ -731,7 +731,7 @@ SDBG.settings.buttons[7].enabled:SetScript("OnShow", function(self)
 end)
 SDBG.settings.buttons[7].enabled:SetScript("OnClick", function(self)
     ShaguDB_SwitchSetting("item_item");
-    if (ShaguDB_Settings.item_item ~= true) then
+    if (CdbSettings.item_item ~= true) then
         SDBG.settings.buttons[7].enabled:SetChecked(false);
     else
         SDBG.settings.buttons[7].enabled:SetChecked(true);
@@ -768,7 +768,7 @@ SDBG.settings.buttons[8].enabled:SetPoint("RIGHT", -25, 0)
 SDBG.settings.buttons[8].enabled:SetWidth(20)
 SDBG.settings.buttons[8].enabled:SetHeight(20)
 SDBG.settings.buttons[8].enabled:SetScript("OnShow", function(self)
-    if (ShaguDB_Settings.waypoints ~= true) then
+    if (CdbSettings.waypoints ~= true) then
         SDBG.settings.buttons[8].enabled:SetChecked(false);
     else
         SDBG.settings.buttons[8].enabled:SetChecked(true);
@@ -776,7 +776,7 @@ SDBG.settings.buttons[8].enabled:SetScript("OnShow", function(self)
 end)
 SDBG.settings.buttons[8].enabled:SetScript("OnClick", function(self)
     ShaguDB_SwitchSetting("waypoints");
-    if (ShaguDB_Settings.waypoints ~= true) then
+    if (CdbSettings.waypoints ~= true) then
         SDBG.settings.buttons[8].enabled:SetChecked(false);
     else
         SDBG.settings.buttons[8].enabled:SetChecked(true);
@@ -816,7 +816,7 @@ SDBG.settings.buttons[9].enabled:SetPoint("RIGHT", -25, 0)
 SDBG.settings.buttons[9].enabled:SetWidth(20)
 SDBG.settings.buttons[9].enabled:SetHeight(20)
 SDBG.settings.buttons[9].enabled:SetScript("OnShow", function(self)
-    if (ShaguDB_Settings.auto_plot ~= true) then
+    if (CdbSettings.auto_plot ~= true) then
         SDBG.settings.buttons[9].enabled:SetChecked(false);
     else
         SDBG.settings.buttons[9].enabled:SetChecked(true);
@@ -824,7 +824,7 @@ SDBG.settings.buttons[9].enabled:SetScript("OnShow", function(self)
 end)
 SDBG.settings.buttons[9].enabled:SetScript("OnClick", function(self)
     ShaguDB_SwitchSetting("auto_plot");
-    if (ShaguDB_Settings.auto_plot ~= true) then
+    if (CdbSettings.auto_plot ~= true) then
         SDBG.settings.buttons[9].enabled:SetChecked(false);
     else
         SDBG.settings.buttons[9].enabled:SetChecked(true);
@@ -851,7 +851,7 @@ function SDBG.HideButtons()
 end
 function SDBG:SearchSpawn(search)
     local spawnCount = 1;
-    local database = SDBG_Favs["spawn"]
+    local database = CdbFavourites["spawn"]
     if strlen(search) > 2 then database = npcData end
     for id, spawn in pairs(database) do
         local npc;
@@ -937,19 +937,19 @@ function SDBG:SearchSpawn(search)
                 SDBG.spawn.buttons[spawnCount].fav:SetHighlightTexture(nil)
                 SDBG.spawn.buttons[spawnCount].fav.icon = SDBG.spawn.buttons[spawnCount].fav:CreateTexture(nil,"BACKGROUND")
                 SDBG.spawn.buttons[spawnCount].fav.icon:SetTexture("Interface\\AddOns\\ShaguDB\\img\\fav")
-                if SDBG_Favs["spawn"][id] then
+                if CdbFavourites["spawn"][id] then
                     SDBG.spawn.buttons[spawnCount].fav.icon:SetVertexColor(1,1,1,1)
                 else
                     SDBG.spawn.buttons[spawnCount].fav.icon:SetVertexColor(0,0,0,1)
                 end
                 SDBG.spawn.buttons[spawnCount].fav.icon:SetAllPoints(SDBG.spawn.buttons[spawnCount].fav)
                 SDBG.spawn.buttons[spawnCount].fav:SetScript("OnClick", function(self)
-                if SDBG_Favs["spawn"][this:GetParent().spawnId] then
-                    SDBG_Favs["spawn"][this:GetParent().spawnId] = nil
+                if CdbFavourites["spawn"][this:GetParent().spawnId] then
+                    CdbFavourites["spawn"][this:GetParent().spawnId] = nil
                     this.icon:SetVertexColor(0,0,0,1)
                     SDBG.inputField:updateSearch()
                 else
-                    SDBG_Favs["spawn"][this:GetParent().spawnId] = true
+                    CdbFavourites["spawn"][this:GetParent().spawnId] = true
                     this.icon:SetVertexColor(1,1,1,1)
                 end
             end)
@@ -966,7 +966,7 @@ function SDBG:SearchSpawn(search)
 end
 function SDBG:SearchObject(search)
     local objectCount = 1;
-    local database = SDBG_Favs["object"]
+    local database = CdbFavourites["object"]
     if strlen(search) > 2 then database = objData end
     for id, object in pairs(database) do
         local obj;
@@ -1048,19 +1048,19 @@ function SDBG:SearchObject(search)
                 SDBG.object.buttons[objectCount].fav:SetHighlightTexture(nil)
                 SDBG.object.buttons[objectCount].fav.icon = SDBG.object.buttons[objectCount].fav:CreateTexture(nil,"BACKGROUND")
                 SDBG.object.buttons[objectCount].fav.icon:SetTexture("Interface\\AddOns\\ShaguDB\\img\\fav")
-                if SDBG_Favs["object"][id] then
+                if CdbFavourites["object"][id] then
                     SDBG.object.buttons[objectCount].fav.icon:SetVertexColor(1,1,1,1)
                 else
                     SDBG.object.buttons[objectCount].fav.icon:SetVertexColor(0,0,0,1)
                 end
                 SDBG.object.buttons[objectCount].fav.icon:SetAllPoints(SDBG.object.buttons[objectCount].fav)
                 SDBG.object.buttons[objectCount].fav:SetScript("OnClick", function(self)
-                    if SDBG_Favs["object"][this:GetParent().objectId] then
-                        SDBG_Favs["object"][this:GetParent().objectId] = nil
+                    if CdbFavourites["object"][this:GetParent().objectId] then
+                        CdbFavourites["object"][this:GetParent().objectId] = nil
                         this.icon:SetVertexColor(0,0,0,1)
                         SDBG.inputField:updateSearch()
                     else
-                        SDBG_Favs["object"][this:GetParent().objectId] = true
+                        CdbFavourites["object"][this:GetParent().objectId] = true
                         this.icon:SetVertexColor(1,1,1,1)
                     end
                 end)
@@ -1077,7 +1077,7 @@ function SDBG:SearchObject(search)
 end
 function SDBG:SearchItem(search)
     local itemCount = 1;
-    local database = SDBG_Favs["item"]
+    local database = CdbFavourites["item"]
     if strlen(search) > 2 then database = itemData end
     for id, item in pairs(database) do
         local itm;
@@ -1226,19 +1226,19 @@ function SDBG:SearchItem(search)
                 SDBG.item.buttons[itemCount].fav:SetHighlightTexture(nil)
                 SDBG.item.buttons[itemCount].fav.icon = SDBG.item.buttons[itemCount].fav:CreateTexture(nil,"BACKGROUND")
                 SDBG.item.buttons[itemCount].fav.icon:SetTexture("Interface\\AddOns\\ShaguDB\\img\\fav")
-                if SDBG_Favs["item"][id] then
+                if CdbFavourites["item"][id] then
                     SDBG.item.buttons[itemCount].fav.icon:SetVertexColor(1,1,1,1)
                 else
                     SDBG.item.buttons[itemCount].fav.icon:SetVertexColor(0,0,0,1)
                 end
                 SDBG.item.buttons[itemCount].fav.icon:SetAllPoints(SDBG.item.buttons[itemCount].fav)
                 SDBG.item.buttons[itemCount].fav:SetScript("OnClick", function(self)
-                    if SDBG_Favs["item"][this:GetParent().itemId] then
-                        SDBG_Favs["item"][this:GetParent().itemId] = nil
+                    if CdbFavourites["item"][this:GetParent().itemId] then
+                        CdbFavourites["item"][this:GetParent().itemId] = nil
                         this.icon:SetVertexColor(0,0,0,1)
                         SDBG.inputField:updateSearch()
                     else
-                        SDBG_Favs["item"][this:GetParent().itemId] = true
+                        CdbFavourites["item"][this:GetParent().itemId] = true
                         this.icon:SetVertexColor(1,1,1,1)
                     end
                 end)
@@ -1255,7 +1255,7 @@ function SDBG:SearchItem(search)
 end
 function SDBG:SearchQuest(search)
     local questCount = 1;
-    local database = SDBG_Favs["quest"]
+    local database = CdbFavourites["quest"]
     if strlen(search) > 2 then database = qData end
     for id, quest in pairs(database) do
         local q;
@@ -1367,19 +1367,19 @@ function SDBG:SearchQuest(search)
                 SDBG.quest.buttons[questCount].fav:SetHighlightTexture(nil)
                 SDBG.quest.buttons[questCount].fav.icon = SDBG.quest.buttons[questCount].fav:CreateTexture(nil,"BACKGROUND")
                 SDBG.quest.buttons[questCount].fav.icon:SetTexture("Interface\\AddOns\\ShaguDB\\img\\fav")
-                if SDBG_Favs["quest"][id] then
+                if CdbFavourites["quest"][id] then
                     SDBG.quest.buttons[questCount].fav.icon:SetVertexColor(1,1,1,1)
                 else
                     SDBG.quest.buttons[questCount].fav.icon:SetVertexColor(0,0,0,1)
                 end
                 SDBG.quest.buttons[questCount].fav.icon:SetAllPoints(SDBG.quest.buttons[questCount].fav)
                 SDBG.quest.buttons[questCount].fav:SetScript("OnClick", function(self)
-                    if SDBG_Favs["quest"][this:GetParent().questId] then
-                        SDBG_Favs["quest"][this:GetParent().questId] = nil
+                    if CdbFavourites["quest"][this:GetParent().questId] then
+                        CdbFavourites["quest"][this:GetParent().questId] = nil
                         this.icon:SetVertexColor(0,0,0,1)
                         SDBG.inputField:updateSearch()
                     else
-                        SDBG_Favs["quest"][this:GetParent().questId] = true
+                        CdbFavourites["quest"][this:GetParent().questId] = true
                         this.icon:SetVertexColor(1,1,1,1)
                     end
                 end)
@@ -1404,16 +1404,16 @@ function SDBG:SearchQuest(search)
                 SDBG.quest.buttons[questCount].finished:SetPoint("RIGHT", -25, 0)
                 SDBG.quest.buttons[questCount].finished:SetWidth(20)
                 SDBG.quest.buttons[questCount].finished:SetHeight(20)
-                if (ShaguDB_FinishedQuests[id] ~= true) then
+                if (CdbFinishedQuests[id] ~= true) then
                     SDBG.quest.buttons[questCount].finished:SetChecked(false);
                 else
                     SDBG.quest.buttons[questCount].finished:SetChecked(true);
                 end
                 SDBG.quest.buttons[questCount].finished:SetScript("OnClick", function(self)
-                    if (ShaguDB_FinishedQuests[this.questId] == true) then
-                        ShaguDB_FinishedQuests[this.questId] = nil;
+                    if (CdbFinishedQuests[this.questId] == true) then
+                        CdbFinishedQuests[this.questId] = nil;
                     else
-                        ShaguDB_FinishedQuests[this.questId] = true;
+                        CdbFinishedQuests[this.questId] = true;
                     end
                 end)
                 SDBG.quest.buttons[questCount].finished:SetScript("OnEnter", function(self)
