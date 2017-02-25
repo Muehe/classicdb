@@ -398,17 +398,17 @@ function ShaguDB_Init()
 
     -- Hook buttons for abandoning quests.
     -- Credit for this approach goes to Questie: https://github.com/AeroScripts/QuestieDev
-    QuestAbandonOnAccept = StaticPopupDialogs["ABANDON_QUEST"].OnAccept;
+    CdbQuestAbandonOnAccept = StaticPopupDialogs["ABANDON_QUEST"].OnAccept;
     StaticPopupDialogs["ABANDON_QUEST"].OnAccept = function()
         ShaguDB_QuestAbandon = GetAbandonQuestName();
         ShaguDB_Debug_Print(4, "Abandon", ShaguDB_QuestAbandon);
-        QuestAbandonOnAccept();
+        CdbQuestAbandonOnAccept();
     end
-    QuestAbandonWithItemsOnAccept = StaticPopupDialogs["ABANDON_QUEST_WITH_ITEMS"].OnAccept;
+    CdbQuestAbandonWithItemsOnAccept = StaticPopupDialogs["ABANDON_QUEST_WITH_ITEMS"].OnAccept;
     StaticPopupDialogs["ABANDON_QUEST_WITH_ITEMS"].OnAccept = function()
         ShaguDB_QuestAbandon = GetAbandonQuestName();
         ShaguDB_Debug_Print(4, "Abandon", ShaguDB_QuestAbandon);
-        QuestAbandonOnAccept();
+        CdbQuestAbandonOnAccept();
     end
 
     -- Create the /shagu SlashCommand
