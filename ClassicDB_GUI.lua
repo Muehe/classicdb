@@ -1,14 +1,14 @@
 local backdrop = {
-    bgFile = "Interface\\AddOns\\ShaguDB\\img\\background",
+    bgFile = "Interface\\AddOns\\ClassicDB\\img\\background",
     tile = true,
     tileSize = 8,
-    edgeFile = "Interface\\AddOns\\ShaguDB\\img\\border",
+    edgeFile = "Interface\\AddOns\\ClassicDB\\img\\border",
     edgeSize = 8,
     insets = {left = 0, right = 0, top = 0, bottom = 0},
 }
 
 local backdrop_noborder = {
-    bgFile = "Interface\\AddOns\\ShaguDB\\img\\background",
+    bgFile = "Interface\\AddOns\\ClassicDB\\img\\background",
     tile = true,
     tileSize = 8,
     insets = {left = 0, right = 0, top = 0, bottom = 0},
@@ -117,7 +117,7 @@ SDBG.minimapButton.overlay:SetPoint('TOPLEFT', 0,0)
 SDBG.minimapButton.icon = SDBG.minimapButton:CreateTexture(nil, 'BACKGROUND')
 SDBG.minimapButton.icon:SetWidth(20)
 SDBG.minimapButton.icon:SetHeight(20)
-SDBG.minimapButton.icon:SetTexture('Interface\\AddOns\\ShaguDB\\symbols\\sq')
+SDBG.minimapButton.icon:SetTexture('Interface\\AddOns\\ClassicDB\\symbols\\sq')
 SDBG.minimapButton.icon:SetTexCoord(0.05, 0.95, 0.05, 0.95)
 SDBG.minimapButton.icon:SetPoint('CENTER',1,1)
 
@@ -911,7 +911,7 @@ function SDBG:SearchSpawn(search)
                     SDBG.spawn.buttons[spawnCount].horde:SetWidth(20)
                     SDBG.spawn.buttons[spawnCount].horde:SetHeight(20)
                     SDBG.spawn.buttons[spawnCount].horde.icon = SDBG.spawn.buttons[spawnCount].horde:CreateTexture(nil,"BACKGROUND")
-                    SDBG.spawn.buttons[spawnCount].horde.icon:SetTexture("Interface\\AddOns\\ShaguDB\\symbols\\icon_horde")
+                    SDBG.spawn.buttons[spawnCount].horde.icon:SetTexture("Interface\\AddOns\\ClassicDB\\symbols\\icon_horde")
                     SDBG.spawn.buttons[spawnCount].horde.icon:SetAllPoints(SDBG.spawn.buttons[spawnCount].horde)
                 end
                 if strfind(faction, "A") and faction ~= "HA" then
@@ -924,7 +924,7 @@ function SDBG:SearchSpawn(search)
                     SDBG.spawn.buttons[spawnCount].alliance:SetWidth(20)
                     SDBG.spawn.buttons[spawnCount].alliance:SetHeight(20)
                     SDBG.spawn.buttons[spawnCount].alliance.icon = SDBG.spawn.buttons[spawnCount].alliance:CreateTexture(nil,"BACKGROUND")
-                    SDBG.spawn.buttons[spawnCount].alliance.icon:SetTexture("Interface\\AddOns\\ShaguDB\\symbols\\icon_alliance")
+                    SDBG.spawn.buttons[spawnCount].alliance.icon:SetTexture("Interface\\AddOns\\ClassicDB\\symbols\\icon_alliance")
                     SDBG.spawn.buttons[spawnCount].alliance.icon:SetAllPoints(SDBG.spawn.buttons[spawnCount].alliance)
                 end
                 -- show fav button
@@ -936,7 +936,7 @@ function SDBG:SearchSpawn(search)
                 SDBG.spawn.buttons[spawnCount].fav:SetPushedTexture(nil)
                 SDBG.spawn.buttons[spawnCount].fav:SetHighlightTexture(nil)
                 SDBG.spawn.buttons[spawnCount].fav.icon = SDBG.spawn.buttons[spawnCount].fav:CreateTexture(nil,"BACKGROUND")
-                SDBG.spawn.buttons[spawnCount].fav.icon:SetTexture("Interface\\AddOns\\ShaguDB\\img\\fav")
+                SDBG.spawn.buttons[spawnCount].fav.icon:SetTexture("Interface\\AddOns\\ClassicDB\\img\\fav")
                 if CdbFavourites["spawn"][id] then
                     SDBG.spawn.buttons[spawnCount].fav.icon:SetVertexColor(1,1,1,1)
                 else
@@ -1022,7 +1022,7 @@ function SDBG:SearchObject(search)
                     SDBG.object.buttons[objectCount].horde:SetWidth(20)
                     SDBG.object.buttons[objectCount].horde:SetHeight(20)
                     SDBG.object.buttons[objectCount].horde.icon = SDBG.object.buttons[objectCount].horde:CreateTexture(nil,"BACKGROUND")
-                    SDBG.object.buttons[objectCount].horde.icon:SetTexture("Interface\\AddOns\\ShaguDB\\symbols\\icon_horde")
+                    SDBG.object.buttons[objectCount].horde.icon:SetTexture("Interface\\AddOns\\ClassicDB\\symbols\\icon_horde")
                     SDBG.object.buttons[objectCount].horde.icon:SetAllPoints(SDBG.object.buttons[objectCount].horde)
                 end
                 if strfind(faction, "A") and faction ~= "HA" then
@@ -1035,7 +1035,7 @@ function SDBG:SearchObject(search)
                     SDBG.object.buttons[objectCount].alliance:SetWidth(20)
                     SDBG.object.buttons[objectCount].alliance:SetHeight(20)
                     SDBG.object.buttons[objectCount].alliance.icon = SDBG.object.buttons[objectCount].alliance:CreateTexture(nil,"BACKGROUND")
-                    SDBG.object.buttons[objectCount].alliance.icon:SetTexture("Interface\\AddOns\\ShaguDB\\symbols\\icon_alliance")
+                    SDBG.object.buttons[objectCount].alliance.icon:SetTexture("Interface\\AddOns\\ClassicDB\\symbols\\icon_alliance")
                     SDBG.object.buttons[objectCount].alliance.icon:SetAllPoints(SDBG.object.buttons[objectCount].alliance)
                 end
                 -- show fav button
@@ -1047,7 +1047,7 @@ function SDBG:SearchObject(search)
                 SDBG.object.buttons[objectCount].fav:SetPushedTexture(nil)
                 SDBG.object.buttons[objectCount].fav:SetHighlightTexture(nil)
                 SDBG.object.buttons[objectCount].fav.icon = SDBG.object.buttons[objectCount].fav:CreateTexture(nil,"BACKGROUND")
-                SDBG.object.buttons[objectCount].fav.icon:SetTexture("Interface\\AddOns\\ShaguDB\\img\\fav")
+                SDBG.object.buttons[objectCount].fav.icon:SetTexture("Interface\\AddOns\\ClassicDB\\img\\fav")
                 if CdbFavourites["object"][id] then
                     SDBG.object.buttons[objectCount].fav.icon:SetVertexColor(1,1,1,1)
                 else
@@ -1159,7 +1159,7 @@ function SDBG:SearchItem(search)
                     SDBG.item.buttons[itemCount].lootNpc:SetPushedTexture(nil)
                     SDBG.item.buttons[itemCount].lootNpc:SetHighlightTexture(nil)
                     SDBG.item.buttons[itemCount].lootNpc.icon = SDBG.item.buttons[itemCount].lootNpc:CreateTexture(nil,"BACKGROUND")
-                    SDBG.item.buttons[itemCount].lootNpc.icon:SetTexture("Interface\\AddOns\\ShaguDB\\symbols\\icon_npc")
+                    SDBG.item.buttons[itemCount].lootNpc.icon:SetTexture("Interface\\AddOns\\ClassicDB\\symbols\\icon_npc")
                     SDBG.item.buttons[itemCount].lootNpc.icon:SetAllPoints(SDBG.item.buttons[itemCount].lootNpc)
                     SDBG.item.buttons[itemCount].lootNpc:SetScript("OnClick", function(self)
                         ShaguDB_MAP_NOTES = {};
@@ -1182,7 +1182,7 @@ function SDBG:SearchItem(search)
                     SDBG.item.buttons[itemCount].lootObj:SetPushedTexture(nil)
                     SDBG.item.buttons[itemCount].lootObj:SetHighlightTexture(nil)
                     SDBG.item.buttons[itemCount].lootObj.icon = SDBG.item.buttons[itemCount].lootObj:CreateTexture(nil,"BACKGROUND")
-                    SDBG.item.buttons[itemCount].lootObj.icon:SetTexture("Interface\\AddOns\\ShaguDB\\symbols\\icon_object")
+                    SDBG.item.buttons[itemCount].lootObj.icon:SetTexture("Interface\\AddOns\\ClassicDB\\symbols\\icon_object")
                     SDBG.item.buttons[itemCount].lootObj.icon:SetAllPoints(SDBG.item.buttons[itemCount].lootObj)
                     SDBG.item.buttons[itemCount].lootObj:SetScript("OnClick", function(self)
                         ShaguDB_MAP_NOTES = {};
@@ -1207,7 +1207,7 @@ function SDBG:SearchItem(search)
                     SDBG.item.buttons[itemCount].vendor:SetPushedTexture(nil)
                     SDBG.item.buttons[itemCount].vendor:SetHighlightTexture(nil)
                     SDBG.item.buttons[itemCount].vendor.icon = SDBG.item.buttons[itemCount].vendor:CreateTexture(nil,"BACKGROUND")
-                    SDBG.item.buttons[itemCount].vendor.icon:SetTexture("Interface\\AddOns\\ShaguDB\\symbols\\icon_vendor")
+                    SDBG.item.buttons[itemCount].vendor.icon:SetTexture("Interface\\AddOns\\ClassicDB\\symbols\\icon_vendor")
                     SDBG.item.buttons[itemCount].vendor.icon:SetAllPoints(SDBG.item.buttons[itemCount].vendor)
                     SDBG.item.buttons[itemCount].vendor:SetScript("OnClick", function(self)
                         ShaguDB_MAP_NOTES = {};
@@ -1225,7 +1225,7 @@ function SDBG:SearchItem(search)
                 SDBG.item.buttons[itemCount].fav:SetPushedTexture(nil)
                 SDBG.item.buttons[itemCount].fav:SetHighlightTexture(nil)
                 SDBG.item.buttons[itemCount].fav.icon = SDBG.item.buttons[itemCount].fav:CreateTexture(nil,"BACKGROUND")
-                SDBG.item.buttons[itemCount].fav.icon:SetTexture("Interface\\AddOns\\ShaguDB\\img\\fav")
+                SDBG.item.buttons[itemCount].fav.icon:SetTexture("Interface\\AddOns\\ClassicDB\\img\\fav")
                 if CdbFavourites["item"][id] then
                     SDBG.item.buttons[itemCount].fav.icon:SetVertexColor(1,1,1,1)
                 else
@@ -1341,7 +1341,7 @@ function SDBG:SearchQuest(search)
                     SDBG.quest.buttons[questCount].horde:SetWidth(20)
                     SDBG.quest.buttons[questCount].horde:SetHeight(20)
                     SDBG.quest.buttons[questCount].horde.icon = SDBG.quest.buttons[questCount].horde:CreateTexture(nil,"BACKGROUND")
-                    SDBG.quest.buttons[questCount].horde.icon:SetTexture("Interface\\AddOns\\ShaguDB\\symbols\\icon_horde")
+                    SDBG.quest.buttons[questCount].horde.icon:SetTexture("Interface\\AddOns\\ClassicDB\\symbols\\icon_horde")
                     SDBG.quest.buttons[questCount].horde.icon:SetAllPoints(SDBG.quest.buttons[questCount].horde)
                 end
                 if strfind(faction, "A") and faction ~= "HA" then
@@ -1354,7 +1354,7 @@ function SDBG:SearchQuest(search)
                     SDBG.quest.buttons[questCount].alliance:SetWidth(20)
                     SDBG.quest.buttons[questCount].alliance:SetHeight(20)
                     SDBG.quest.buttons[questCount].alliance.icon = SDBG.quest.buttons[questCount].alliance:CreateTexture(nil,"BACKGROUND")
-                    SDBG.quest.buttons[questCount].alliance.icon:SetTexture("Interface\\AddOns\\ShaguDB\\symbols\\icon_alliance")
+                    SDBG.quest.buttons[questCount].alliance.icon:SetTexture("Interface\\AddOns\\ClassicDB\\symbols\\icon_alliance")
                     SDBG.quest.buttons[questCount].alliance.icon:SetAllPoints(SDBG.quest.buttons[questCount].alliance)
                 end
                 -- show fav button
@@ -1366,7 +1366,7 @@ function SDBG:SearchQuest(search)
                 SDBG.quest.buttons[questCount].fav:SetPushedTexture(nil)
                 SDBG.quest.buttons[questCount].fav:SetHighlightTexture(nil)
                 SDBG.quest.buttons[questCount].fav.icon = SDBG.quest.buttons[questCount].fav:CreateTexture(nil,"BACKGROUND")
-                SDBG.quest.buttons[questCount].fav.icon:SetTexture("Interface\\AddOns\\ShaguDB\\img\\fav")
+                SDBG.quest.buttons[questCount].fav.icon:SetTexture("Interface\\AddOns\\ClassicDB\\img\\fav")
                 if CdbFavourites["quest"][id] then
                     SDBG.quest.buttons[questCount].fav.icon:SetVertexColor(1,1,1,1)
                 else

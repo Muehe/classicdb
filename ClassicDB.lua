@@ -94,31 +94,31 @@ function ShaguDB_Event(event, ...)
         })
         Cartographer_Notes:RegisterIcon("QuestionMark", {
             text = "QuestionMark",
-            path = "Interface\\AddOns\\ShaguDB\\symbols\\complete",
+            path = "Interface\\AddOns\\ClassicDB\\symbols\\complete",
             width = 16,
             height = 16,
         })
         Cartographer_Notes:RegisterIcon("ExclamationMark", {
             text = "ExclamationMark",
-            path = "Interface\\AddOns\\ShaguDB\\symbols\\available",
+            path = "Interface\\AddOns\\ClassicDB\\symbols\\available",
             width = 16,
             height = 16,
         })
         Cartographer_Notes:RegisterIcon("AreaTrigger", {
             text = "AreaTrigger",
-            path = "Interface\\AddOns\\ShaguDB\\symbols\\event",
+            path = "Interface\\AddOns\\ClassicDB\\symbols\\event",
             width = 16,
             height = 16,
         })
         Cartographer_Notes:RegisterIcon("Vendor", {
             text = "Vendor",
-            path = "Interface\\AddOns\\ShaguDB\\symbols\\vendor",
+            path = "Interface\\AddOns\\ClassicDB\\symbols\\vendor",
             width = 16,
             height = 16,
         })
         Cartographer_Notes:RegisterIcon("Object", {
             text = "Vendor",
-            path = "Interface\\AddOns\\ShaguDB\\symbols\\icon_object",
+            path = "Interface\\AddOns\\ClassicDB\\symbols\\icon_object",
             width = 16,
             height = 16,
         })
@@ -126,49 +126,49 @@ function ShaguDB_Event(event, ...)
         -- Switched 3 and 7 for better contrast of colors follwing each other
         Cartographer_Notes:RegisterIcon("mk1", {
             text = "Mark 1",
-            path = "Interface\\AddOns\\ShaguDB\\symbols\\mk1",
+            path = "Interface\\AddOns\\ClassicDB\\symbols\\mk1",
             width = 16,
             height = 16,
         })
         Cartographer_Notes:RegisterIcon("mk2", {
             text = "Mark 2",
-            path = "Interface\\AddOns\\ShaguDB\\symbols\\mk2",
+            path = "Interface\\AddOns\\ClassicDB\\symbols\\mk2",
             width = 16,
             height = 16,
         })
         Cartographer_Notes:RegisterIcon("mk3", {
             text = "Mark 3",
-            path = "Interface\\AddOns\\ShaguDB\\symbols\\mk7",
+            path = "Interface\\AddOns\\ClassicDB\\symbols\\mk7",
             width = 16,
             height = 16,
         })
         Cartographer_Notes:RegisterIcon("mk4", {
             text = "Mark 4",
-            path = "Interface\\AddOns\\ShaguDB\\symbols\\mk4",
+            path = "Interface\\AddOns\\ClassicDB\\symbols\\mk4",
             width = 16,
             height = 16,
         })
         Cartographer_Notes:RegisterIcon("mk5", {
             text = "Mark 5",
-            path = "Interface\\AddOns\\ShaguDB\\symbols\\mk5",
+            path = "Interface\\AddOns\\ClassicDB\\symbols\\mk5",
             width = 16,
             height = 16,
         })
         Cartographer_Notes:RegisterIcon("mk6", {
             text = "Mark 6",
-            path = "Interface\\AddOns\\ShaguDB\\symbols\\mk6",
+            path = "Interface\\AddOns\\ClassicDB\\symbols\\mk6",
             width = 16,
             height = 16,
         })
         Cartographer_Notes:RegisterIcon("mk7", {
             text = "Mark 7",
-            path = "Interface\\AddOns\\ShaguDB\\symbols\\mk3",
+            path = "Interface\\AddOns\\ClassicDB\\symbols\\mk3",
             width = 16,
             height = 16,
         })
         Cartographer_Notes:RegisterIcon("mk8", {
             text = "Mark 8",
-            path = "Interface\\AddOns\\ShaguDB\\symbols\\mk8",
+            path = "Interface\\AddOns\\ClassicDB\\symbols\\mk8",
             width = 16,
             height = 16,
         })

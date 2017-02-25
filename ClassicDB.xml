@@ -34,7 +34,7 @@
             </OnShow>
         </Scripts>
 
-        <Backdrop bgFile="Interface\AddOns\ShaguDB\img\background" edgeFile="Interface\AddOns\ShaguDB\img\border" tile="true">
+        <Backdrop bgFile="Interface\AddOns\ClassicDB\img\background" edgeFile="Interface\AddOns\ClassicDB\img\border" tile="true">
             <BackgroundInsets>
                 <AbsInset left="0" right="0" top="0" bottom="0"/>
             </BackgroundInsets>
@@ -106,8 +106,8 @@
                     </OnEnter>
                     <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
                 </Scripts>
-                <NormalTexture file="Interface\Addons\ShaguDB\symbols\Map"/>
-                <PushedTexture file="Interface\Addons\ShaguDB\symbols\MapPushed"/>
+                <NormalTexture file="Interface\Addons\ClassicDB\symbols\Map"/>
+                <PushedTexture file="Interface\Addons\ClassicDB\symbols\MapPushed"/>
             </Button>
             <Button name="PlotAll" inherits="OptionsButtonTemplate">
                 <Size>
@@ -131,8 +131,8 @@
                     </OnEnter>
                     <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
                 </Scripts>
-                <NormalTexture file="Interface\Addons\ShaguDB\symbols\MarkMap"/>
-                <PushedTexture file="Interface\Addons\ShaguDB\symbols\MarkMapPushed"/>
+                <NormalTexture file="Interface\Addons\ClassicDB\symbols\MarkMap"/>
+                <PushedTexture file="Interface\Addons\ClassicDB\symbols\MarkMapPushed"/>
             </Button>
             <Button name="PlotSelected" inherits="OptionsButtonTemplate">
                 <Size>
@@ -156,8 +156,8 @@
                     </OnEnter>
                     <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
                 </Scripts>
-                <NormalTexture file="Interface\Addons\ShaguDB\symbols\Log"/>
-                <PushedTexture file="Interface\Addons\ShaguDB\symbols\LogPushed"/>
+                <NormalTexture file="Interface\Addons\ClassicDB\symbols\Log"/>
+                <PushedTexture file="Interface\Addons\ClassicDB\symbols\LogPushed"/>
             </Button>
             <Button name="ShowSearch" inherits="OptionsButtonTemplate">
                 <Size>
@@ -184,8 +184,8 @@
                     </OnEnter>
                     <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
                 </Scripts>
-                <NormalTexture file="Interface\Addons\ShaguDB\symbols\Glass"/>
-                <PushedTexture file="Interface\Addons\ShaguDB\symbols\GlassPushed"/>
+                <NormalTexture file="Interface\Addons\ClassicDB\symbols\Glass"/>
+                <PushedTexture file="Interface\Addons\ClassicDB\symbols\GlassPushed"/>
             </Button>
             <Button name="ToggleCartographer" inherits="OptionsButtonTemplate">
                 <Size>
@@ -206,8 +206,8 @@
                     </OnEnter>
                     <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
                 </Scripts>
-                <NormalTexture file="Interface\Addons\ShaguDB\symbols\OnOff"/>
-                <PushedTexture file="Interface\Addons\ShaguDB\symbols\OnOffPushed"/>
+                <NormalTexture file="Interface\Addons\ClassicDB\symbols\OnOff"/>
+                <PushedTexture file="Interface\Addons\ClassicDB\symbols\OnOffPushed"/>
             </Button>
             <Button name="CycleMap" inherits="OptionsButtonTemplate">
                 <Size>
@@ -228,8 +228,8 @@
                     </OnEnter>
                     <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
                 </Scripts>
-                <NormalTexture file="Interface\Addons\ShaguDB\symbols\MapCycle"/>
-                <PushedTexture file="Interface\Addons\ShaguDB\symbols\MapCyclePushed"/>
+                <NormalTexture file="Interface\Addons\ClassicDB\symbols\MapCycle"/>
+                <PushedTexture file="Interface\Addons\ClassicDB\symbols\MapCyclePushed"/>
             </Button>
             <Button name="ToggleQuestieNotes" inherits="OptionsButtonTemplate">
                 <Size>
@@ -251,8 +251,8 @@
                     </OnEnter>
                     <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
                 </Scripts>
-                <NormalTexture file="Interface\Addons\ShaguDB\symbols\OnOff"/>
-                <PushedTexture file="Interface\Addons\ShaguDB\symbols\OnOffPushed"/>
+                <NormalTexture file="Interface\Addons\ClassicDB\symbols\OnOff"/>
+                <PushedTexture file="Interface\Addons\ClassicDB\symbols\OnOffPushed"/>
             </Button>
             <CheckButton name="waypoints" inherits="OptionsCheckButtonTemplate">
                 <Size>
