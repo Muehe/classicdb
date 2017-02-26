@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-import os
-import sys
-import shutil
 import configparser
+import os
+import shutil
+import subprocess
+import sys
 
 def copyFile(sourcePath, destinationPath):
     if not os.path.isfile(sourcePath):
@@ -29,9 +30,15 @@ else:
     shutil.copytree('resources/Cartographer', enPath+'Cartographer')
     shutil.copytree('resources/img', enPath+'ClassicDB/img')
     shutil.copytree('resources/symbols', enPath+'ClassicDB/symbols')
+
     shutil.copy2('ClassicDB_GUI.lua', enPath+'ClassicDB')
+    subprocess.run(['sed',  '-i', 's/oooVersionooo/'+version+'/g', enPath+'ClassicDB/ClassicDB_GUI.lua'])
     shutil.copy2('ClassicDB.lua', enPath+'ClassicDB')
+    subprocess.run(['sed',  '-i', 's/oooVersionooo/'+version+'/g', enPath+'ClassicDB/ClassicDB.lua'])
+    subprocess.run(['sed',  '-i', 's/oooLocaleooo/enGB/g', enPath+'ClassicDB/ClassicDB.lua'])
     shutil.copy2('ClassicDB.toc', enPath+'ClassicDB')
+    subprocess.run(['sed',  '-i', 's/oooVersionooo/'+version+'/g', enPath+'ClassicDB/ClassicDB.toc'])
+    subprocess.run(['sed',  '-i', 's/oooLocaleooo/enGB/g', enPath+'ClassicDB/ClassicDB.toc'])
     shutil.copy2('ClassicDB.xml', enPath+'ClassicDB')
 
     shutil.copy2('resources/itemDB.lua_enGB', enPath+'ClassicDB/db/itemDB.lua')
@@ -51,9 +58,15 @@ else:
     shutil.copytree('resources/Cartographer', dePath+'Cartographer')
     shutil.copytree('resources/img', dePath+'ClassicDB/img')
     shutil.copytree('resources/symbols', dePath+'ClassicDB/symbols')
+
     shutil.copy2('ClassicDB_GUI.lua', dePath+'ClassicDB')
+    subprocess.run(['sed',  '-i', 's/oooVersionooo/'+version+'/g', dePath+'ClassicDB/ClassicDB_GUI.lua'])
     shutil.copy2('ClassicDB.lua', dePath+'ClassicDB')
+    subprocess.run(['sed',  '-i', 's/oooVersionooo/'+version+'/g', dePath+'ClassicDB/ClassicDB.lua'])
+    subprocess.run(['sed',  '-i', 's/oooLocaleooo/deDE/g', dePath+'ClassicDB/ClassicDB.lua'])
     shutil.copy2('ClassicDB.toc', dePath+'ClassicDB')
+    subprocess.run(['sed',  '-i', 's/oooVersionooo/'+version+'/g', dePath+'ClassicDB/ClassicDB.toc'])
+    subprocess.run(['sed',  '-i', 's/oooLocaleooo/deDE/g', dePath+'ClassicDB/ClassicDB.toc'])
     shutil.copy2('ClassicDB.xml', dePath+'ClassicDB')
 
     shutil.copy2('resources/itemDB.lua_deDE', dePath+'ClassicDB/db/itemDB.lua')
