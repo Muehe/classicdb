@@ -999,8 +999,8 @@ end -- SearchEndNPC(questID)
 function ShaguDB_SearchEndObj(questID)
     ShaguDB_Debug_Print(2, "SearchEndObj(", questID, ") called");
     for obj, data in pairs(objData) do
-        if (data["ends"] ~= nil) then
-            for line, entry in pairs(data["ends"]) do
+        if (data[DB_ENDS] ~= nil) then
+            for line, entry in pairs(data[DB_ENDS]) do
                 if (entry == questID) then return obj; end
             end
         end
@@ -1022,12 +1022,12 @@ function ShaguDB_GetQuestEndNotes(questLogID)
         if (type(qIDs) == "table") then
             local multi = 0;
             local npcIDs = {}
-            for n, qID in pairs(qIDs) do
+            for _, qID in pairs(qIDs) do
                 multi = multi + 1;
                 local npcID = ShaguDB_SearchEndNPC(qID);
                 if (npcID) then
                     local done = false;
-                    for n, IDInside in pairs(npcIDs) do
+                    for _, IDInside in pairs(npcIDs) do
                         if (npcID == IDInside) then
                             done = true;
                         end
@@ -1051,11 +1051,11 @@ function ShaguDB_GetQuestEndNotes(questLogID)
                 end
             else
                 local objIDs = {}
-                    for n, qID in pairs(qIDs) do
+                for _, qID in pairs(qIDs) do
                     local objID = ShaguDB_SearchEndObj(qID);
                     if (objID) then
                         local done = false;
-                        for n, IDInside in pairs(objIDs) do
+                        for _, IDInside in pairs(objIDs) do
                             if (objID == IDInside) then
                                 done = true;
                             end
@@ -1478,7 +1478,7 @@ function ShaguDB_GetQuestNotes(questLogID)
             title = questTitle
         end
         local itemList = {};
-        if (numObjectives ~= nil) then
+        if (numObjectives ~= nil) and (numObjectives ~= 0) then
             for i=1, numObjectives, 1 do
                 local text, objectiveType, finished = GetQuestLogLeaderBoard(i, questLogID);
                 local i, j, itemName, numItems, numNeeded = strfind(text, "(.*):%s*([%d]+)%s*/%s*([%d]+)");
