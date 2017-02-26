@@ -102,7 +102,7 @@ end)
 SDBG.minimapButton:SetScript("OnEnter", function()
     ShaguDB_Tooltip:SetOwner(SDBG.minimapButton, "ANCHOR_BOTTOMLEFT");
     ShaguDB_Tooltip:ClearLines();
-    ShaguDB_Tooltip:SetText("<LeftClick>: Toggle search window\n<RightClick>: Toggle control window\n<Shift>+<RightClick>: Reset Map and Icon Size\n<Shift>+<RightClick>: Reset and show both windows");
+    ShaguDB_Tooltip:SetText("ClassicDB\n\n<LeftClick>: Toggle search window\n<RightClick>: Toggle control window\n<Shift>+<LeftClick>: Reset Map and Icon Size\n<Shift>+<RightClick>: Reset and show both windows");
     ShaguDB_Tooltip:Show();
 end)
 SDBG.minimapButton:SetScript("OnLeave", function()
@@ -142,7 +142,7 @@ SDBG.text:ClearAllPoints()
 SDBG.text:SetPoint("TOPLEFT", 12, -12)
 SDBG.text:SetFontObject(GameFontWhite)
 SDBG.text:SetFont(STANDARD_TEXT_FONT, 16, "OUTLINE")
-SDBG.text:SetText("|cff33ffccShagu|cffffffffDB |cffaaaaaaoooVersionooo")
+SDBG.text:SetText("|cff33ffccClassic|cffffffffDB |cffaaaaaaoooVersionooo")
 
 SDBG.input = CreateFrame("Frame", nil, SDBG)
 --SDBG.input:ClearAllPoints()
@@ -442,7 +442,7 @@ SDBG.settings.buttons[1]:SetScript("OnEnter", function(self)
     ShaguDB_Tooltip:ClearLines();
     ShaguDB_Tooltip:SetText(ShaguDB_GetSetting("dbMode")..
                             "\n\n|cffffffff"..
-                            "When enabled, this option prevents ShaguDB from cleaning quests\n"..
+                            "When enabled, this option prevents ClassicDB from cleaning quests\n"..
                             "for other classes and the opposite faction from the quest DB.\n"..
                             "Not recommended for normal users, as it adds many unatainable\n"..
                             "quest starts to the map.|r");

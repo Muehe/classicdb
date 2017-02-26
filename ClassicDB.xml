@@ -101,7 +101,7 @@
                     <OnEnter>
                         ShaguDB_Tooltip:SetOwner(CleanMap, "ANCHOR_TOPLEFT");
                         ShaguDB_Tooltip:ClearLines();
-                        ShaguDB_Tooltip:SetText("Clean ShaguDB notes from map.\nDisable automatic quest start and objective plotting.");
+                        ShaguDB_Tooltip:SetText("Clean ClassicDB notes from map.\nDisables automatic quest start and objective plotting.");
                         ShaguDB_Tooltip:Show();
                     </OnEnter>
                     <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>

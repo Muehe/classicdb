@@ -75,7 +75,7 @@ function ShaguDB_Event(event, ...)
     if (event == "PLAYER_LOGIN") then
         if (Cartographer_Notes ~= nil) then
             ShaguDBDB = {}; ShaguDBDBH = {};
-            Cartographer_Notes:RegisterNotesDatabase("ShaguDB",ShaguDBDB,ShaguDBDBH);
+            Cartographer_Notes:RegisterNotesDatabase("ClassicDB",ShaguDBDB,ShaguDBDBH);
             ShaguDB_Debug_Print(1, "ShaguDB: Cartographer Database Registered.");
         end
 
@@ -250,7 +250,7 @@ function ShaguDB_Event(event, ...)
         end
         fillQuestLookup();
         ShaguDB_Frame:Show();
-        ShaguDB_Print("ShaguDB Loaded.");
+        ShaguDB_Print("ClassicDB Loaded.");
     elseif (event == "WORLD_MAP_UPDATE") and (WorldMapFrame:IsVisible()) and (CdbSettings.questStarts) then
         ShaguDB_Debug_Print(4, "    ", zone);
         ShaguDB_InEvent = true;
@@ -411,29 +411,29 @@ function ShaguDB_Init()
         CdbQuestAbandonOnAccept();
     end
 
-    -- Create the /shagu SlashCommand
-    SLASH_SHAGU1 = "/shagu";
-    SlashCmdList["SHAGU"] = function(input, editbox)
+    -- Create the /classicdb SlashCommand
+    --SLASH_SHAGU1 = "/classicdb";
+    SlashCmdList["CLASSICDB"] = function(input, editbox)
         local params = {};
         if (input == "" or input == "help" or input == nil) then
-            ShaguDB_Print("|cff33ff88ShaguDB|cffffffff oooVersionooo |cff00ccff[" .. UnitFactionGroup("player") .. "]|cffaaaaaa [oooLocaleooo]");
+            ShaguDB_Print("|cff33ff88ClassicDB|cffffffff oooVersionooo |cff00ccff[" .. UnitFactionGroup("player") .. "]|cffaaaaaa [oooLocaleooo]");
             ShaguDB_Print("Available Commands:");
-            ShaguDB_Print("/shagu help |cffaaaaaa This help.");
-            ShaguDB_Print("/shagu spawn <npc name> |cffaaaaaa Show NPC location on map.");
-            ShaguDB_Print("/shagu obj <object name> |cffaaaaaa Show object location on map.");
-            ShaguDB_Print("/shagu item <item name> |cffaaaaaa Show item drop info on map (includes vendors).");
-            ShaguDB_Print("/shagu min [0, 101] |cffaaaaaa Minimum drop chance for items. 0 shows all, 101 none.");
-            ShaguDB_Print("/shagu starts |cffaaaaaa Toggle: Automatically show quest starts on changing map.");
-            ShaguDB_Print("/shagu quests <zone name> |cffaaaaaa - Show quest starts for a zone (the current one if no zone name is given).");
-            ShaguDB_Print("/shagu hide <quest ID> |cffaaaaaa Prevent the given quest ID from being plotted to quest starts.");
-            ShaguDB_Print("/shagu quest <quest name | quest ID> |cffaaaaaa - Show all points for quest, by either name or ID (name is case-sensitiv).");
-            ShaguDB_Print("/shagu clean |cffaaaaaa - Clean the map. Disable automatic quest start and objective plotting.");
-            ShaguDB_Print("/shagu minimap |cffaaaaaa - Toggle: Minimap icon.");
-            ShaguDB_Print("/shagu auto |cffaaaaaa Toggle: Automatically plot uncompleted objectives on map.");
-            ShaguDB_Print("/shagu waypoint |cffaaaaaa Toggle: Plot waypoints on map.");
-            ShaguDB_Print("/shagu db |cffaaaaaa - Show database interface.");
-            ShaguDB_Print("/shagu reset |cffaaaaaa Reset positon of the Interface.");
-            ShaguDB_Print("/shagu clear |cffaaaaaa !THIS RELOADS THE UI! Delete ShaguDB Settings.");
+            ShaguDB_Print("/classicdb help |cffaaaaaa This help.");
+            ShaguDB_Print("/classicdb spawn <npc name> |cffaaaaaa Show NPC location on map.");
+            ShaguDB_Print("/classicdb obj <object name> |cffaaaaaa Show object location on map.");
+            ShaguDB_Print("/classicdb item <item name> |cffaaaaaa Show item drop info on map (includes vendors).");
+            ShaguDB_Print("/classicdb min [0, 101] |cffaaaaaa Minimum drop chance for items. 0 shows all, 101 none.");
+            ShaguDB_Print("/classicdb starts |cffaaaaaa Toggle: Automatically show quest starts on changing map.");
+            ShaguDB_Print("/classicdb quests <zone name> |cffaaaaaa - Show quest starts for a zone (the current one if no zone name is given).");
+            ShaguDB_Print("/classicdb hide <quest ID> |cffaaaaaa Prevent the given quest ID from being plotted to quest starts.");
+            ShaguDB_Print("/classicdb quest <quest name | quest ID> |cffaaaaaa - Show all points for quest, by either name or ID (name is case-sensitiv).");
+            ShaguDB_Print("/classicdb clean |cffaaaaaa - Clean the map. Disable automatic quest start and objective plotting.");
+            ShaguDB_Print("/classicdb minimap |cffaaaaaa - Toggle: Minimap icon.");
+            ShaguDB_Print("/classicdb auto |cffaaaaaa Toggle: Automatically plot uncompleted objectives on map.");
+            ShaguDB_Print("/classicdb waypoint |cffaaaaaa Toggle: Plot waypoints on map.");
+            ShaguDB_Print("/classicdb db |cffaaaaaa - Show database interface.");
+            ShaguDB_Print("/classicdb reset |cffaaaaaa Reset positon of the Interface.");
+            ShaguDB_Print("/classicdb clear |cffaaaaaa !THIS RELOADS THE UI! Delete ShaguDB Settings.");
             DEFAULT_CHAT_FRAME:AddMessage("\n");
         end
 
@@ -607,9 +607,9 @@ end -- NextCMark()
 function ShaguDB_CleanMap()
     ShaguDB_Debug_Print(2, "CleanMap() called");
     if (Cartographer_Notes ~= nil) then
-        Cartographer_Notes:UnregisterNotesDatabase("ShaguDB");
+        Cartographer_Notes:UnregisterNotesDatabase("ClassicDB");
         ShaguDBDB = {}; ShaguDBDBH = {};
-        Cartographer_Notes:RegisterNotesDatabase("ShaguDB",ShaguDBDB,ShaguDBDBH);
+        Cartographer_Notes:RegisterNotesDatabase("ClassicDB",ShaguDBDB,ShaguDBDBH);
     end
     ShaguDB_MARKED_ZONES = {};
     ShaguDB_MARKED_ZONE = "";
@@ -733,23 +733,23 @@ function ShaguDB_PlotNotesOnMap()
         end
         if (Cartographer_Notes ~= nil) and (not instance) then
             if (nData[6] == 0) then
-                Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, "NPC", "ShaguDB", 'title', nData[4], 'info', nData[5]);
+                Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, "NPC", "ClassicDB", 'title', nData[4], 'info', nData[5]);
             elseif (nData[6] == 1) then
-                Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, "Diamond", "ShaguDB", 'title', nData[4], 'info', nData[5]);
+                Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, "Diamond", "ClassicDB", 'title', nData[4], 'info', nData[5]);
             elseif (nData[6] == 2) then
-                Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, "QuestionMark", "ShaguDB", 'title', nData[4], 'info', nData[5]);
+                Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, "QuestionMark", "ClassicDB", 'title', nData[4], 'info', nData[5]);
             elseif (nData[6] == 3) then
-                Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, "Waypoint", "ShaguDB", 'title', nData[4], 'info', nData[5]);
+                Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, "Waypoint", "ClassicDB", 'title', nData[4], 'info', nData[5]);
             elseif (nData[6] == 4) then
-                Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, "Cross", "ShaguDB", 'title', nData[4], 'info', nData[5]);
+                Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, "Cross", "ClassicDB", 'title', nData[4], 'info', nData[5]);
             elseif (nData[6] == 5) then
-                Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, "ExclamationMark", "ShaguDB", 'title', nData[4], 'info', nData[5]);
+                Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, "ExclamationMark", "ClassicDB", 'title', nData[4], 'info', nData[5]);
             elseif (nData[6] == 6) then
-                Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, "Vendor", "ShaguDB", 'title', nData[4], 'info', nData[5]);
+                Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, "Vendor", "ClassicDB", 'title', nData[4], 'info', nData[5]);
             elseif (nData[6] == 7) then
-                Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, "AreaTrigger", "ShaguDB", 'title', nData[4], 'info', nData[5]);
+                Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, "AreaTrigger", "ClassicDB", 'title', nData[4], 'info', nData[5]);
             elseif (nData[6] ~= nil) then
-                Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, nData[6], "ShaguDB", 'title', nData[4], 'info', nData[5]);
+                Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, nData[6], "ClassicDB", 'title', nData[4], 'info', nData[5]);
             end
         end
         if (nData[1] ~= nil) and (not instance) then
