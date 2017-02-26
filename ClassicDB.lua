@@ -1,6 +1,4 @@
--- clear variables
-ShaguDB_QuestZoneInfo = {}; -- unused?
-cMark = "mk1";
+-- Global Variables
 --[[
 0 = off
 1 = standard debug notes
@@ -9,30 +7,30 @@ cMark = "mk1";
 8 = advanced
 16 = other event debug attempt
 --]]
-ShaguDB_Debug = 16;
+CdbDebug = 16;
 -- This table is used to prepare new notes.
 -- It holds npcs, objects, items and marked area triggers.
-ShaguDB_PREPARE = {{},{},{},{}};
+CdbPrepare = {{},{},{},{}};
 -- This table holds a copy of the above table, in case it gets updated. Maybe redundant at the moment.
-ShaguDB_MARKED = {{},{},{},{}};
+CdbCurrentNotes = {{},{},{},{}};
 -- List of marked zones (Format: ["zoneName"] = true/false)
-ShaguDB_MARKED_ZONES = {};
+CdbMarkedZones = {};
 -- Currently used zone for CycleMarkedZones().
-ShaguDB_MARKED_ZONE = "";
+CdbCycleZone = "";
 -- Which zones have quest starts marked.
-ShaguDB_QUEST_START_ZONES = {};
+CdbQuestStartZones = {};
 -- Used to prepare notes for being sent to Cartographer.
-ShaguDB_MAP_NOTES = {};
+CdbMapNotes = {};
 -- Number of current notes gets saved here (not counting quest starts).
-ShaguDB_Notes = 0;
+CdbLastNoteCount = 0;
 -- This variable is used to achieve different behaviour for quest start notes.
-ShaguDB_InEvent = false;
+CdbInEvent = false;
 -- These variables are used to determine types of Quest Log events (accept/abandon/finish).
-ShaguDB_QuestLogFootprint = {{},{}};
-ShaguDB_QuestAbandon = '';
+CdbQuestLogFootprint = {{},{}};
+CdbQuestAbandon = '';
 -- For debugging quest progress events
-ShaguDB_WatchUpdate = false;
-ShaguDB_WatchQuestLogID = 0;
+CdbWatchUpdate = false;
+CdbWatchUpdateQuestLogId = 0;
 
 -- DB keys
 DB_NAME, DB_NPC, NOTE_TITLE = 1, 1, 1;
@@ -52,31 +50,31 @@ DB_SUB_QUESTS = 14;
 DB_QUEST_GROUP = 15;
 DB_EXCLUSIVE_QUEST_GROUP = 16;
 
--- functions for the event handeling and control frame
+-- functions for event handeling and control gui
 
-function ShaguDB_OnMouseDown(arg1)
+function CdbOnMouseDown(arg1)
     if (arg1 == "LeftButton") then
-        ShaguDB_Frame:StartMoving();
+        CdbControlGui:StartMoving();
     end
 end -- OnMouseDown(arg1)
 
-function ShaguDB_OnMouseUp(arg1)
+function CdbOnMouseUp(arg1)
     if (arg1 == "LeftButton") then
-        ShaguDB_Frame:StopMovingOrSizing();
+        CdbControlGui:StopMovingOrSizing();
     end
 end -- OnMouseUp(arg1)
 
-function ShaguDB_OnFrameShow()
+function CdbOnFrameShow()
     --
 end -- OnFrameShow()
 
-function ShaguDB_Event(event, ...)
-    ShaguDB_Debug_Print(20, "Event() called", event, arg1, arg2, arg3);
+function CdbOnEvent(event, ...)
+    CdbDebugPrint(20, "Event() called", event, arg1, arg2, arg3);
     if (event == "PLAYER_LOGIN") then
         if (Cartographer_Notes ~= nil) then
-            ShaguDBDB = {}; ShaguDBDBH = {};
-            Cartographer_Notes:RegisterNotesDatabase("ClassicDB",ShaguDBDB,ShaguDBDBH);
-            ShaguDB_Debug_Print(1, "ShaguDB: Cartographer Database Registered.");
+            ClassicDBDB = {}; ClassicDBDBH = {};
+            Cartographer_Notes:RegisterNotesDatabase("ClassicDB",ClassicDBDB,ClassicDBDBH);
+            CdbDebugPrint(1, "ClassicDB: Cartographer Database Registered.");
         end
 
         -- load symbols
@@ -173,10 +171,10 @@ function ShaguDB_Event(event, ...)
             height = 16,
         })
 
-        if ShaguMinimapEnabled == nil then
-          ShaguMinimapEnabled = true
-        elseif ShaguMinimapEnabled == false then
-          SDBG.minimapButton:Hide()
+        if CdbMinimapEnabled == nil then
+          CdbMinimapEnabled = true
+        elseif CdbMinimapEnabled == false then
+          CdbSearchGui.minimapButton:Hide()
         end
 
         if (CdbFinishedQuests == nil) then
@@ -238,127 +236,127 @@ function ShaguDB_Event(event, ...)
         end
         if (CdbSettings.faction == "Alliance" and not CdbSettings.dbMode) then
             deleteFaction("H");
-            ShaguDB_Print("Horde data cleared.");
+            CdbPrint("Horde data cleared.");
         elseif (CdbSettings.faction == "Horde" and not CdbSettings.dbMode) then
             deleteFaction("A");
-            ShaguDB_Print("Alliance data cleared.");
+            CdbPrint("Alliance data cleared.");
         else
-            ShaguDB_Print("DB Mode active, no quest data cleared.");
+            CdbPrint("DB Mode active, no quest data cleared.");
         end
         if not CdbSettings.dbMode then
             deleteClasses();
         end
         fillQuestLookup();
-        ShaguDB_Frame:Show();
-        ShaguDB_Print("ClassicDB Loaded.");
+        CdbControlGui:Show();
+        CdbPrint("ClassicDB Loaded.");
     elseif (event == "WORLD_MAP_UPDATE") and (WorldMapFrame:IsVisible()) and (CdbSettings.questStarts) then
-        ShaguDB_Debug_Print(4, "    ", zone);
-        ShaguDB_InEvent = true;
-        ShaguDB_GetQuestStartNotes();
-        ShaguDB_InEvent = false;
+        CdbDebugPrint(4, "    ", zone);
+        CdbInEvent = true;
+        CdbGetQuestStartNotes();
+        CdbInEvent = false;
     elseif (event == "QUEST_LOG_UPDATE") then
-        local footprint = ShaguDB_GetQuestLogFootprint(); -- {footprintString, questIdTable}
+        local footprint = CdbGetQuestLogFootprint(); -- {footprintString, questIdTable}
         local count = GetNumQuestLogEntries();
-        -- NOTE: maybe ShaguDB_CompareTables(ShaguDB_QuestLogFootprint[2], footprint[2]) would catch more edge cases, making footprintString obsolete
-        if (ShaguDB_QuestLogFootprint[1] ~= footprint[1]) then
+        -- NOTE: maybe CdbCompareTables(CdbQuestLogFootprint[2], footprint[2]) would catch more edge cases, making footprintString obsolete
+        if (CdbQuestLogFootprint[1] ~= footprint[1]) then
             local added = 0;
             for k, v in pairs(footprint[2]) do
-                if ShaguDB_QuestLogFootprint[2][k] == nil then
+                if CdbQuestLogFootprint[2][k] == nil then
                     added = k;
                 end
             end
             if added ~= 0 then
-                ShaguDB_Debug_Print(4, "    Quest accepted", added);
+                CdbDebugPrint(4, "    Quest accepted", added);
                 CdbFinishedQuests[added] = false;
             end
             local removed = 0;
-            for k, v in pairs(ShaguDB_QuestLogFootprint[2]) do
+            for k, v in pairs(CdbQuestLogFootprint[2]) do
                 if footprint[2][k] == nil then
                     removed = k;
                 end
             end
             if removed ~= 0 then
                 if CdbFinishedQuests[removed] == false then
-                    ShaguDB_Debug_Print(4, "    Quest finished", removed);
+                    CdbDebugPrint(4, "    Quest finished", removed);
                     CdbFinishedQuests[removed] = true;
                 else
-                    ShaguDB_Debug_Print(4, "    Quest abandoned", removed);
+                    CdbDebugPrint(4, "    Quest abandoned", removed);
                     CdbFinishedQuests[removed] = nil;
                 end
             end
             if (CdbSettings.questStarts == true) then
-                ShaguDB_CleanMap();
+                CdbCleanMap();
             end
             if (CdbSettings.auto_plot == true) then
-                ShaguDB_InEvent = true;
-                ShaguDB_PlotAllQuests();
-                ShaguDB_InEvent = false;
+                CdbInEvent = true;
+                CdbGetAllQuestNotes();
+                CdbInEvent = false;
             end
         end
-        ShaguDB_Debug_Print(4, "    footprint", {footprint, count, change});
-        if ShaguDB_WatchUpdate == true then
-            local questTitle, level, questTag, isHeader, isCollapsed, isComplete = GetQuestLogTitle(ShaguDB_WatchQuestLogID);
-            ShaguDB_Debug_Print(16, "    title", questTitle);
-            local numObjectives = GetNumQuestLeaderBoards(ShaguDB_WatchQuestLogID);
+        CdbDebugPrint(4, "    footprint", {footprint, count, change});
+        if CdbWatchUpdate == true then
+            local questTitle, level, questTag, isHeader, isCollapsed, isComplete = GetQuestLogTitle(CdbWatchUpdateQuestLogId);
+            CdbDebugPrint(16, "    title", questTitle);
+            local numObjectives = GetNumQuestLeaderBoards(CdbWatchUpdateQuestLogId);
             if (numObjectives ~= nil) then
                 for i=1, numObjectives, 1 do
-                    local text, objectiveType, finished = GetQuestLogLeaderBoard(i, ShaguDB_WatchQuestLogID);
+                    local text, objectiveType, finished = GetQuestLogLeaderBoard(i, CdbWatchUpdateQuestLogId);
                     local i, j, itemName, numItems, numNeeded = strfind(text, "(.*):%s*([%d]+)%s*/%s*([%d]+)");
-                    ShaguDB_Debug_Print(16, "    objective, have, need", itemName, numItems, numNeeded);
+                    CdbDebugPrint(16, "    objective, have, need", itemName, numItems, numNeeded);
                 end
             end
-            ShaguDB_WatchUpdate = false;
-            ShaguDB_WatchQuestLogID = 0;
+            CdbWatchUpdate = false;
+            CdbWatchUpdateQuestLogId = 0;
         end
     elseif (event == "QUEST_WATCH_UPDATE") then
         if (CdbSettings.auto_plot == true) then
-            ShaguDB_InEvent = true;
-            ShaguDB_PlotAllQuests();
-            ShaguDB_InEvent = false;
+            CdbInEvent = true;
+            CdbGetAllQuestNotes();
+            CdbInEvent = false;
         end
         local questTitle, level, questTag, isHeader, isCollapsed, isComplete = GetQuestLogTitle(arg1);
-        ShaguDB_Debug_Print(16, "    title", questTitle);
+        CdbDebugPrint(16, "    title", questTitle);
         local numObjectives = GetNumQuestLeaderBoards(arg1);
         if (numObjectives ~= nil) then
             for i=1, numObjectives, 1 do
                 local text, objectiveType, finished = GetQuestLogLeaderBoard(i, arg1);
                 local i, j, itemName, numItems, numNeeded = strfind(text, "(.*):%s*([%d]+)%s*/%s*([%d]+)");
-                ShaguDB_Debug_Print(16, "    objective, have, need =", itemName, numItems, numNeeded);
+                CdbDebugPrint(16, "    objective, have, need =", itemName, numItems, numNeeded);
             end
         end
-        ShaguDB_WatchUpdate = true;
-        ShaguDB_WatchQuestLogID = arg1;
+        CdbWatchUpdate = true;
+        CdbWatchUpdateQuestLogId = arg1;
     elseif (event == "QUEST_PROGRESS") then
-        local footprint = ShaguDB_GetQuestLogFootprint();
+        local footprint = CdbGetQuestLogFootprint();
         local count = GetNumQuestLogEntries();
-        ShaguDB_Debug_Print(4, "    footprint", {footprint, count});
-        ShaguDB_QuestLogFootprint = footprint;
+        CdbDebugPrint(4, "    footprint", {footprint, count});
+        CdbQuestLogFootprint = footprint;
     elseif (event == "UNIT_QUEST_LOG_CHANGED") then
-        local footprint = ShaguDB_GetQuestLogFootprint();
+        local footprint = CdbGetQuestLogFootprint();
         local count = GetNumQuestLogEntries();
-        ShaguDB_Debug_Print(4, "    footprint", {ShaguDB_QuestLogFootprint, count});
-        if ((CdbSettings.auto_plot) and (ShaguDB_QuestLogFootprint[1] ~= footprint[1])) then
-            ShaguDB_InEvent = true;
-            ShaguDB_PlotAllQuests();
-            ShaguDB_InEvent = false;
+        CdbDebugPrint(4, "    footprint", {CdbQuestLogFootprint, count});
+        if ((CdbSettings.auto_plot) and (CdbQuestLogFootprint[1] ~= footprint[1])) then
+            CdbInEvent = true;
+            CdbGetAllQuestNotes();
+            CdbInEvent = false;
         end
-        ShaguDB_QuestLogFootprint = footprint;
-        if ShaguDB_WatchUpdate == true then
-            local questTitle, level, questTag, isHeader, isCollapsed, isComplete = GetQuestLogTitle(ShaguDB_WatchQuestLogID);
-            ShaguDB_Debug_Print(16, "    title", questTitle);
-            local numObjectives = GetNumQuestLeaderBoards(ShaguDB_WatchQuestLogID);
+        CdbQuestLogFootprint = footprint;
+        if CdbWatchUpdate == true then
+            local questTitle, level, questTag, isHeader, isCollapsed, isComplete = GetQuestLogTitle(CdbWatchUpdateQuestLogId);
+            CdbDebugPrint(16, "    title", questTitle);
+            local numObjectives = GetNumQuestLeaderBoards(CdbWatchUpdateQuestLogId);
             if (numObjectives ~= nil) then
                 for i=1, numObjectives, 1 do
-                    local text, objectiveType, finished = GetQuestLogLeaderBoard(i, ShaguDB_WatchQuestLogID);
+                    local text, objectiveType, finished = GetQuestLogLeaderBoard(i, CdbWatchUpdateQuestLogId);
                     local i, j, itemName, numItems, numNeeded = strfind(text, "(.*):%s*([%d]+)%s*/%s*([%d]+)");
-                    ShaguDB_Debug_Print(16, "    objective, have, need", itemName, numItems, numNeeded);
+                    CdbDebugPrint(16, "    objective, have, need", itemName, numItems, numNeeded);
                 end
             end
         end
     elseif (event == "QUEST_FINISHED") then
-        local footprint = ShaguDB_GetQuestLogFootprint();
+        local footprint = CdbGetQuestLogFootprint();
         local count = GetNumQuestLogEntries();
-        ShaguDB_Debug_Print(4, "    footprint", {footprint, count});
+        CdbDebugPrint(4, "    footprint", {footprint, count});
         local count = GetNumQuestLogEntries();
         local questLogId = 1;
         local finishingTitle = GetTitleText()
@@ -369,7 +367,7 @@ function ShaguDB_Event(event, ...)
                 break;
             end
         end
-        ShaguDB_Debug_Print(4, "    ", questLogId);
+        CdbDebugPrint(4, "    ", questLogId);
     end
 end -- Event(event, arg1)
 
@@ -386,7 +384,7 @@ function range(from, to, step)
 end
 
  -- Called from xml
-function ShaguDB_Init()
+function CdbInit()
     -- Register Events (some unused)
     this:RegisterEvent("PLAYER_LOGIN");
     this:RegisterEvent("QUEST_WATCH_UPDATE");
@@ -400,14 +398,14 @@ function ShaguDB_Init()
     -- Credit for this approach goes to Questie: https://github.com/AeroScripts/QuestieDev
     CdbQuestAbandonOnAccept = StaticPopupDialogs["ABANDON_QUEST"].OnAccept;
     StaticPopupDialogs["ABANDON_QUEST"].OnAccept = function()
-        ShaguDB_QuestAbandon = GetAbandonQuestName();
-        ShaguDB_Debug_Print(4, "Abandon", ShaguDB_QuestAbandon);
+        CdbQuestAbandon = GetAbandonQuestName();
+        CdbDebugPrint(4, "Abandon", CdbQuestAbandon);
         CdbQuestAbandonOnAccept();
     end
     CdbQuestAbandonWithItemsOnAccept = StaticPopupDialogs["ABANDON_QUEST_WITH_ITEMS"].OnAccept;
     StaticPopupDialogs["ABANDON_QUEST_WITH_ITEMS"].OnAccept = function()
-        ShaguDB_QuestAbandon = GetAbandonQuestName();
-        ShaguDB_Debug_Print(4, "Abandon", ShaguDB_QuestAbandon);
+        CdbQuestAbandon = GetAbandonQuestName();
+        CdbDebugPrint(4, "Abandon", CdbQuestAbandon);
         CdbQuestAbandonOnAccept();
     end
 
@@ -416,24 +414,24 @@ function ShaguDB_Init()
     SlashCmdList["CLASSICDB"] = function(input, editbox)
         local params = {};
         if (input == "" or input == "help" or input == nil) then
-            ShaguDB_Print("|cff33ff88ClassicDB|cffffffff oooVersionooo |cff00ccff[" .. UnitFactionGroup("player") .. "]|cffaaaaaa [oooLocaleooo]");
-            ShaguDB_Print("Available Commands:");
-            ShaguDB_Print("/classicdb help |cffaaaaaa This help.");
-            ShaguDB_Print("/classicdb spawn <npc name> |cffaaaaaa Show NPC location on map.");
-            ShaguDB_Print("/classicdb obj <object name> |cffaaaaaa Show object location on map.");
-            ShaguDB_Print("/classicdb item <item name> |cffaaaaaa Show item drop info on map (includes vendors).");
-            ShaguDB_Print("/classicdb min [0, 101] |cffaaaaaa Minimum drop chance for items. 0 shows all, 101 none.");
-            ShaguDB_Print("/classicdb starts |cffaaaaaa Toggle: Automatically show quest starts on changing map.");
-            ShaguDB_Print("/classicdb quests <zone name> |cffaaaaaa - Show quest starts for a zone (the current one if no zone name is given).");
-            ShaguDB_Print("/classicdb hide <quest ID> |cffaaaaaa Prevent the given quest ID from being plotted to quest starts.");
-            ShaguDB_Print("/classicdb quest <quest name | quest ID> |cffaaaaaa - Show all points for quest, by either name or ID (name is case-sensitiv).");
-            ShaguDB_Print("/classicdb clean |cffaaaaaa - Clean the map. Disable automatic quest start and objective plotting.");
-            ShaguDB_Print("/classicdb minimap |cffaaaaaa - Toggle: Minimap icon.");
-            ShaguDB_Print("/classicdb auto |cffaaaaaa Toggle: Automatically plot uncompleted objectives on map.");
-            ShaguDB_Print("/classicdb waypoint |cffaaaaaa Toggle: Plot waypoints on map.");
-            ShaguDB_Print("/classicdb db |cffaaaaaa - Show database interface.");
-            ShaguDB_Print("/classicdb reset |cffaaaaaa Reset positon of the Interface.");
-            ShaguDB_Print("/classicdb clear |cffaaaaaa !THIS RELOADS THE UI! Delete ShaguDB Settings.");
+            CdbPrint("|cff33ff88ClassicDB|cffffffff oooVersionooo |cff00ccff[" .. UnitFactionGroup("player") .. "]|cffaaaaaa [oooLocaleooo]");
+            CdbPrint("Available Commands:");
+            CdbPrint("/classicdb help |cffaaaaaa This help.");
+            CdbPrint("/classicdb spawn <npc name> |cffaaaaaa Show NPC location on map.");
+            CdbPrint("/classicdb obj <object name> |cffaaaaaa Show object location on map.");
+            CdbPrint("/classicdb item <item name> |cffaaaaaa Show item drop info on map (includes vendors).");
+            CdbPrint("/classicdb min [0, 101] |cffaaaaaa Minimum drop chance for items. 0 shows all, 101 none.");
+            CdbPrint("/classicdb starts |cffaaaaaa Toggle: Automatically show quest starts on changing map.");
+            CdbPrint("/classicdb quests <zone name> |cffaaaaaa - Show quest starts for a zone (the current one if no zone name is given).");
+            CdbPrint("/classicdb hide <quest ID> |cffaaaaaa Prevent the given quest ID from being plotted to quest starts.");
+            CdbPrint("/classicdb quest <quest name | quest ID> |cffaaaaaa - Show all points for quest, by either name or ID (name is case-sensitiv).");
+            CdbPrint("/classicdb clean |cffaaaaaa - Clean the map. Disable automatic quest start and objective plotting.");
+            CdbPrint("/classicdb minimap |cffaaaaaa - Toggle: Minimap icon.");
+            CdbPrint("/classicdb auto |cffaaaaaa Toggle: Automatically plot uncompleted objectives on map.");
+            CdbPrint("/classicdb waypoint |cffaaaaaa Toggle: Plot waypoints on map.");
+            CdbPrint("/classicdb db |cffaaaaaa - Show database interface.");
+            CdbPrint("/classicdb reset |cffaaaaaa Reset positon of the Interface.");
+            CdbPrint("/classicdb clear |cffaaaaaa !THIS RELOADS THE UI! Delete ClassicDB Settings.");
             DEFAULT_CHAT_FRAME:AddMessage("\n");
         end
 
@@ -463,33 +461,33 @@ function ShaguDB_Init()
             if (string.sub(itemName,1,1) == "|") then
                 _, _, _, itemName = string.find(itemName, "^|c%x+|H(.+)|h%[(.+)%]");
             end
-            ShaguDB_Print("Drops for: "..itemName);
+            CdbPrint("Drops for: "..itemName);
             if (itemName and itemName ~= "") then
                 if ((itemLookup[itemName]) and (itemData[itemLookup[itemName]])) then
-                    ShaguDB_MarkForPlotting(DB_ITM, itemName, itemName, "", 0);
-                    ShaguDB_ShowMap();
+                    CdbPrepareForDrawing(DB_ITM, itemName, itemName, "", 0);
+                    CdbShowMap();
                 end
             end
         elseif (arg1 == "vendor") then
             local itemName = arg2;
-            ShaguDB_MAP_NOTES = {};
-            ShaguDB_PrepareItemNotes(itemName, "Vendors for: "..itemName, "Sells: "..itemName, "Vendor", {DB_VENDOR});
-            ShaguDB_ShowMap();
+            CdbMapNotes = {};
+            CdbPrepareItemNotes(itemName, "Vendors for: "..itemName, "Sells: "..itemName, "Vendor", {DB_VENDOR});
+            CdbShowMap();
         elseif (arg1 == "spawn") then
             local monsterName = arg2;
             if (monsterName and monsterName ~= "") then
-                ShaguDB_Print("Location for: "..monsterName);
+                CdbPrint("Location for: "..monsterName);
                 if (monsterName ~= nil) then
-                    npcID = ShaguDB_GetNPCID(monsterName)
+                    npcID = CdbGetNpcId(monsterName)
                     if (npcData[npcID] ~= nil) then
                         zoneName = zoneData[npcData[npcID][DB_ZONE]];
                         if (zoneName == nil) then zoneName = npcData[npcID][DB_ZONE]; end
-                        ShaguDB_Print("    Zone: " .. zoneName);
-                        if (ShaguDB_MarkForPlotting(DB_NPC, monsterName, monsterName, ShaguDB_GetNPCStatsComment(monsterName, true), 0)) then
-                            ShaguDB_ShowMap();
+                        CdbPrint("    Zone: " .. zoneName);
+                        if (CdbPrepareForDrawing(DB_NPC, monsterName, monsterName, CdbGetNpcStatsComment(monsterName, true), 0)) then
+                            CdbShowMap();
                         end
                     else
-                        ShaguDB_Print("No location found.");
+                        CdbPrint("No location found.");
                     end
                 end
             end
@@ -498,41 +496,41 @@ function ShaguDB_Init()
             if(zoneName == "")then
                 zoneName = GetZoneText();
             end
-            ShaguDB_MAP_NOTES = {};
-            ShaguDB_GetQuestStartNotes(zoneName);
-            ShaguDB_ShowMap();
+            CdbMapNotes = {};
+            CdbGetQuestStartNotes(zoneName);
+            CdbShowMap();
         elseif (arg1 == "quest") then
             local questTitle = arg2;
-            ShaguDB_MAP_NOTES = {};
+            CdbMapNotes = {};
             local qIDs;
             if type(tonumber(questTitle)) == "number" then
                 qIDs = tonumber(questTitle);
             elseif type(questTitle) == "string" then
-                qIDs = ShaguDB_GetQuestIDs(questTitle);
+                qIDs = CdbGetQuestIds(questTitle);
             end
             if type(qIDs) == "number" then
-                ShaguDB_GetQuestNotesById(qIDs);
-                ShaguDB_NextCMark();
+                CdbGetQuestNotesById(qIDs);
+                CdbNextMark();
             elseif type(qIDs) == "table" then
                 for _, qID in pairs(qIDs) do
-                    ShaguDB_GetQuestNotesById(qID);
-                    ShaguDB_NextCMark();
+                    CdbGetQuestNotesById(qID);
+                    CdbNextMark();
                 end
             end
-            ShaguDB_ShowMap();
+            CdbShowMap();
         elseif (arg1 == "minimap") then
-            if (SDBG.minimapButton:IsShown()) then
-                SDBG.minimapButton:Hide()
-                ShaguMinimapEnabled = false
+            if (CdbSearchGui.minimapButton:IsShown()) then
+                CdbSearchGui.minimapButton:Hide()
+                CdbMinimapEnabled = false
             else
-                SDBG.minimapButton:Show()
-                ShaguMinimapEnabled = true
+                CdbSearchGui.minimapButton:Show()
+                CdbMinimapEnabled = true
             end
         elseif (arg1 == "db") then
-            if (SDBG:IsShown()) then
-                SDBG:Hide()
+            if (CdbSearchGui:IsShown()) then
+                CdbSearchGui:Hide()
             else
-                SDBG:Show()
+                CdbSearchGui:Show()
             end
         elseif (arg1 == "min") then
             local number = tonumber(arg2);
@@ -542,37 +540,37 @@ function ShaguDB_Init()
                     value = 101;
                 end
                 CdbSettings.minDropChance = value;
-                ShaguDB_Print("Minimum Drop Chance set to: "..value.."%");
+                CdbPrint("Minimum Drop Chance set to: "..value.."%");
             else
-                ShaguDB_Print("Minimum Drop Chance is: "..CdbSettings.minDropChance.."%");
+                CdbPrint("Minimum Drop Chance is: "..CdbSettings.minDropChance.."%");
             end
         elseif (arg1 == "obj") then
             local objName = string.sub(input, 5);
             if (objName ~= "") then
-                ShaguDB_Print("Locations for: "..objName);
+                CdbPrint("Locations for: "..objName);
                 if (objName ~= nil) then
-                    if (ShaguDB_MarkForPlotting(DB_OBJ, objName, objName, "This object can be found here", 0)) then
-                        ShaguDB_ShowMap();
+                    if (CdbPrepareForDrawing(DB_OBJ, objName, objName, "This object can be found here", 0)) then
+                        CdbShowMap();
                     else
-                        ShaguDB_Print("No locations found.");
+                        CdbPrint("No locations found.");
                     end
                 end
             end
         elseif (arg1 == "clean") then
-            ShaguDB_DoCleanMap();
+            CdbCleanMapAndPreventRedraw();
         elseif (arg1 == "auto") then
-            ShaguDB_SwitchSetting("auto_plot");
+            CdbSwitchSetting("auto_plot");
         elseif (arg1 == "waypoint") then
-            ShaguDB_SwitchSetting("waypoints");
+            CdbSwitchSetting("waypoints");
         elseif (arg1 == "starts") then
-            ShaguDB_SwitchSetting("questStarts");
+            CdbSwitchSetting("questStarts");
         elseif (arg1 == "hide") then
             local questId = tonumber(string.sub(input, 6));
             if qData[questId] then
                 CdbFinishedQuests[questId] = true;
             end
         elseif (arg1 == "reset") then
-            ShaguDB_ResetGui();
+            CdbResetGui();
         elseif (arg1 == "clear") then
             CdbSettings = nil;
             ReloadUI();
@@ -580,11 +578,11 @@ function ShaguDB_Init()
     end;
 end -- Init()
 
-function ShaguDB_Print(string)
+function CdbPrint(string)
   DEFAULT_CHAT_FRAME:AddMessage("|cffffffff" .. string);
 end -- Print(string)
 
-function ShaguDB_NextCMark()
+function CdbNextMark()
   if (cMark == "mk1") then
     cMark = "mk2";
   elseif (cMark == "mk2") then
@@ -604,34 +602,34 @@ function ShaguDB_NextCMark()
   end
 end -- NextCMark()
 
-function ShaguDB_CleanMap()
-    ShaguDB_Debug_Print(2, "CleanMap() called");
+function CdbCleanMap()
+    CdbDebugPrint(2, "CleanMap() called");
     if (Cartographer_Notes ~= nil) then
         Cartographer_Notes:UnregisterNotesDatabase("ClassicDB");
-        ShaguDBDB = {}; ShaguDBDBH = {};
-        Cartographer_Notes:RegisterNotesDatabase("ClassicDB",ShaguDBDB,ShaguDBDBH);
+        ClassicDBDB = {}; ClassicDBDBH = {};
+        Cartographer_Notes:RegisterNotesDatabase("ClassicDB",ClassicDBDB,ClassicDBDBH);
     end
-    ShaguDB_MARKED_ZONES = {};
-    ShaguDB_MARKED_ZONE = "";
-    ShaguDB_QUEST_START_ZONES = {};
-    ShaguDB_MARKED = {{},{},{},{}};
-    ShaguDB_MAP_NOTES = {};
+    CdbMarkedZones = {};
+    CdbCycleZone = "";
+    CdbQuestStartZones = {};
+    CdbCurrentNotes = {{},{},{},{}};
+    CdbMapNotes = {};
 end -- CleanMap()
 
-function ShaguDB_ShowMap()
-    ShaguDB_Debug_Print(2, "ShowMap() called");
-    local ShowMapZone, ShowMapTitle, ShowMapID = ShaguDB_PlotNotesOnMap();
+function CdbShowMap()
+    CdbDebugPrint(2, "ShowMap() called");
+    local ShowMapZone, ShowMapTitle, ShowMapID = CdbDrawNotesOnMap();
     if (Cartographer) then
         if (ShowMapZone ~= nil) then
             WorldMapFrame:Show();
             if (ShowMapZone) then
-                SetMapZoom(ShaguDB_GetMapIDFromZone(ShowMapZone));
+                SetMapZoom(CdbGetZoneIdFromZoneName(ShowMapZone));
             end
         end
     end
 end -- ShowMap()
 
-function ShaguDB_CheckIcons(a, b)
+function CdbCheckIcons(a, b)
     if a ~= -1 then
         if a ~= b then
             if (a == 2 or b == 2 or a == "QuestionMark" or b == "QuestionMark") then
@@ -649,69 +647,69 @@ function ShaguDB_CheckIcons(a, b)
     return a;
 end -- CheckIcons(a, b)
 
-function ShaguDB_PlotNotesOnMap()
-    ShaguDB_Debug_Print(2, "PlotNotesOnMap() called");
+function CdbDrawNotesOnMap()
+    CdbDebugPrint(2, "PlotNotesOnMap() called");
 
-    if ShaguDB_PREPARE[DB_NPC] then
-        for k, npcMarks in ShaguDB_PREPARE[DB_NPC] do
+    if CdbPrepare[DB_NPC] then
+        for k, npcMarks in CdbPrepare[DB_NPC] do
             local noteTitle, comment, icon = '', '', -1;
-            if ShaguDB_GetTableLength(npcMarks) > 1 then
+            if CdbGetTableLength(npcMarks) > 1 then
                 noteTitle = npcData[k][DB_NAME];
                 for key, note in pairs(npcMarks) do
                     comment = comment.."\n"..note[NOTE_TITLE].."\n"..note[NOTE_COMMENT].."\n";
-                    icon = ShaguDB_CheckIcons(icon, note[NOTE_ICON])
+                    icon = CdbCheckIcons(icon, note[NOTE_ICON])
                 end
                 if (icon ~= 2) and (icon ~= 5) and (icon ~= 6) then
-                    comment = ShaguDB_GetNPCStatsComment(k, true)..comment;
+                    comment = CdbGetNpcStatsComment(k, true)..comment;
                     local st, en = string.find(comment, "|c.-|r");
                     noteTitle = string.sub(comment, st, en);
                     comment = string.sub(comment, en+2);
                 end
-                ShaguDB_GetNPCNotes(k, noteTitle, comment, icon);
+                CdbGetNpcNotes(k, noteTitle, comment, icon);
             else
                 for key, v in pairs(npcMarks) do
                     if (v[NOTE_ICON] ~= 2) and (v[NOTE_ICON] ~= 5) and (v[NOTE_ICON] ~= 6) then
-                        comment = ShaguDB_GetNPCStatsComment(k, true)..comment;
+                        comment = CdbGetNpcStatsComment(k, true)..comment;
                     end
-                    ShaguDB_GetNPCNotes(k, v[NOTE_TITLE], comment..v[NOTE_COMMENT], v[NOTE_ICON]);
+                    CdbGetNpcNotes(k, v[NOTE_TITLE], comment..v[NOTE_COMMENT], v[NOTE_ICON]);
                 end
             end
         end
     end
-    if ShaguDB_PREPARE[DB_OBJ] then
-        for k, objMarks in ShaguDB_PREPARE[DB_OBJ] do
+    if CdbPrepare[DB_OBJ] then
+        for k, objMarks in CdbPrepare[DB_OBJ] do
             local noteTitle, comment, icon = '', '', -1;
-            if ShaguDB_GetTableLength(objMarks) > 1 then
+            if CdbGetTableLength(objMarks) > 1 then
                 noteTitle = objData[k][DB_NAME];
                 for key, note in pairs(objMarks) do
                     comment = comment.."\n"..note[NOTE_TITLE].."\n"..note[NOTE_COMMENT].."\n";
-                    icon = ShaguDB_CheckIcons(icon, note[NOTE_ICON])
+                    icon = CdbCheckIcons(icon, note[NOTE_ICON])
                 end
-                ShaguDB_GetObjNotes(k, noteTitle, comment, icon);
+                CdbGetObjNotes(k, noteTitle, comment, icon);
             else
                 for key, v in pairs(objMarks) do
-                    ShaguDB_GetObjNotes(k, v[NOTE_TITLE], v[NOTE_COMMENT], v[NOTE_ICON]);
+                    CdbGetObjNotes(k, v[NOTE_TITLE], v[NOTE_COMMENT], v[NOTE_ICON]);
                 end
             end
         end
     end
-    if ShaguDB_PREPARE[DB_TRIGGER_MARKED] then
-        for questId, _ in ShaguDB_PREPARE[DB_TRIGGER_MARKED] do
-            local color = ShaguDB_GetDifficultyColor(qData[questId][DB_LEVEL]);
+    if CdbPrepare[DB_TRIGGER_MARKED] then
+        for questId, _ in CdbPrepare[DB_TRIGGER_MARKED] do
+            local color = CdbGetQuestDifficultyColor(qData[questId][DB_LEVEL]);
             local level = qData[questId][DB_LEVEL];
             if level == -1 then level = UnitLevel("player"); end
             local title = color.."Location for: ".."["..level.."] "..qData[questId][DB_NAME].."|r";
             for zoneId, coords in pairs(qData[questId][DB_TRIGGER][2]) do
                 for _, coord in pairs(coords) do
-                    table.insert(ShaguDB_MAP_NOTES,{zoneData[zoneId], coord[1], coord[2], title, "|cFF00FF00"..qData[questId][DB_TRIGGER][1].."|r", 7});
+                    table.insert(CdbMapNotes,{zoneData[zoneId], coord[1], coord[2], title, "|cFF00FF00"..qData[questId][DB_TRIGGER][1].."|r", 7});
                 end
             end
         end
     end
-    ShaguDB_MARKED = ShaguDB_PREPARE;
-    ShaguDB_PREPARE = {{},{},{},{}};
+    CdbCurrentNotes = CdbPrepare;
+    CdbPrepare = {{},{},{},{}};
 
-    if ShaguDB_MAP_NOTES == {} then
+    if CdbMapNotes == {} then
         return false, false, false;
     end
     local firstNote = 1;
@@ -720,7 +718,7 @@ function ShaguDB_PlotNotesOnMap()
     local title = nil;
     local noteID = nil;
 
-    for nKey, nData in ipairs(ShaguDB_MAP_NOTES) do
+    for nKey, nData in ipairs(CdbMapNotes) do
         -- C nData[1] is zone name/number
         -- C nData[2] is x coordinate
         -- C nData[3] is y coordinate
@@ -755,25 +753,25 @@ function ShaguDB_PlotNotesOnMap()
         if (nData[1] ~= nil) and (not instance) then
             zone = nData[1];
             if nData[6] ~= 5 then
-                ShaguDB_MARKED_ZONES[zone] = true;
+                CdbMarkedZones[zone] = true;
             end
             title = nData[4];
         end
     end
-    if (table.getn(ShaguDB_MAP_NOTES) ~= nil) and (not ShaguDB_InEvent) then
-        local notes = table.getn(ShaguDB_MAP_NOTES);
-        if (notes ~= ShaguDB_Notes) then
-            ShaguDB_Print(notes.." notes plotted.");
-            ShaguDB_Notes = notes;
+    if (table.getn(CdbMapNotes) ~= nil) and (not CdbInEvent) then
+        local notes = table.getn(CdbMapNotes);
+        if (notes ~= CdbLastNoteCount) then
+            CdbPrint(notes.." notes plotted.");
+            CdbLastNoteCount = notes;
         end
-        ShaguDB_Print(ShaguDB_GetTableLength(ShaguDB_MARKED_ZONES).." zones marked.");
+        CdbPrint(CdbGetTableLength(CdbMarkedZones).." zones marked.");
     end
-    ShaguDB_MAP_NOTES = {}
+    CdbMapNotes = {}
     return zone, title, noteID;
 end -- PlotNotesOnMap()
 
-function ShaguDB_GetMapIDFromZone(zoneText)
-    ShaguDB_Debug_Print(2, "GetMapIDFromZone(", zoneText, ") called");
+function CdbGetZoneIdFromZoneName(zoneText)
+    CdbDebugPrint(2, "GetMapIDFromZone(", zoneText, ") called");
     for cKey, cName in ipairs{GetMapContinents()} do
         for zKey,zName in ipairs{GetMapZones(cKey)} do
             if(zoneText == zName) then
@@ -876,46 +874,46 @@ end -- SetItemRef (link, text, button)
 -- Wowhead DB Continued By: Muehe
 --------------------------------------------------------
 
-function ShaguDB_CycleMarkedZones()
-    local currentlyShown = zoneData[ShaguDB_GetCurrentZoneID()];
-    if ShaguDB_MARKED_ZONE == "" and currentlyShown then ShaguDB_MARKED_ZONE = currentlyShown; end
-    if ShaguDB_MARKED_ZONE ~= "" then
+function CdbCycleMarkedZones()
+    local currentlyShown = zoneData[CdbGetCurrentZoneId()];
+    if CdbCycleZone == "" and currentlyShown then CdbCycleZone = currentlyShown; end
+    if CdbCycleZone ~= "" then
         local found = false;
-        for k, v in pairs(ShaguDB_MARKED_ZONES) do
+        for k, v in pairs(CdbMarkedZones) do
             if found then
-                ShaguDB_MARKED_ZONE = k;
-                SetMapZoom(ShaguDB_GetMapIDFromZone(k));
+                CdbCycleZone = k;
+                SetMapZoom(CdbGetZoneIdFromZoneName(k));
                 return;
             end
-            if k == ShaguDB_MARKED_ZONE then
+            if k == CdbCycleZone then
                 found = true;
             end
         end
         if found then
-            for k, v in pairs(ShaguDB_MARKED_ZONES) do
-                ShaguDB_MARKED_ZONE = k;
-                SetMapZoom(ShaguDB_GetMapIDFromZone(k));
+            for k, v in pairs(CdbMarkedZones) do
+                CdbCycleZone = k;
+                SetMapZoom(CdbGetZoneIdFromZoneName(k));
                 return;
             end
         end
     else
-        for k, v in pairs(ShaguDB_MARKED_ZONES) do
-            ShaguDB_MARKED_ZONE = k;
-            SetMapZoom(ShaguDB_GetMapIDFromZone(k));
+        for k, v in pairs(CdbMarkedZones) do
+            CdbCycleZone = k;
+            SetMapZoom(CdbGetZoneIdFromZoneName(k));
             return;
         end
     end
 end -- CycleMarkedZones()
 
 -- Debug print function. Credits to Questie.
-function ShaguDB_Debug_Print(...)
+function CdbDebugPrint(...)
     local debugWin = 0;
     local name, shown;
     for i=1, NUM_CHAT_WINDOWS do
         name,_,_,_,_,_,shown = GetChatWindowInfo(i);
         if (string.lower(name) == "shagudebug") then debugWin = i; break; end
     end
-    if (debugWin == 0) or (ShaguDB_Debug == 0) or (bit.band(arg[1], ShaguDB_Debug) == 0) then return end
+    if (debugWin == 0) or (CdbDebug == 0) or (bit.band(arg[1], CdbDebug) == 0) then return end
     local out = "";
     for i = 2, arg.n, 1 do
         if (i > 2) then out = out .. ", "; end
@@ -934,7 +932,7 @@ function ShaguDB_Debug_Print(...)
             out = out .. "nil";
         elseif (t == "table") then
             out = out .. "table (see above)";
-            ShaguDB_PrintTable(arg[i]);
+            CdbPrintTable(arg[i]);
         else
             out = out .. t;
         end
@@ -942,50 +940,51 @@ function ShaguDB_Debug_Print(...)
     getglobal("ChatFrame"..debugWin):AddMessage(out, 1.0, 1.0, 0.3);
 end -- Debug_Print(...)
 
-function ShaguDB_ResetGui()
-    SDBG:ClearAllPoints();
-    SDBG:SetPoint("CENTER", 0, 0);
-    ShaguDB_Frame:ClearAllPoints();
-    ShaguDB_Frame:SetPoint("BOTTOMLEFT", "SDBG", "BOTTOMRIGHT", 0, 0);
-    SDBG:Show();
-    ShaguDB_Frame:Show();
+-- TODO debug
+function CdbResetGui()
+    CdbSearchGui:ClearAllPoints();
+    CdbSearchGui:SetPoint("CENTER", 0, 0);
+    CdbControlGui:ClearAllPoints();
+    CdbControlGui:SetPoint("BOTTOMLEFT", "CdbSearchGui", "BOTTOMRIGHT", 0, 0);
+    CdbSearchGui:Show();
+    CdbControlGui:Show();
 end -- ResetGui()
 
-function ShaguDB_PlotAllQuests()
-    ShaguDB_Debug_Print(2, "PlotAllQuests() called");
+function CdbGetAllQuestNotes()
+    CdbDebugPrint(2, "PlotAllQuests() called");
     local questLogID=1;
-    ShaguDB_MAP_NOTES = {};
+    CdbMapNotes = {};
     while (GetQuestLogTitle(questLogID) ~= nil) do
         questLogID = questLogID + 1;
-        ShaguDB_GetQuestNotes(questLogID)
+        CdbGetQuestNotes(questLogID)
     end
-    ShaguDB_QUEST_START_ZONES = {};
-    ShaguDB_CleanMap();
-    if ShaguDB_InEvent == true then
-        ShaguDB_PlotNotesOnMap();
+    CdbQuestStartZones = {};
+    CdbCleanMap();
+    if CdbInEvent == true then
+        CdbDrawNotesOnMap();
     else
-        ShaguDB_ShowMap();
+        CdbShowMap();
     end
 end -- PlotAllQuests()
 
 -- called from xml
-function ShaguDB_DoCleanMap()
-    ShaguDB_Debug_Print(2, "DoCleanMap() called");
+function CdbCleanMapAndPreventRedraw()
+    CdbDebugPrint(2, "DoCleanMap() called");
     if (CdbSettings.auto_plot) then
         CdbSettings.auto_plot = false;
-        ShaguDB_CheckSetting("auto_plot")
-        ShaguDB_Print("Auto plotting disabled.");
+        CdbCheckSetting("auto_plot")
+        CdbPrint("Auto plotting disabled.");
     end
     if (CdbSettings.questStarts) then
         CdbSettings.questStarts = false;
-        ShaguDB_CheckSetting("questStarts")
-        ShaguDB_Print("Quest start plotting disabled.");
+        CdbCheckSetting("questStarts")
+        CdbPrint("Quest start plotting disabled.");
     end
-    ShaguDB_CleanMap();
+    CdbCleanMap();
 end -- DoCleanMap()
 
-function ShaguDB_SearchEndNPC(questID)
-    ShaguDB_Debug_Print(2, "SearchEndNPC(", questID, ") called");
+function CdbSearchEndNpc(questID)
+    CdbDebugPrint(2, "SearchEndNPC(", questID, ") called");
     for npc, data in pairs(npcData) do
         if (data[DB_NPC_ENDS] ~= nil) then
             for line, entry in pairs(data[DB_NPC_ENDS]) do
@@ -996,8 +995,8 @@ function ShaguDB_SearchEndNPC(questID)
     return nil;
 end -- SearchEndNPC(questID)
 
-function ShaguDB_SearchEndObj(questID)
-    ShaguDB_Debug_Print(2, "SearchEndObj(", questID, ") called");
+function CdbSearchEndObj(questID)
+    CdbDebugPrint(2, "SearchEndObj(", questID, ") called");
     for obj, data in pairs(objData) do
         if (data[DB_ENDS] ~= nil) then
             for line, entry in pairs(data[DB_ENDS]) do
@@ -1008,15 +1007,15 @@ function ShaguDB_SearchEndObj(questID)
     return nil;
 end -- SearchEndObj(questID)
 
-function ShaguDB_GetQuestEndNotes(questLogID)
-    ShaguDB_Debug_Print(2, "GetQuestEndNotes(", questLogID, ") called");
+function CdbGetQuestEndNotes(questLogID)
+    CdbDebugPrint(2, "GetQuestEndNotes(", questLogID, ") called");
     local questTitle, level = GetQuestLogTitle(questLogID);
     SelectQuestLogEntry(questLogID);
     local questDescription, questObjectives = GetQuestLogQuestText();
     if (questObjectives == nil) then questObjectives = ''; end
-    local qIDs = ShaguDB_GetQuestIDs(questTitle, questObjectives, level);
+    local qIDs = CdbGetQuestIds(questTitle, questObjectives, level);
     if qIDs ~= false then
-        ShaguDB_Debug_Print(8, "    ", type(qIDs));
+        CdbDebugPrint(8, "    ", type(qIDs));
     end
     if (qIDs ~= false) then
         if (type(qIDs) == "table") then
@@ -1024,7 +1023,7 @@ function ShaguDB_GetQuestEndNotes(questLogID)
             local npcIDs = {}
             for _, qID in pairs(qIDs) do
                 multi = multi + 1;
-                local npcID = ShaguDB_SearchEndNPC(qID);
+                local npcID = CdbSearchEndNpc(qID);
                 if (npcID) then
                     local done = false;
                     for _, IDInside in pairs(npcIDs) do
@@ -1042,17 +1041,17 @@ function ShaguDB_GetQuestEndNotes(questLogID)
                     for n, npcID in pairs(npcIDs) do
                         local commentTitle = "|cFF33FF00"..questTitle.." (Complete)|r".." - "..n.."/"..table.getn(npcIDs).." NPCs";
                         local comment = npcData[npcID][DB_NAME].."\n("..multi.." quests with this name)"
-                        ShaguDB_MarkForPlotting(DB_NPC, npcID, commentTitle, "Finished by: |cFFa6a6a6"..comment.."|r", 2);
+                        CdbPrepareForDrawing(DB_NPC, npcID, commentTitle, "Finished by: |cFFa6a6a6"..comment.."|r", 2);
                     end
                 else
                     local npcID = npcIDs[1]
                     local comment = npcData[npcID][DB_NAME].."\n(Ends "..multi.." quests with this name)"
-                    return ShaguDB_MarkForPlotting(DB_NPC, npcID, "|cFF33FF00"..questTitle.." (Complete)|r", "Finished by: |cFFa6a6a6"..comment.."|r", 2);
+                    return CdbPrepareForDrawing(DB_NPC, npcID, "|cFF33FF00"..questTitle.." (Complete)|r", "Finished by: |cFFa6a6a6"..comment.."|r", 2);
                 end
             else
                 local objIDs = {}
                 for _, qID in pairs(qIDs) do
-                    local objID = ShaguDB_SearchEndObj(qID);
+                    local objID = CdbSearchEndObj(qID);
                     if (objID) then
                         local done = false;
                         for _, IDInside in pairs(objIDs) do
@@ -1070,12 +1069,12 @@ function ShaguDB_GetQuestEndNotes(questLogID)
                         for n, objID in pairs(objIDs) do
                             local commentTitle = "|cFF33FF00"..questTitle.." (Complete)|r".." - "..n.."/"..table.getn(objIDs).." NPCs";
                             local comment = objData[objID][DB_NAME].."\n("..multi.." quests with this name)"
-                            ShaguDB_MarkForPlotting(DB_OBJ, objID, commentTitle, "Finished by: |cFFa6a6a6"..comment.."|r", 2);
+                            CdbPrepareForDrawing(DB_OBJ, objID, commentTitle, "Finished by: |cFFa6a6a6"..comment.."|r", 2);
                         end
                     else
                         local objID = objIDs[1]
                         local comment = objData[objID][DB_NAME].."\n(Ends "..multi.." quests with this name)"
-                        return ShaguDB_MarkForPlotting(DB_OBJ, objID, "|cFF33FF00"..questTitle.." (Complete)|r", "Finished by: |cFFa6a6a6"..comment.."|r", 2);
+                        return CdbPrepareForDrawing(DB_OBJ, objID, "|cFF33FF00"..questTitle.." (Complete)|r", "Finished by: |cFFa6a6a6"..comment.."|r", 2);
                     end
                 else
                     return false;
@@ -1083,15 +1082,15 @@ function ShaguDB_GetQuestEndNotes(questLogID)
             end
             return true;
         elseif (type(qIDs) == "number") then
-            local npcID = ShaguDB_SearchEndNPC(qIDs);
+            local npcID = CdbSearchEndNpc(qIDs);
             if npcID and npcData[npcID] then
                 local name = npcData[npcID][DB_NAME];
-                return ShaguDB_MarkForPlotting(DB_NPC, npcID, "|cFF33FF00"..questTitle.." (Complete)|r", "Finished by: |cFFa6a6a6"..name.."|r", 2);
+                return CdbPrepareForDrawing(DB_NPC, npcID, "|cFF33FF00"..questTitle.." (Complete)|r", "Finished by: |cFFa6a6a6"..name.."|r", 2);
             else
-                local objID = ShaguDB_SearchEndObj(qIDs);
+                local objID = CdbSearchEndObj(qIDs);
                 if objID and objData[objID] then
                     local name = objData[objID][DB_NAME];
-                    return ShaguDB_MarkForPlotting(DB_OBJ, objID, "|cFF33FF00"..questTitle.." (Complete)|r", "Finished by: |cFFa6a6a6"..name.."|r", 2);
+                    return CdbPrepareForDrawing(DB_OBJ, objID, "|cFF33FF00"..questTitle.." (Complete)|r", "Finished by: |cFFa6a6a6"..name.."|r", 2);
                 else
                     return false;
                 end
@@ -1102,16 +1101,16 @@ function ShaguDB_GetQuestEndNotes(questLogID)
     end
 end -- GetQuestEndNotes(questLogID)
 
-function ShaguDB_GetQuestIDs(questName, objectives, ...)
+function CdbGetQuestIds(questName, objectives, ...)
     if not qLookup[questName] then
         return false;
     end
     local qIDs = {};
     if (objectives == nil) then objectives = ''; end
-    ShaguDB_Debug_Print(2, "GetQuestIDs('", questName, "', '", objectives, "')", arg[1]);
-    if (ShaguDB_GetTableLength(qLookup[questName]) == 1) then
+    CdbDebugPrint(2, "GetQuestIDs('", questName, "', '", objectives, "')", arg[1]);
+    if (CdbGetTableLength(qLookup[questName]) == 1) then
         for k, v in pairs(qLookup[questName]) do
-            ShaguDB_Debug_Print(8, "    Possible questIDs: 1");
+            CdbDebugPrint(8, "    Possible questIDs: 1");
             return k;
         end
     else
@@ -1127,7 +1126,7 @@ function ShaguDB_GetQuestIDs(questName, objectives, ...)
                 table.insert(qIDs, k);
             end
         end
-        if (ShaguDB_GetTableLength(qIDs) > 1) then
+        if (CdbGetTableLength(qIDs) > 1) then
             local level = arg[1];
             if level then
                 for k, v in pairs(qIDs) do
@@ -1138,8 +1137,8 @@ function ShaguDB_GetQuestIDs(questName, objectives, ...)
             end
         end
     end
-    local length = ShaguDB_GetTableLength(qIDs);
-    ShaguDB_Debug_Print(8, "    Possible questIDs: ", length);
+    local length = CdbGetTableLength(qIDs);
+    CdbDebugPrint(8, "    Possible questIDs: ", length);
     if (length == nil) then
         return false;
     elseif (length == 1) then
@@ -1152,16 +1151,16 @@ function ShaguDB_GetQuestIDs(questName, objectives, ...)
 end -- GetQuestIDs(questName, objectives)
 
 -- TODO 19 npc names are used twice. first found is chosen atm
-function ShaguDB_GetNPCID(npcName)
-    ShaguDB_Debug_Print(2, "GetNPCID(", npcName, ") called");
+function CdbGetNpcId(npcName)
+    CdbDebugPrint(2, "GetNPCID(", npcName, ") called");
     for npcid, data in pairs(npcData) do
         if (data[DB_NAME] == npcName) then return npcid; end
     end
     return false;
 end -- GetNPCID(npcName)
 
-function ShaguDB_GetObjID(objName)
-    ShaguDB_Debug_Print(2, "GetObjID(", objName, ") called");
+function CdbGetObjIds(objName)
+    CdbDebugPrint(2, "GetObjID(", objName, ") called");
     local objIDs = {};
     for objID, data in pairs(objData) do
         if (data[DB_NAME] == objName) then
@@ -1173,7 +1172,7 @@ function ShaguDB_GetObjID(objName)
     end
 end -- GetObjID(objName)
 
-function ShaguDB_SwitchSetting(setting, ...)
+function CdbSwitchSetting(setting, ...)
     text = {
         ["waypoints"] = "Showing waypoints",
         ["auto_plot"] = "Automatically tracking quests",
@@ -1187,28 +1186,28 @@ function ShaguDB_SwitchSetting(setting, ...)
     };
     if (CdbSettings[setting] == false) then
         CdbSettings[setting] = true;
-        ShaguDB_Print(text[setting].." enabled.");
+        CdbPrint(text[setting].." enabled.");
     elseif (setting == "minDropChance") then
         local number = tonumber(arg1);
         if (number) and (number >= 0 and number <= 101) then
             CdbSettings[setting] = number;
-            ShaguDB_Print(text[setting].." set to: "..number);
+            CdbPrint(text[setting].." set to: "..number);
         else
-            ShaguDB_Print(text[setting].." is: "..CdbSettings[setting]);
+            CdbPrint(text[setting].." is: "..CdbSettings[setting]);
         end
     else
         CdbSettings[setting] = false;
-        ShaguDB_Print(text[setting].." disabled.");
+        CdbPrint(text[setting].." disabled.");
     end
-    ShaguDB_CheckSetting(setting);
+    CdbCheckSetting(setting);
     if (setting == "auto_plot") and (CdbSettings[setting]) then
-        ShaguDB_PlotAllQuests();
+        CdbGetAllQuestNotes();
     elseif (setting == "auto_plot") and (not CdbSettings[setting]) then
-        ShaguDB_CleanMap();
+        CdbCleanMap();
     end
 end -- SwitchSetting(setting)
 
-function ShaguDB_GetSetting(setting, ...)
+function CdbGetSetting(setting, ...)
     text = {
         ["waypoints"] = "Showing waypoints",
         ["auto_plot"] = "Automatically tracking quests",
@@ -1226,7 +1225,7 @@ function ShaguDB_GetSetting(setting, ...)
     end
 end -- GetSetting(setting, ...)
 
-function ShaguDB_CheckSetting(setting)
+function CdbCheckSetting(setting)
     if (setting ~= "waypoints") and (setting ~= "auto_plot") and (setting ~= "questStarts") then
         return;
     end
@@ -1237,13 +1236,13 @@ function ShaguDB_CheckSetting(setting)
     end
 end -- CheckSetting(setting)
 
--- tries to get locations for an NPC and inserts them in ShaguDB_MAP_NOTES if found
-function ShaguDB_GetNPCNotes(npcNameOrID, commentTitle, comment, icon)
+-- tries to get locations for an NPC and inserts them in CdbMapNotes if found
+function CdbGetNpcNotes(npcNameOrID, commentTitle, comment, icon)
     if (npcNameOrID ~= nil) then
-        ShaguDB_Debug_Print(2, "GetNPCNotes(", npcNameOrID, ") called");
+        CdbDebugPrint(2, "GetNPCNotes(", npcNameOrID, ") called");
         local npcID;
         if (type(npcNameOrID) == "string") then
-            npcID = ShaguDB_GetNPCID(npcNameOrID);
+            npcID = CdbGetNpcId(npcNameOrID);
         else
             npcID = npcNameOrID;
         end
@@ -1258,13 +1257,13 @@ function ShaguDB_GetNPCNotes(npcNameOrID, commentTitle, comment, icon)
                                 noteZone = zoneData[data[1] ];
                                 coordx = data[2];
                                 coordy = data[3];
-                                table.insert(ShaguDB_MAP_NOTES,{noteZone, coordx, coordy, commentTitle, "|cFF00FF00Instance Entry to "..zoneName.."|r\n"..comment, icon});
+                                table.insert(CdbMapNotes,{noteZone, coordx, coordy, commentTitle, "|cFF00FF00Instance Entry to "..zoneName.."|r\n"..comment, icon});
                             end
                             break;
                         end
                         coordx = coords[1];
                         coordy = coords[2];
-                        table.insert(ShaguDB_MAP_NOTES,{zoneName, coordx, coordy, commentTitle, comment, 3});
+                        table.insert(CdbMapNotes,{zoneName, coordx, coordy, commentTitle, comment, 3});
                         showMap = true;
                     end
                 end
@@ -1279,12 +1278,12 @@ function ShaguDB_GetNPCNotes(npcNameOrID, commentTitle, comment, icon)
                                     noteZone = zoneData[data[1] ];
                                     coordx = data[2];
                                     coordy = data[3];
-                                    table.insert(ShaguDB_MAP_NOTES,{noteZone, coordx, coordy, commentTitle, "|cFF00FF00Instance Entry to "..zoneName.."|r\n"..comment, icon});
+                                    table.insert(CdbMapNotes,{noteZone, coordx, coordy, commentTitle, "|cFF00FF00Instance Entry to "..zoneName.."|r\n"..comment, icon});
                                 end
                             end
                             coordx = coords[1];
                             coordy = coords[2];
-                            table.insert(ShaguDB_MAP_NOTES,{zoneName, coordx, coordy, commentTitle, comment, icon});
+                            table.insert(CdbMapNotes,{zoneName, coordx, coordy, commentTitle, comment, icon});
                             showMap = true;
                         end
                     end
@@ -1296,13 +1295,13 @@ function ShaguDB_GetNPCNotes(npcNameOrID, commentTitle, comment, icon)
     return false;
 end -- GetNPCNotes(npcNameOrID, commentTitle, comment, icon)
 
--- tries to get locations for an (ingame) object and inserts them in ShaguDB_MAP_NOTES if found
-function ShaguDB_GetObjNotes(objNameOrID, commentTitle, comment, icon)
-    ShaguDB_Debug_Print(2, "GetObjNotes(objNameOrID, commentTitle, comment, icon) called");
+-- tries to get locations for an (ingame) object and inserts them in CdbMapNotes if found
+function CdbGetObjNotes(objNameOrID, commentTitle, comment, icon)
+    CdbDebugPrint(2, "GetObjNotes(objNameOrID, commentTitle, comment, icon) called");
     if (objNameOrID ~= nil) then
         local objIDs;
         if (type(objNameOrID) == "string") then
-            objIDs = ShaguDB_GetObjID(objNameOrID);
+            objIDs = CdbGetObjIds(objNameOrID);
         else
             objIDs = {objNameOrID};
         end
@@ -1317,7 +1316,7 @@ function ShaguDB_GetObjNotes(objNameOrID, commentTitle, comment, icon)
                             for cID, coords in pairs(coordsdata) do
                                 coordx = coords[1]
                                 coordy = coords[2]
-                                table.insert(ShaguDB_MAP_NOTES,{zoneName, coordx, coordy, commentTitle, comment, icon});
+                                table.insert(CdbMapNotes,{zoneName, coordx, coordy, commentTitle, comment, icon});
                                 showMap = true;
                             end
                         end
@@ -1330,8 +1329,8 @@ function ShaguDB_GetObjNotes(objNameOrID, commentTitle, comment, icon)
     return false;
 end -- GetObjNotes(objNameOrID, commentTitle, comment, icon)
 
-function ShaguDB_PrepareItemNotes(itemNameOrID, commentTitle, comment, icon, types)
-    ShaguDB_Debug_Print(2, "PrepareItemNotes(", itemNameOrID, ") called");
+function CdbPrepareItemNotes(itemNameOrID, commentTitle, comment, icon, types)
+    CdbDebugPrint(2, "PrepareItemNotes(", itemNameOrID, ") called");
     local itemID = 0;
     if (type(itemNameOrID) == "number") then
         itemID = itemNameOrID;
@@ -1339,7 +1338,7 @@ function ShaguDB_PrepareItemNotes(itemNameOrID, commentTitle, comment, icon, typ
         itemID = itemLookup[itemNameOrID];
     end
     if itemID ~= 0 then
-        ShaguDB_PREPARE[DB_ITM][itemID] = true;
+        CdbPrepare[DB_ITM][itemID] = true;
     end
     -- if recursively called
     if (type(commentTitle) == "number") then
@@ -1352,7 +1351,7 @@ function ShaguDB_PrepareItemNotes(itemNameOrID, commentTitle, comment, icon, typ
     end
     local showType = {};
     if type(types) == "table" then
-        ShaguDB_Debug_Print(8, "    ", types);
+        CdbDebugPrint(8, "    ", types);
         for _, type in pairs(types) do
             showType[type] = true;
         end
@@ -1373,7 +1372,7 @@ function ShaguDB_PrepareItemNotes(itemNameOrID, commentTitle, comment, icon, typ
                     end
                     if show then
                         local dropComment = " ("..value[2].."%)";
-                        showMap = ShaguDB_MarkForPlotting(DB_NPC, value[1], commentTitle, comment..dropComment, icon) or showMap;
+                        showMap = CdbPrepareForDrawing(DB_NPC, value[1], commentTitle, comment..dropComment, icon) or showMap;
                     end
                 end
             end
@@ -1387,7 +1386,7 @@ function ShaguDB_PrepareItemNotes(itemNameOrID, commentTitle, comment, icon, typ
                     end
                     if show then
                         local dropComment = objData[value[1]][DB_NAME].."\n"..comment.." ("..value[2].."%)";
-                        showMap = ShaguDB_MarkForPlotting(DB_OBJ, objData[value[1]][DB_NAME], commentTitle, dropComment, icon) or showMap;
+                        showMap = CdbPrepareForDrawing(DB_OBJ, objData[value[1]][DB_NAME], commentTitle, dropComment, icon) or showMap;
                     end
                 end
             end
@@ -1400,7 +1399,7 @@ function ShaguDB_PrepareItemNotes(itemNameOrID, commentTitle, comment, icon, typ
                 end
                 if show then
                     local dropComment = "|cFF00FF00"..value[2].."% chance of containing "..commentTitle.."|r\n"
-                    showMap = ShaguDB_PrepareItemNotes(value[1], commentTitle, dropComment..comment, icon, true) or showMap;
+                    showMap = CdbPrepareItemNotes(value[1], commentTitle, dropComment..comment, icon, true) or showMap;
                 end
             end
         end
@@ -1410,13 +1409,13 @@ function ShaguDB_PrepareItemNotes(itemNameOrID, commentTitle, comment, icon, typ
                 if npcData[npc] then
                     local sellComment = '';
                     if maxcount then
-                        sellComment = "Sold by: "..npcData[npc][DB_NAME].."\nMax available: "..maxcount.."\nRestock time: "..ShaguDB_GetTimeString(increaseTime).."\n"..comment;
+                        sellComment = "Sold by: "..npcData[npc][DB_NAME].."\nMax available: "..maxcount.."\nRestock time: "..CdbGetTimeString(increaseTime).."\n"..comment;
                     else
                         sellComment = "Sold by: "..npcData[npc][DB_NAME].."\n"..comment;
                     end
-                    showMap = ShaguDB_MarkForPlotting(DB_NPC, npc, commentTitle, sellComment, 6) or showMap;
+                    showMap = CdbPrepareForDrawing(DB_NPC, npc, commentTitle, sellComment, 6) or showMap;
                 else
-                    ShaguDB_Debug_Print(1, "Spawn Error for NPC", npc);
+                    CdbDebugPrint(1, "Spawn Error for NPC", npc);
                 end
             end
         end
@@ -1426,7 +1425,7 @@ function ShaguDB_PrepareItemNotes(itemNameOrID, commentTitle, comment, icon, typ
     end
 end -- PrepareItemNotes(itemNameOrID, commentTitle, comment, icon, types)
 
-function ShaguDB_GetTimeString(seconds)
+function CdbGetTimeString(seconds)
     local hour, minute, second;
     hour = math.floor(seconds/(60*60));
     minute = math.floor(mod(seconds/60, 60));
@@ -1434,47 +1433,47 @@ function ShaguDB_GetTimeString(seconds)
     return string.format("%.2d:%.2d:%.2d", hour, minute, second);
 end -- GetTimeString(seconds)
 
-function ShaguDB_GetSpecialNpcNotes(qId, objectiveText, numItems, numNeeded, title)
+function CdbGetSpecialNpcNotes(qId, objectiveText, numItems, numNeeded, title)
     local showMap = false;
     for _, v in pairs(qData[qId][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_NPC]) do
         if v[2] ~= nil and v[2] == objectiveText then
             local comment = "|cFF00FF00"..objectiveText..":  "..numItems.."/"..numNeeded.."|r";
-            showMap = ShaguDB_MarkForPlotting(DB_NPC, v[1], title, comment, cMark) or showMap;
+            showMap = CdbPrepareForDrawing(DB_NPC, v[1], title, comment, cMark) or showMap;
         end
     end
     return showMap;
 end -- GetSpecialNpcNotes(qId, objectiveText, numItems, numNeeded, title)
 
-function ShaguDB_GetQuestNotes(questLogID)
-    ShaguDB_Debug_Print(2, "GetQuestNotes(", questLogID, ") called");
+function CdbGetQuestNotes(questLogID)
+    CdbDebugPrint(2, "GetQuestNotes(", questLogID, ") called");
     local questTitle, level, questTag, isHeader, isCollapsed, isComplete = GetQuestLogTitle(questLogID);
     local showMap = false;
     if (not isHeader and questTitle ~= nil) then
-        ShaguDB_Debug_Print(8, "    questTitle = ", questTitle);
-        ShaguDB_Debug_Print(8, "    level = ", level);
-        ShaguDB_Debug_Print(8, "    isComplete = ", isComplete);
+        CdbDebugPrint(8, "    questTitle = ", questTitle);
+        CdbDebugPrint(8, "    level = ", level);
+        CdbDebugPrint(8, "    isComplete = ", isComplete);
         local numObjectives = GetNumQuestLeaderBoards(questLogID);
         if (numObjectives ~= nil) then
-            ShaguDB_Debug_Print(8, "    numObjectives = ", numObjectives);
+            CdbDebugPrint(8, "    numObjectives = ", numObjectives);
         end
         SelectQuestLogEntry(questLogID);
         local questDescription, questObjectives = GetQuestLogQuestText();
-        local qIDs = ShaguDB_GetQuestIDs(questTitle, questObjectives, level);
+        local qIDs = CdbGetQuestIds(questTitle, questObjectives, level);
         local title = "";
         if (type(qIDs) == "number") then
-            ShaguDB_Debug_Print(8, "    qID = ", qIDs);
+            CdbDebugPrint(8, "    qID = ", qIDs);
             local level = qData[qIDs][DB_LEVEL];
             if level == -1 then level = UnitLevel("player"); end
-            title = ShaguDB_GetDifficultyColor(qData[qIDs][DB_LEVEL]).."["..level.."] "..questTitle.."|r";
+            title = CdbGetQuestDifficultyColor(qData[qIDs][DB_LEVEL]).."["..level.."] "..questTitle.."|r";
         elseif (type(qIDs) == "table") then
             numQuests = 0;
             for k, qID in pairs(qIDs) do
-                ShaguDB_Debug_Print(8, "    qID[", k, "] = ", qID);
+                CdbDebugPrint(8, "    qID[", k, "] = ", qID);
                 numQuests = numQuests + 1;
             end
             title = questTitle.."|cFFa6a6a6 (there are "..numQuests.." Quests with this name)|r";
         else
-            ShaguDB_Debug_Print(1, "Failed to find Quest ID for: ", questTitle)
+            CdbDebugPrint(1, "Failed to find Quest ID for: ", questTitle)
             title = questTitle
         end
         local itemList = {};
@@ -1483,40 +1482,40 @@ function ShaguDB_GetQuestNotes(questLogID)
                 local text, objectiveType, finished = GetQuestLogLeaderBoard(i, questLogID);
                 local i, j, itemName, numItems, numNeeded = strfind(text, "(.*):%s*([%d]+)%s*/%s*([%d]+)");
                 if itemName then
-                    ShaguDB_Debug_Print(8, "    objectiveText = ", itemName);
+                    CdbDebugPrint(8, "    objectiveText = ", itemName);
                 end
                 if (not finished) then
                     if (objectiveType == "monster") then
-                        ShaguDB_Debug_Print(8, "    type = monster");
+                        CdbDebugPrint(8, "    type = monster");
                         local i, j, monsterName = strfind(itemName, "(.*) slain");
                         if i == nil then
                             i, j, monsterName = strfind(itemName, "(.*) getötet");
                         end
                         if monsterName then
-                            local npcID = ShaguDB_GetNPCID(monsterName);
+                            local npcID = CdbGetNpcId(monsterName);
                             if npcID then
                                 local comment = "|cFF00FF00"..itemName..":  "..numItems.."/"..numNeeded.."|r";
-                                showMap = ShaguDB_MarkForPlotting(DB_NPC, npcID, title, comment, cMark) or showMap;
+                                showMap = CdbPrepareForDrawing(DB_NPC, npcID, title, comment, cMark) or showMap;
                             end
                         else
                             if (type(qIDs) == "number") then
-                                showMap = ShaguDB_GetSpecialNpcNotes(qIDs, itemName, numItems, numNeeded, title) or showMap;
+                                showMap = CdbGetSpecialNpcNotes(qIDs, itemName, numItems, numNeeded, title) or showMap;
                             elseif (type(qIDs) == "table") then
                                 for _, qId in pairs(qIDs) do
-                                    showMap = ShaguDB_GetSpecialNpcNotes(qId, itemName, numItems, numNeeded, title) or showMap;
+                                    showMap = CdbGetSpecialNpcNotes(qId, itemName, numItems, numNeeded, title) or showMap;
                                 end
                             end
                         end
                     elseif (objectiveType == "item") then
-                        ShaguDB_Debug_Print(8, "    type = item");
+                        CdbDebugPrint(8, "    type = item");
                         local itemID = itemLookup[itemName];
                         if (itemID and (itemData[itemID])) then
                             itemList[itemID] = true;
                             local comment = "|cFF00FF00"..itemName..": "..numItems.."/"..numNeeded.."|r"
-                            showMap = ShaguDB_PrepareItemNotes(itemID, title, comment, cMark, true) or showMap;
+                            showMap = CdbPrepareItemNotes(itemID, title, comment, cMark, true) or showMap;
                         end
                     elseif (objectiveType == "object") then
-                        ShaguDB_Debug_Print(8, "    type = object");
+                        CdbDebugPrint(8, "    type = object");
                         if (type(qIDs) == "number") then
                             if qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_OBJ] then
                                 for key, data in pairs(qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_OBJ]) do
@@ -1528,7 +1527,7 @@ function ShaguDB_GetQuestNotes(questLogID)
                                         else
                                             comment = comment..objectiveText..": "..numItems.."/"..numNeeded.."|r\n";
                                         end
-                                        ShaguDB_MarkForPlotting(DB_OBJ, objectId, title, comment, "Object");
+                                        CdbPrepareForDrawing(DB_OBJ, objectId, title, comment, "Object");
                                     end
                                 end
                             end
@@ -1544,7 +1543,7 @@ function ShaguDB_GetQuestNotes(questLogID)
                                             else
                                                 comment = comment..objectiveText..": "..numItems.."/"..numNeeded.."|r\n";
                                             end
-                                            ShaguDB_MarkForPlotting(DB_OBJ, objectId, title, comment, "Object");
+                                            CdbPrepareForDrawing(DB_OBJ, objectId, title, comment, "Object");
                                         end
                                     end
                                 end
@@ -1553,21 +1552,21 @@ function ShaguDB_GetQuestNotes(questLogID)
                     elseif (objectiveType == "event") then
                         if (type(qIDs) == "number") then
                             if qData[qIDs][DB_TRIGGER] then
-                                ShaguDB_PREPARE[DB_TRIGGER_MARKED][qIDs] = true;
+                                CdbPrepare[DB_TRIGGER_MARKED][qIDs] = true;
                             end
                         elseif (type(qIDs) == "table") then
                             for k, qID in pairs(qIDs) do
                                 if qData[qIDs][DB_TRIGGER] then
-                                    ShaguDB_PREPARE[DB_TRIGGER_MARKED][qID] = true;
+                                    CdbPrepare[DB_TRIGGER_MARKED][qID] = true;
                                 end
                             end
                         end
                     -- checks for objective type other than item/monster/object, e.g. reputation, event
                     elseif (objectiveType ~= "item" and objectiveType ~= "monster" and objectiveType ~= "object" and objectiveType ~= "event") then
-                        ShaguDB_Debug_Print(1, "    ", objectiveType, " quest objective-type not supported yet");
+                        CdbDebugPrint(1, "    ", objectiveType, " quest objective-type not supported yet");
                     end
                 elseif (objectiveType == "item") then
-                    ShaguDB_Debug_Print(8, "    type = item");
+                    CdbDebugPrint(8, "    type = item");
                     local itemID = itemLookup[itemName];
                     if (itemID and (itemData[itemID])) then
                         itemList[itemID] = true;
@@ -1576,24 +1575,24 @@ function ShaguDB_GetQuestNotes(questLogID)
             end
             if ((not isComplete) and (numObjectives ~= 0)) then
                 if (type(qIDs) == "number") then
-                    ShaguDB_Debug_Print(8, "    Quest related drop for: ", qIDs)
+                    CdbDebugPrint(8, "    Quest related drop for: ", qIDs)
                     if qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_ITM] then
                         for k, item in pairs(qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_ITM]) do
                             if (itemData[item[1]] and itemList[item[1]] == nil) then
                                 local comment = "Drop for quest related item:\n"..itemData[item[1]][DB_ITM_NAME];
-                                showMap = ShaguDB_PrepareItemNotes(item[1], title, comment, cMark, true) or showMap;
+                                showMap = CdbPrepareItemNotes(item[1], title, comment, cMark, true) or showMap;
                             end
                         end
                     end
                 end
                 if (type(qIDs) == "table") then
                     for k, qID in pairs(qIDs) do
-                        ShaguDB_Debug_Print(8, "    Quest related drop for: ", qID)
+                        CdbDebugPrint(8, "    Quest related drop for: ", qID)
                         if qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_ITM] then
                             for k, item in pairs(qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_ITM]) do
                                 if itemData[item[1]] then
                                     local comment = "Drop for quest related item:\n"..itemData[item[1]][DB_ITM_NAME];
-                                    showMap = ShaguDB_PrepareItemNotes(item[1], title, comment, cMark, true) or showMap;
+                                    showMap = CdbPrepareItemNotes(item[1], title, comment, cMark, true) or showMap;
                                 end
                             end
                         end
@@ -1603,17 +1602,17 @@ function ShaguDB_GetQuestNotes(questLogID)
         end
         -- added numObjectives condition due to some quests not showing "isComplete" though having nothing to do but turn it in
         if (isComplete or numObjectives == 0) then
-            ShaguDB_GetQuestEndNotes(questLogID);
+            CdbGetQuestEndNotes(questLogID);
         end
     end
     if showMap then
-        ShaguDB_NextCMark();
+        CdbNextMark();
     end
     return showMap;
 end -- GetQuestNotes(questLogID)
 
 -- returns level and hp values with prefix for provided NPC name as string
-function ShaguDB_GetNPCStatsComment(npcNameOrID, ...)
+function CdbGetNpcStatsComment(npcNameOrID, ...)
     local color = arg[1];
     local colorStringMin = "|cFFFFFFFF";
     local colorStringMax = "|cFFFFFFFF";
@@ -1626,10 +1625,10 @@ function ShaguDB_GetNPCStatsComment(npcNameOrID, ...)
     else
         color = true;
     end
-    ShaguDB_Debug_Print(2, "GetNPCStatsComment(", npcNameOrID, ") called");
+    CdbDebugPrint(2, "GetNPCStatsComment(", npcNameOrID, ") called");
     local npcID = 0;
     if (type(npcNameOrID) == "string") then
-        npcID = ShaguDB_GetNPCID(npcNameOrID);
+        npcID = CdbGetNpcId(npcNameOrID);
     else
         npcID = npcNameOrID;
     end
@@ -1645,23 +1644,24 @@ function ShaguDB_GetNPCStatsComment(npcNameOrID, ...)
         if npcData[npcID][DB_LEVEL] ~= npcData[npcID][DB_MIN_LEVEL] then
             local maxLevel = npcData[npcID][DB_LEVEL];
             local minLevel = npcData[npcID][DB_MIN_LEVEL];
-            local colorStringMax = ShaguDB_GetDifficultyColor(maxLevel);
-            local colorStringMin = ShaguDB_GetDifficultyColor(minLevel);
+            local colorStringMax = CdbGetQuestDifficultyColor(maxLevel);
+            local colorStringMin = CdbGetQuestDifficultyColor(minLevel);
             return colorStringMax..npcData[npcID][DB_NAME].."|r\nLevel: "..colorStringMin..minLevel.."|r - "..colorStringMax..maxLevel.." "..rank.."|r\n".."Health: "..colorStringMin..npcData[npcID][DB_MIN_LEVEL_HEALTH].."|r - "..colorStringMax..npcData[npcID][DB_MAX_LEVEL_HEALTH].."|r\n";
         else
-            local colorString = ShaguDB_GetDifficultyColor(npcData[npcID][DB_LEVEL]);
+            local colorString = CdbGetQuestDifficultyColor(npcData[npcID][DB_LEVEL]);
             return colorString..npcData[npcID][DB_NAME].."|r\nLevel: "..colorString..npcData[npcID][DB_MIN_LEVEL].." "..rank.."|r\n".."Health: "..colorString..npcData[npcID][DB_MIN_LEVEL_HEALTH].."|r\n";
         end
     else
-        ShaguDB_Debug_Print(1, "    NPC not found: ", npcNameOrID);
+        CdbDebugPrint(1, "    NPC not found: ", npcNameOrID);
         return "NPC not found: "..npcNameOrID;
     end
 end -- GetNPCStatsComment(npcNameOrID)
 
 -- returns dropRate value with prefix for provided NPC name as string
 -- TODO: fix for new item data
-function ShaguDB_GetNPCDropComment(itemName, npcName)
-    ShaguDB_Debug_Print(2, "GetNPCDropComment(", itemName, ", ", npcName, ") called");
+-- unused ?
+function CdbGetNpcDropComment(itemName, npcName)
+    CdbDebugPrint(2, "GetNPCDropComment(", itemName, ", ", npcName, ") called");
     local dropRate = itemData[itemName][npcName];
     if (dropRate == "" or dropRate == nil) then
         dropRate = "Unknown";
@@ -1669,10 +1669,10 @@ function ShaguDB_GetNPCDropComment(itemName, npcName)
     return "Drop chance: "..dropRate.."%";
 end -- GetNPCDropComment(itemName, npcName)
 
-function ShaguDB_GetQuestStartNotes(zoneName)
+function CdbGetQuestStartNotes(zoneName)
     local zoneID = 0;
     if zoneName == nil then
-        zoneID = ShaguDB_GetCurrentZoneID();
+        zoneID = CdbGetCurrentZoneId();
     end
     if (zoneID == 0) and (zoneName) then
         for k,v in pairs(zoneData) do
@@ -1682,33 +1682,33 @@ function ShaguDB_GetQuestStartNotes(zoneName)
         end
     end
     if zoneID ~= 0 then
-        if ShaguDB_QUEST_START_ZONES[zoneID] == true then
+        if CdbQuestStartZones[zoneID] == true then
             return;
         else
-            ShaguDB_QUEST_START_ZONES[zoneID] = true;
+            CdbQuestStartZones[zoneID] = true;
         end
-        ShaguDB_PREPARE = ShaguDB_MARKED;
+        CdbPrepare = CdbCurrentNotes;
         for id, data in pairs(npcData) do
             if (data[DB_NPC_SPAWNS][zoneID] ~= nil) and (data[DB_NPC_STARTS] ~= nil) then
-                local comment = ShaguDB_GetQuestStartComment(data[DB_NPC_STARTS]);
+                local comment = CdbGetQuestStartComment(data[DB_NPC_STARTS]);
                 if (comment ~= "") then -- (comment == "") => other faction quest, or quest is filtered
-                    ShaguDB_MarkForPlotting(DB_NPC, id, data[DB_NAME], "Starts quests:\n"..comment, 5);
+                    CdbPrepareForDrawing(DB_NPC, id, data[DB_NAME], "Starts quests:\n"..comment, 5);
                 end
             end
         end
         for id, data in pairs(objData) do
             if (data[DB_OBJ_SPAWNS][zoneID] ~= nil) and (data[DB_STARTS] ~= nil) then
-                local comment = ShaguDB_GetQuestStartComment(data[DB_STARTS]);
+                local comment = CdbGetQuestStartComment(data[DB_STARTS]);
                 if (comment ~= "") then
-                    ShaguDB_MarkForPlotting(DB_OBJ, id, data[DB_NAME], "Starts quests:\n"..comment, 5);
+                    CdbPrepareForDrawing(DB_OBJ, id, data[DB_NAME], "Starts quests:\n"..comment, 5);
                 end
             end
         end
-        local _,_,_ = ShaguDB_PlotNotesOnMap();
+        local _,_,_ = CdbDrawNotesOnMap();
     end
 end -- GetQuestStartNotes(zoneName)
 
-function ShaguDB_GetQuestStartComment(npcOrGoStarts)
+function CdbGetQuestStartComment(npcOrGoStarts)
     local tooltipText = "";
     for key, questID in npcOrGoStarts do
         if (qData[questID]) and (CdbFinishedQuests[questID] == nil) and (CdbFinishedQuests[questID] ~= true) then
@@ -1736,7 +1736,7 @@ function ShaguDB_GetQuestStartComment(npcOrGoStarts)
                     end
                 end
             end
-            local colorString = ShaguDB_GetDifficultyColor(qData[questID][DB_LEVEL]);
+            local colorString = CdbGetQuestDifficultyColor(qData[questID][DB_LEVEL]);
             local level = qData[questID][DB_LEVEL];
             if level == -1 then level = UnitLevel("player"); end
             if not skip then
@@ -1748,7 +1748,7 @@ function ShaguDB_GetQuestStartComment(npcOrGoStarts)
                 end
                 if CdbSettings.reqLevel then
                     local comment = "";
-                    if ShaguDB_GetGreyLevel(UnitLevel("player")) >= qData[questID][DB_MIN_LEVEL] then
+                    if CdbGetQuestGreyLevel(UnitLevel("player")) >= qData[questID][DB_MIN_LEVEL] then
                         comment = qData[questID][DB_MIN_LEVEL];
                     elseif qData[questID][DB_MIN_LEVEL] > UnitLevel("player") then
                         comment = "|r|cFFFF1A1A"..qData[questID][DB_MIN_LEVEL]; -- red
@@ -1763,7 +1763,7 @@ function ShaguDB_GetQuestStartComment(npcOrGoStarts)
     return tooltipText;
 end -- GetQuestStartComment(npcOrGoStarts)
 
-function ShaguDB_GetCurrentZoneID()
+function CdbGetCurrentZoneId()
     local zoneXY = {GetMapZones(GetCurrentMapContinent())};
     local zoneName = zoneXY[GetCurrentMapZone()];
     for k,v in pairs(zoneData) do
@@ -1775,13 +1775,13 @@ function ShaguDB_GetCurrentZoneID()
 end -- GetCurrentZoneID()
 
 -- called from xml
-function ShaguDB_GetSelectionQuestNotes()
-    ShaguDB_PREPARE = ShaguDB_MARKED;
-    ShaguDB_GetQuestNotes(GetQuestLogSelection())
-    ShaguDB_ShowMap();
+function CdbGetSelectionQuestNotes()
+    CdbPrepare = CdbCurrentNotes;
+    CdbGetQuestNotes(GetQuestLogSelection())
+    CdbShowMap();
 end -- GetSelectionQuestNotes()
 
-function ShaguDB_GetTableLength(tab)
+function CdbGetTableLength(tab)
     if tab then
         local count = 0;
         for k, v in pairs(tab) do
@@ -1793,7 +1793,7 @@ function ShaguDB_GetTableLength(tab)
     end
 end -- GetTableLength()
 
-function ShaguDB_GetDifficultyColor(level1, ...)
+function CdbGetQuestDifficultyColor(level1, ...)
     if level1 == -1 then
         level1 = UnitLevel("player");
     end
@@ -1807,7 +1807,7 @@ function ShaguDB_GetDifficultyColor(level1, ...)
         return "|cFFFF8040"; -- Orange
     elseif (level1 <= (level2 + 2)) and (level1 >= (level2 - 2)) then
         return "|cFFFFFF00"; -- Yellow
-    elseif (level1 > ShaguDB_GetGreyLevel(level2)) then
+    elseif (level1 > CdbGetQuestGreyLevel(level2)) then
         return "|cFF40C040"; -- Green
     else
         return "|cFFC0C0C0"; -- Grey
@@ -1815,7 +1815,7 @@ function ShaguDB_GetDifficultyColor(level1, ...)
     return "|cFFffffff"; --white
 end -- GetDifficultyColor(level1, ...)
 
-function ShaguDB_GetGreyLevel(level)
+function CdbGetQuestGreyLevel(level)
     if (level <= 5) then
         return 0;
     elseif (level <= 39) then
@@ -1825,18 +1825,18 @@ function ShaguDB_GetGreyLevel(level)
     end
 end -- GetGreyLevel(level)
 
-function ShaguDB_MarkForPlotting(kind, nameOrId, title, comment, icon, ...)
-    ShaguDB_Debug_Print(2, "MarkForPlotting(", kind, ", ", nameOrId, ") called");
+function CdbPrepareForDrawing(kind, nameOrId, title, comment, icon, ...)
+    CdbDebugPrint(2, "MarkForPlotting(", kind, ", ", nameOrId, ") called");
     if kind == DB_NPC then
         local npcID = 0;
         if type(nameOrId) == "number" then
             npcID = nameOrId;
         else
-            npcID = ShaguDB_GetNPCID(nameOrId);
+            npcID = CdbGetNpcId(nameOrId);
         end
         if npcID and npcID ~=0 then
-            if not ShaguDB_PREPARE[DB_NPC][npcID] then ShaguDB_PREPARE[DB_NPC][npcID] = {}; end
-            ShaguDB_FillPrepare(ShaguDB_PREPARE[DB_NPC][npcID], title, comment, icon);
+            if not CdbPrepare[DB_NPC][npcID] then CdbPrepare[DB_NPC][npcID] = {}; end
+            CdbInsertInPrepareTable(CdbPrepare[DB_NPC][npcID], title, comment, icon);
             return true;
         end
     elseif kind == DB_OBJ then
@@ -1844,12 +1844,12 @@ function ShaguDB_MarkForPlotting(kind, nameOrId, title, comment, icon, ...)
         if type(nameOrId) == "number" then
             objIDs = {nameOrId};
         else
-            objIDs = ShaguDB_GetObjID(nameOrId);
+            objIDs = CdbGetObjIds(nameOrId);
         end
         if objIDs and objIDs ~= 0 then
             for k, objID in pairs(objIDs) do
-                if not ShaguDB_PREPARE[DB_OBJ][objID] then ShaguDB_PREPARE[DB_OBJ][objID] = {}; end
-                ShaguDB_FillPrepare(ShaguDB_PREPARE[DB_OBJ][objID], title, comment, icon);
+                if not CdbPrepare[DB_OBJ][objID] then CdbPrepare[DB_OBJ][objID] = {}; end
+                CdbInsertInPrepareTable(CdbPrepare[DB_OBJ][objID], title, comment, icon);
             end
             return true;
         end
@@ -1861,20 +1861,20 @@ function ShaguDB_MarkForPlotting(kind, nameOrId, title, comment, icon, ...)
             itmID = itemLookup[nameOrId];
         end
         if itmID and itmID ~=0 then
-            ShaguDB_PrepareItemNotes(itmID, title, comment, icon, true);
+            CdbPrepareItemNotes(itmID, title, comment, icon, true);
             return true;
         end
     end
     return false;
 end -- MarkForPlotting(kind, nameOrId, title, comment, icon, ...)
 
-function ShaguDB_FillPrepare(tab, title, comment, icon)
-    ShaguDB_Debug_Print(2, "FillPrepare(", title, ", ", comment, ", ", icon, tostring(tab), ")")
+function CdbInsertInPrepareTable(tab, title, comment, icon)
+    CdbDebugPrint(2, "FillPrepare(", title, ", ", comment, ", ", icon, tostring(tab), ")")
     if tab then
         local added = false;
         for k, v in tab do
             if (v[NOTE_TITLE] == title) and (not strfind(strlower(v[NOTE_COMMENT]), strlower(comment))) and (comment ~= v[NOTE_COMMENT]) then
-                v[NOTE_ICON] = ShaguDB_CheckIcons(v[NOTE_ICON], icon);
+                v[NOTE_ICON] = CdbCheckIcons(v[NOTE_ICON], icon);
                 v[NOTE_COMMENT] = v[NOTE_COMMENT].."\n"..comment;
                 added = true;
             elseif (strfind(strlower(v[NOTE_COMMENT]), strlower(comment))) or (comment == v[NOTE_COMMENT]) then
@@ -1890,34 +1890,34 @@ function ShaguDB_FillPrepare(tab, title, comment, icon)
     return true;
 end -- FillPrepare(tab, title, comment, icon)
 
-function ShaguDB_GetQuestNotesById(questId)
+function CdbGetQuestNotesById(questId)
     if qData[questId] then
         local quest = qData[questId];
-        local title = ShaguDB_GetDifficultyColor(quest[DB_LEVEL]).."["..quest[DB_LEVEL].."] "..quest[DB_NAME].." (ID: "..questId..")|r";
+        local title = CdbGetQuestDifficultyColor(quest[DB_LEVEL]).."["..quest[DB_LEVEL].."] "..quest[DB_NAME].." (ID: "..questId..")|r";
         for k, v in pairs(quest[DB_STARTS]) do
             if v then
                 for _, id in pairs(v) do
-                    ShaguDB_Debug_Print(8, "    starts ", id)
+                    CdbDebugPrint(8, "    starts ", id)
                     local comment = "-";
                     local icon = "ExclamationMark";
                     if k == DB_NPC then comment = "|cFFa6a6a6Creature|r "..npcData[id][DB_NAME].." |cFFa6a6a6starts the quest|r";
                     elseif k == DB_OBJ then comment = "|cFFa6a6a6Object|r "..objData[id][DB_NAME].." |cFFa6a6a6starts the quest|r";
                     elseif k == DB_ITM then comment = "|cFFa6a6a6Aquire item|r "..itemData[id][DB_ITM_NAME].." |cFFa6a6a6 to start the quest|r";
                     end
-                    ShaguDB_MarkForPlotting(k, id, title, comment, icon);
+                    CdbPrepareForDrawing(k, id, title, comment, icon);
                 end
             end
         end
         for k, v in pairs(quest[DB_ENDS]) do
             if v then
                 for _, id in pairs(v) do
-                    ShaguDB_Debug_Print(8, "    ends", id)
+                    CdbDebugPrint(8, "    ends", id)
                     local comment = "+";
                     local icon = "QuestionMark";
                     if k == DB_NPC then comment = "|cFFa6a6a6Creature|r "..npcData[id][DB_NAME].." |cFFa6a6a6ends the quest|r";
                     elseif k == DB_OBJ then comment = "|cFFa6a6a6Object|r "..objData[id][DB_NAME].." |cFFa6a6a6ends the quest|r";
                     end
-                    ShaguDB_MarkForPlotting(k, id, title, comment, icon);
+                    CdbPrepareForDrawing(k, id, title, comment, icon);
                 end
             end
         end
@@ -1925,7 +1925,7 @@ function ShaguDB_GetQuestNotesById(questId)
             if v then
                 for _, list in pairs(v) do
                     if type(list) == "table" then
-                        ShaguDB_Debug_Print(8, "    tables2 ", list[1], list[2], " - type ", k)
+                        CdbDebugPrint(8, "    tables2 ", list[1], list[2], " - type ", k)
                         local id = list[1];
                         local text = nil;
                         if list[2] then
@@ -1939,14 +1939,14 @@ function ShaguDB_GetQuestNotesById(questId)
                         elseif k == DB_ITM and text == nil and id ~= quest[DB_SRC_ITM] and itemData[id] then comment = "|cFFa6a6a6'Item'-type objective:|r "..itemData[id][DB_ITM_NAME]; icon = "Vendor";
                         elseif k == DB_ITM and text then comment = "|cFFa6a6a6Item type objective:|r "..text; icon = "Vendor";
                         end
-                        if comment ~= "." and icon ~= 4 then ShaguDB_MarkForPlotting(k, id, title, comment, icon); end
+                        if comment ~= "." and icon ~= 4 then CdbPrepareForDrawing(k, id, title, comment, icon); end
                     end
                 end
             end
         end
         if quest[DB_SRC_ITM] then
-            if not (ShaguDB_PREPARE[DB_ITM][quest[DB_SRC_ITM]] == true) and itemData[quest[DB_SRC_ITM]] then
-                ShaguDB_MarkForPlotting(DB_ITM, quest[DB_SRC_ITM], title, "|cFFa6a6a6Item related to quest:|r "..quest[DB_NAME], "Vendor");
+            if not (CdbPrepare[DB_ITM][quest[DB_SRC_ITM]] == true) and itemData[quest[DB_SRC_ITM]] then
+                CdbPrepareForDrawing(DB_ITM, quest[DB_SRC_ITM], title, "|cFFa6a6a6Item related to quest:|r "..quest[DB_NAME], "Vendor");
             end
         end
     end
@@ -1954,10 +1954,10 @@ end -- GetQuestNotesById(questId)
 
 -- Unused dev helper functions
 
-function ShaguDB_CompareTables(tab1, tab2)
+function CdbCompareTables(tab1, tab2)
     for k, v in pairs(tab1) do
         if (type(v) == "table") then
-            if not ShaguDB_CompareTables(v, tab2[k]) then
+            if not CdbCompareTables(v, tab2[k]) then
                 return false;
             end
         else
@@ -1969,7 +1969,7 @@ function ShaguDB_CompareTables(tab1, tab2)
     return true;
 end -- CompareTables(tab1, tab2)
 
-function ShaguDB_PrintTable(tab, indent)
+function CdbPrintTable(tab, indent)
     if indent == nil then indent = 0; end
     local debugWin = 0;
     local name, shown;
@@ -1977,7 +1977,7 @@ function ShaguDB_PrintTable(tab, indent)
         name,_,_,_,_,_,shown = GetChatWindowInfo(i);
         if (string.lower(name) == "shagudebug") then debugWin = i; break; end
     end
-    if (debugWin == 0) or (ShaguDB_Debug == 0) then return end
+    if (debugWin == 0) or (CdbDebug == 0) then return end
     local iString = "";
     local ind = indent;
     while (ind > 0) do
@@ -1987,7 +1987,7 @@ function ShaguDB_PrintTable(tab, indent)
     for k, v in pairs(tab) do
         if (type(v) == "table") then
             getglobal("ChatFrame"..debugWin):AddMessage(iString.."["..k.."] = ", 1.0, 1.0, 0.3);
-            ShaguDB_PrintTable(v, indent+1);
+            CdbPrintTable(v, indent+1);
         else
             if (v) then
                 local out = v;
@@ -2004,8 +2004,8 @@ function ShaguDB_PrintTable(tab, indent)
     end
 end -- PrintTable(tab, indent)
 
-function ShaguDB_GetQuestLogFootprint()
-    ShaguDB_Debug_Print(4, "GetQuestLogFootprint() called");
+function CdbGetQuestLogFootprint()
+    CdbDebugPrint(4, "GetQuestLogFootprint() called");
     local questLogID=1;
     local footprint = "";
     local ids = {};
@@ -2013,17 +2013,17 @@ function ShaguDB_GetQuestLogFootprint()
         questLogID = questLogID + 1;
         local questTitle, level, questTag, isHeader, isCollapsed, isComplete = GetQuestLogTitle(questLogID);
         if (isHeader == nil) and (questTitle) then
-            ShaguDB_Debug_Print(4, "    logID, title, level, tag, isHeader, isComplete =", questLogID, questTitle, level, questTag, isHeader, isComplete);
+            CdbDebugPrint(4, "    logID, title, level, tag, isHeader, isComplete =", questLogID, questTitle, level, questTag, isHeader, isComplete);
             SelectQuestLogEntry(questLogID);
             local questDescription, questObjectives = GetQuestLogQuestText();
-            local qIds = ShaguDB_GetQuestIDs(questTitle, questObjectives, level);
+            local qIds = CdbGetQuestIds(questTitle, questObjectives, level);
             local uId;
             if (type(qIds) == "number") then
                 uId = qIds;
                 ids[qIds] = true;
-                if (ShaguDB_QuestAbandon == questTitle) then
+                if (CdbQuestAbandon == questTitle) then
                     CdbFinishedQuests[qIds] = -1;
-                    ShaguDB_QuestAbandon = '';
+                    CdbQuestAbandon = '';
                 end
             else
                 if type(qIds) == "table" then
@@ -2042,14 +2042,14 @@ function ShaguDB_GetQuestLogFootprint()
     return {strlower(footprint), ids}
 end
 
-function ShaguDB_FinishQuest(questId)
+function CdbMarkQuestAsFinished(questId)
     if qData[questId] then
         CdbFinishedQuests[questId] = true;
     end
     WorldMapFrame:Hide();
-    ShaguDB_CleanMap();
+    CdbCleanMap();
     if (CdbSettings.auto_plot) then
-        ShaguDB_PlotAllQuests();
+        CdbGetAllQuestNotes();
     else
         WorldMapFrame:Show();
     end

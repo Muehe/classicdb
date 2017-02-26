@@ -4,7 +4,7 @@
             <AbsValue val="11"/>
         </FontHeight>
     </Font>
-    <Frame name="ShaguDB_Frame" parent="UIParent" movable="true" toplevel="true" enableMouse="true" frameStrata="HIGH" hidden="true">
+    <Frame name="CdbControlGui" parent="UIParent" movable="true" toplevel="true" enableMouse="true" frameStrata="HIGH" hidden="true">
         <Size>
             <AbsDimension x="180" y="116"/>
         </Size>
@@ -15,22 +15,22 @@
 
         <Scripts>
             <OnLoad>
-                ShaguDB_Init();
+                CdbInit();
             </OnLoad>
             <OnEvent>
-                ShaguDB_Event(event);
+                CdbOnEvent(event);
             </OnEvent>
             <OnShow>
 
             </OnShow>
             <OnMouseDown>
-                ShaguDB_OnMouseDown(arg1);
+                CdbOnMouseDown(arg1);
             </OnMouseDown>
             <OnMouseUp>
-                ShaguDB_OnMouseUp(arg1);
+                CdbOnMouseUp(arg1);
             </OnMouseUp>
             <OnShow>
-                ShaguDB_OnFrameShow();
+                CdbOnFrameShow();
             </OnShow>
         </Scripts>
 
@@ -97,14 +97,14 @@
                     </Anchor>
                 </Anchors>
                 <Scripts>
-                    <OnClick>ShaguDB_DoCleanMap();</OnClick>
+                    <OnClick>CdbCleanMapAndPreventRedraw();</OnClick>
                     <OnEnter>
-                        ShaguDB_Tooltip:SetOwner(CleanMap, "ANCHOR_TOPLEFT");
-                        ShaguDB_Tooltip:ClearLines();
-                        ShaguDB_Tooltip:SetText("Clean ClassicDB notes from map.\nDisables automatic quest start and objective plotting.");
-                        ShaguDB_Tooltip:Show();
+                        CdbTooltip:SetOwner(CleanMap, "ANCHOR_TOPLEFT");
+                        CdbTooltip:ClearLines();
+                        CdbTooltip:SetText("Clean ClassicDB notes from map.\nDisables automatic quest start and objective plotting.");
+                        CdbTooltip:Show();
                     </OnEnter>
-                    <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
+                    <OnLeave>CdbTooltip:Hide();</OnLeave>
                 </Scripts>
                 <NormalTexture file="Interface\Addons\ClassicDB\symbols\Map"/>
                 <PushedTexture file="Interface\Addons\ClassicDB\symbols\MapPushed"/>
@@ -120,16 +120,16 @@
                 </Anchors>
                 <Scripts>
                     <OnClick>
-                        ShaguDB_PlotAllQuests();
+                        CdbGetAllQuestNotes();
                         WorldMapFrame:Show();
                     </OnClick>
                     <OnEnter>
-                        ShaguDB_Tooltip:SetOwner(PlotAll, "ANCHOR_TOPLEFT");
-                        ShaguDB_Tooltip:ClearLines();
-                        ShaguDB_Tooltip:SetText("Show notes for all quests in the quest log.");
-                        ShaguDB_Tooltip:Show();
+                        CdbTooltip:SetOwner(PlotAll, "ANCHOR_TOPLEFT");
+                        CdbTooltip:ClearLines();
+                        CdbTooltip:SetText("Show notes for all quests in the quest log.");
+                        CdbTooltip:Show();
                     </OnEnter>
-                    <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
+                    <OnLeave>CdbTooltip:Hide();</OnLeave>
                 </Scripts>
                 <NormalTexture file="Interface\Addons\ClassicDB\symbols\MarkMap"/>
                 <PushedTexture file="Interface\Addons\ClassicDB\symbols\MarkMapPushed"/>
@@ -145,16 +145,16 @@
                 </Anchors>
                 <Scripts>
                     <OnClick>
-                        ShaguDB_GetSelectionQuestNotes()
+                        CdbGetSelectionQuestNotes()
                         WorldMapFrame:Show();
                     </OnClick>
                     <OnEnter>
-                        ShaguDB_Tooltip:SetOwner(PlotSelected, "ANCHOR_TOPLEFT");
-                        ShaguDB_Tooltip:ClearLines();
-                        ShaguDB_Tooltip:SetText("Show notes for the quest which is currently selected in the quest log.");
-                        ShaguDB_Tooltip:Show();
+                        CdbTooltip:SetOwner(PlotSelected, "ANCHOR_TOPLEFT");
+                        CdbTooltip:ClearLines();
+                        CdbTooltip:SetText("Show notes for the quest which is currently selected in the quest log.");
+                        CdbTooltip:Show();
                     </OnEnter>
-                    <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
+                    <OnLeave>CdbTooltip:Hide();</OnLeave>
                 </Scripts>
                 <NormalTexture file="Interface\Addons\ClassicDB\symbols\Log"/>
                 <PushedTexture file="Interface\Addons\ClassicDB\symbols\LogPushed"/>
@@ -170,19 +170,19 @@
                 </Anchors>
                 <Scripts>
                     <OnClick>
-                        if (SDBG:IsShown()) then
-                            SDBG:Hide()
+                        if (CdbSearchGui:IsShown()) then
+                            CdbSearchGui:Hide()
                         else
-                            SDBG:Show()
+                            CdbSearchGui:Show()
                         end
                     </OnClick>
                     <OnEnter>
-                        ShaguDB_Tooltip:SetOwner(ShowSearch, "ANCHOR_TOPLEFT");
-                        ShaguDB_Tooltip:ClearLines();
-                        ShaguDB_Tooltip:SetText("Toggle window for searching NPCs, objects, items and quests.");
-                        ShaguDB_Tooltip:Show();
+                        CdbTooltip:SetOwner(ShowSearch, "ANCHOR_TOPLEFT");
+                        CdbTooltip:ClearLines();
+                        CdbTooltip:SetText("Toggle window for searching NPCs, objects, items and quests.");
+                        CdbTooltip:Show();
                     </OnEnter>
-                    <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
+                    <OnLeave>CdbTooltip:Hide();</OnLeave>
                 </Scripts>
                 <NormalTexture file="Interface\Addons\ClassicDB\symbols\Glass"/>
                 <PushedTexture file="Interface\Addons\ClassicDB\symbols\GlassPushed"/>
@@ -199,12 +199,12 @@
                 <Scripts>
                     <OnClick> Cartographer.options.args.Notes.args.toggle.set(); </OnClick>
                     <OnEnter>
-                        ShaguDB_Tooltip:SetOwner(ToggleCartographer, "ANCHOR_TOPLEFT");
-                        ShaguDB_Tooltip:ClearLines();
-                        ShaguDB_Tooltip:SetText("Show/Hide Cartographer Notes.");
-                        ShaguDB_Tooltip:Show();
+                        CdbTooltip:SetOwner(ToggleCartographer, "ANCHOR_TOPLEFT");
+                        CdbTooltip:ClearLines();
+                        CdbTooltip:SetText("Show/Hide Cartographer Notes.");
+                        CdbTooltip:Show();
                     </OnEnter>
-                    <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
+                    <OnLeave>CdbTooltip:Hide();</OnLeave>
                 </Scripts>
                 <NormalTexture file="Interface\Addons\ClassicDB\symbols\OnOff"/>
                 <PushedTexture file="Interface\Addons\ClassicDB\symbols\OnOffPushed"/>
@@ -219,14 +219,14 @@
                     </Anchor>
                 </Anchors>
                 <Scripts>
-                    <OnClick> ShaguDB_CycleMarkedZones(); </OnClick>
+                    <OnClick> CdbCycleMarkedZones(); </OnClick>
                     <OnEnter>
-                        ShaguDB_Tooltip:SetOwner(CycleMap, "ANCHOR_TOPLEFT");
-                        ShaguDB_Tooltip:ClearLines();
-                        ShaguDB_Tooltip:SetText("Cycle through marked zones.");
-                        ShaguDB_Tooltip:Show();
+                        CdbTooltip:SetOwner(CycleMap, "ANCHOR_TOPLEFT");
+                        CdbTooltip:ClearLines();
+                        CdbTooltip:SetText("Cycle through marked zones.");
+                        CdbTooltip:Show();
                     </OnEnter>
-                    <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
+                    <OnLeave>CdbTooltip:Hide();</OnLeave>
                 </Scripts>
                 <NormalTexture file="Interface\Addons\ClassicDB\symbols\MapCycle"/>
                 <PushedTexture file="Interface\Addons\ClassicDB\symbols\MapCyclePushed"/>
@@ -242,14 +242,14 @@
                 </Anchors>
                 <Scripts>
                     <OnLoad> if not Questie then ToggleQuestieNotes:Hide(); end </OnLoad>
-                    <OnClick> if Questie then Questie:Toggle(); else ShaguDB_Print("Questie not found."); end </OnClick>
+                    <OnClick> if Questie then Questie:Toggle(); else CdbPrint("Questie not found."); end </OnClick>
                     <OnEnter>
-                        ShaguDB_Tooltip:SetOwner(ToggleQuestieNotes, "ANCHOR_TOPLEFT");
-                        ShaguDB_Tooltip:ClearLines();
-                        ShaguDB_Tooltip:SetText("Toggle Questie.");
-                        ShaguDB_Tooltip:Show();
+                        CdbTooltip:SetOwner(ToggleQuestieNotes, "ANCHOR_TOPLEFT");
+                        CdbTooltip:ClearLines();
+                        CdbTooltip:SetText("Toggle Questie.");
+                        CdbTooltip:Show();
                     </OnEnter>
-                    <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
+                    <OnLeave>CdbTooltip:Hide();</OnLeave>
                 </Scripts>
                 <NormalTexture file="Interface\Addons\ClassicDB\symbols\OnOff"/>
                 <PushedTexture file="Interface\Addons\ClassicDB\symbols\OnOffPushed"/>
@@ -265,18 +265,18 @@
                 </Anchors>
                 <Scripts>
                     <OnShow>
-                        ShaguDB_CheckSetting("waypoints");
+                        CdbCheckSetting("waypoints");
                     </OnShow>
                     <OnClick>
-                        ShaguDB_SwitchSetting("waypoints");
+                        CdbSwitchSetting("waypoints");
                     </OnClick>
                     <OnEnter>
-                        ShaguDB_Tooltip:SetOwner(waypoints, "ANCHOR_TOPLEFT");
-                        ShaguDB_Tooltip:ClearLines();
-                        ShaguDB_Tooltip:SetText("Plot waypoints for marked NPCs.");
-                        ShaguDB_Tooltip:Show();
+                        CdbTooltip:SetOwner(waypoints, "ANCHOR_TOPLEFT");
+                        CdbTooltip:ClearLines();
+                        CdbTooltip:SetText("Plot waypoints for marked NPCs.");
+                        CdbTooltip:Show();
                     </OnEnter>
-                    <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
+                    <OnLeave>CdbTooltip:Hide();</OnLeave>
                 </Scripts>
             </CheckButton>
             <CheckButton name="auto_plot" inherits="OptionsCheckButtonTemplate">
@@ -290,18 +290,18 @@
                 </Anchors>
                 <Scripts>
                     <OnShow>
-                        ShaguDB_CheckSetting("auto_plot");
+                        CdbCheckSetting("auto_plot");
                     </OnShow>
                     <OnClick>
-                        ShaguDB_SwitchSetting("auto_plot");
+                        CdbSwitchSetting("auto_plot");
                     </OnClick>
                     <OnEnter>
-                        ShaguDB_Tooltip:SetOwner(auto_plot, "ANCHOR_TOPLEFT");
-                        ShaguDB_Tooltip:ClearLines();
-                        ShaguDB_Tooltip:SetText("Automatically update quest notes.");
-                        ShaguDB_Tooltip:Show();
+                        CdbTooltip:SetOwner(auto_plot, "ANCHOR_TOPLEFT");
+                        CdbTooltip:ClearLines();
+                        CdbTooltip:SetText("Automatically update quest notes.");
+                        CdbTooltip:Show();
                     </OnEnter>
-                    <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
+                    <OnLeave>CdbTooltip:Hide();</OnLeave>
                 </Scripts>
             </CheckButton>
             <CheckButton name="questStarts" inherits="OptionsCheckButtonTemplate">
@@ -315,21 +315,21 @@
                 </Anchors>
                 <Scripts>
                     <OnShow>
-                        ShaguDB_CheckSetting("questStarts");
+                        CdbCheckSetting("questStarts");
                     </OnShow>
                     <OnClick>
-                        ShaguDB_SwitchSetting("questStarts");
+                        CdbSwitchSetting("questStarts");
                     </OnClick>
                     <OnEnter>
-                        ShaguDB_Tooltip:SetOwner(questStarts, "ANCHOR_TOPLEFT");
-                        ShaguDB_Tooltip:ClearLines();
-                        ShaguDB_Tooltip:SetText("Automatically show quest start notes upon changing map zone.");
-                        ShaguDB_Tooltip:Show();
+                        CdbTooltip:SetOwner(questStarts, "ANCHOR_TOPLEFT");
+                        CdbTooltip:ClearLines();
+                        CdbTooltip:SetText("Automatically show quest start notes upon changing map zone.");
+                        CdbTooltip:Show();
                     </OnEnter>
-                    <OnLeave>ShaguDB_Tooltip:Hide();</OnLeave>
+                    <OnLeave>CdbTooltip:Hide();</OnLeave>
                 </Scripts>
             </CheckButton>
         </Frames>
     </Frame>
-    <GameTooltip name="ShaguDB_Tooltip" inherits="GameTooltipTemplate"/>
+    <GameTooltip name="CdbTooltip" inherits="GameTooltipTemplate"/>
 </Ui>

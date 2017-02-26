@@ -1348,7 +1348,7 @@ do
 												'func', editNoteFunc
 											)
 										end
-										if poi.creator == 'ShaguDB' then
+										if poi.creator == 'ClassicDB' then
 											local quests = {};
 											local i = 0;
 											local j = 0;
@@ -1356,13 +1356,13 @@ do
 												i, j = string.find(poi.info, 'ID: %d+', i+1);
 												if i == nil then break; end
 												table.insert(quests, tonumber(string.sub(poi.info, i+4, j)));
-												ShaguDB_Debug_Print(4, string.sub(poi.info, i+4, j));
+												CdbDebugPrint(4, string.sub(poi.info, i+4, j));
 											end
 											for k, v in pairs(quests) do
 												Dewdrop:AddLine(
 													'text', "Finish quest '"..qData[v][1].."' ("..v..")",
 													'func', function (val)
-														ShaguDB_FinishQuest(val)
+														CdbMarkQuestAsFinished(val)
 													end,
 													'arg1', v
 												)
