@@ -852,7 +852,7 @@ end
 function CdbSearchGui:SearchSpawn(search)
     local spawnCount = 1;
     local database = CdbFavourites["spawn"]
-    if strlen(search) > 2 then database = npcData end
+    if ((strlen(search) > 2) or (tonumber(search) ~= nil)) then database = npcData end
     for id, spawn in pairs(database) do
         local npc;
         if type(spawn) == "boolean" then
@@ -860,7 +860,8 @@ function CdbSearchGui:SearchSpawn(search)
         else
             npc = spawn;
         end
-        if (npc ~= nil) and (strfind(strlower(npc[DB_NAME]), strlower(search))) or strlen(search) <= 2 then
+        -- TODO Make a separate function for this search and the the whole button drawing. It's redundant with the object/item/quest search, apart from a few things that can be handeled with if conditions.
+        if npc ~= nil and ((tonumber(search) == nil and (strlen(search) <= 2 or strfind(strlower(npc[DB_NAME]), strlower(search)))) or (tonumber(search) ~= nil and strfind(tostring(id), search))) then
             if ( spawnCount <= 14) then
                 local name = npc[DB_NAME];
                 CdbSearchGui.spawn.buttons[spawnCount] = CreateFrame("Button","mybutton",CdbSearchGui.spawn,"UIPanelButtonTemplate")
@@ -967,7 +968,7 @@ end
 function CdbSearchGui:SearchObject(search)
     local objectCount = 1;
     local database = CdbFavourites["object"]
-    if strlen(search) > 2 then database = objData end
+    if ((strlen(search) > 2) or (tonumber(search) ~= nil)) then database = objData end
     for id, object in pairs(database) do
         local obj;
         if type(object) == "boolean" then
@@ -975,7 +976,7 @@ function CdbSearchGui:SearchObject(search)
         else
             obj = object;
         end
-        if (strfind(strlower(obj[DB_NAME]), strlower(search))) or strlen(search) <= 2 then
+        if obj ~= nil and ((tonumber(search) == nil and (strlen(search) <= 2 or strfind(strlower(obj[DB_NAME]), strlower(search)))) or (tonumber(search) ~= nil and strfind(tostring(id), search))) then
             if ( objectCount <= 14) then
                 local name = obj[DB_NAME];
                 CdbSearchGui.object.buttons[objectCount] = CreateFrame("Button","mybutton",CdbSearchGui.object,"UIPanelButtonTemplate")
@@ -1078,7 +1079,7 @@ end
 function CdbSearchGui:SearchItem(search)
     local itemCount = 1;
     local database = CdbFavourites["item"]
-    if strlen(search) > 2 then database = itemData end
+    if ((strlen(search) > 2) or (tonumber(search) ~= nil)) then database = itemData end
     for id, item in pairs(database) do
         local itm;
         if type(item) == "boolean" then
@@ -1086,7 +1087,7 @@ function CdbSearchGui:SearchItem(search)
         else
             itm = item;
         end
-        if (strfind(strlower(itm[DB_ITM_NAME]), strlower(search))) or strlen(search) <= 2 then
+        if itm ~= nil and ((tonumber(search) == nil and (strlen(search) <= 2 or strfind(strlower(itm[DB_ITM_NAME]), strlower(search)))) or (tonumber(search) ~= nil and strfind(tostring(id), search))) then
             if ( itemCount <= 14) then
                 local name = itm[DB_ITM_NAME];
                 local itemColor
@@ -1256,7 +1257,7 @@ end
 function CdbSearchGui:SearchQuest(search)
     local questCount = 1;
     local database = CdbFavourites["quest"]
-    if strlen(search) > 2 then database = qData end
+    if ((strlen(search) > 2) or (tonumber(search) ~= nil)) then database = qData end
     for id, quest in pairs(database) do
         local q;
         if type(quest) == "boolean" then
@@ -1264,7 +1265,7 @@ function CdbSearchGui:SearchQuest(search)
         else
             q = quest;
         end
-        if (strfind(strlower(q[DB_NAME]), strlower(search))) or strlen(search) <= 2 then
+        if q ~= nil and ((tonumber(search) == nil and (strlen(search) <= 2 or strfind(strlower(q[DB_NAME]), strlower(search)))) or (tonumber(search) ~= nil and strfind(tostring(id), search))) then
             if questCount <= 14 then
                 local name = q[DB_NAME];
                 CdbSearchGui.quest.buttons[questCount] = CreateFrame("Button","mybutton",CdbSearchGui.quest,"UIPanelButtonTemplate")
