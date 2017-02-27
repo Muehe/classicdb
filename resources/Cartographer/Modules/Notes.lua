@@ -1807,7 +1807,7 @@ function Cartographer_Notes:ShowNote(zone, id, creator)
 		poi:SetWidth(t.width*self.db.profile.iconSize)
 		poi:SetHeight(t.height*self.db.profile.iconSize)
 		poi:SetAlpha(t.alpha)
-		if icon == "QuestionMark" or icon == "quest" then poi:SetFrameLevel(10); end -- WHDB related. Quest End > Normal notes.
+		if icon == "CdbQuestionMark" or icon == "quest" then poi:SetFrameLevel(10); end -- WHDB related. Quest End > Normal notes.
 		poi.texture:SetTexture(t.path)
 		poi.texture:SetTexCoord(t.cLeft, t.cRight, t.cTop, t.cBottom)
 	end

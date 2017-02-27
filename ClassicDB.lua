@@ -1,4 +1,5 @@
 -- Global Variables
+cMark = "CdbIcon1";
 --[[
 0 = off
 1 = standard debug notes
@@ -78,93 +79,93 @@ function CdbOnEvent(event, ...)
         end
 
         -- load symbols
-        Cartographer_Notes:RegisterIcon("NPC", {
-            text = "NPC",
+        Cartographer_Notes:RegisterIcon("CdbCreature", {
+            text = "CdbCreature",
             path = "Interface\\WorldMap\\WorldMapPartyIcon",
             width = 12,
             height = 12,
         })
-        Cartographer_Notes:RegisterIcon("Waypoint", {
-            text = "Waypoint",
+        Cartographer_Notes:RegisterIcon("CdbWaypoint", {
+            text = "CdbWaypoint",
             path = "Interface\\WorldMap\\WorldMapPlayerIcon",
             width = 12,
             height = 12,
         })
-        Cartographer_Notes:RegisterIcon("QuestionMark", {
-            text = "QuestionMark",
+        Cartographer_Notes:RegisterIcon("CdbQuestionMark", {
+            text = "CdbQuestionMark",
             path = "Interface\\AddOns\\ClassicDB\\symbols\\complete",
             width = 16,
             height = 16,
         })
-        Cartographer_Notes:RegisterIcon("ExclamationMark", {
-            text = "ExclamationMark",
+        Cartographer_Notes:RegisterIcon("CdbExclamationMark", {
+            text = "CdbExclamationMark",
             path = "Interface\\AddOns\\ClassicDB\\symbols\\available",
             width = 16,
             height = 16,
         })
-        Cartographer_Notes:RegisterIcon("AreaTrigger", {
-            text = "AreaTrigger",
+        Cartographer_Notes:RegisterIcon("CdbAreaTrigger", {
+            text = "CdbAreaTrigger",
             path = "Interface\\AddOns\\ClassicDB\\symbols\\event",
             width = 16,
             height = 16,
         })
-        Cartographer_Notes:RegisterIcon("Vendor", {
-            text = "Vendor",
+        Cartographer_Notes:RegisterIcon("CdbVendor", {
+            text = "CdbVendor",
             path = "Interface\\AddOns\\ClassicDB\\symbols\\vendor",
             width = 16,
             height = 16,
         })
-        Cartographer_Notes:RegisterIcon("Object", {
-            text = "Vendor",
+        Cartographer_Notes:RegisterIcon("CdbObject", {
+            text = "CdbObject",
             path = "Interface\\AddOns\\ClassicDB\\symbols\\icon_object",
             width = 16,
             height = 16,
         })
 
         -- Switched 3 and 7 for better contrast of colors follwing each other
-        Cartographer_Notes:RegisterIcon("mk1", {
+        Cartographer_Notes:RegisterIcon("CdbIcon1", {
             text = "Mark 1",
             path = "Interface\\AddOns\\ClassicDB\\symbols\\mk1",
             width = 16,
             height = 16,
         })
-        Cartographer_Notes:RegisterIcon("mk2", {
+        Cartographer_Notes:RegisterIcon("CdbIcon2", {
             text = "Mark 2",
             path = "Interface\\AddOns\\ClassicDB\\symbols\\mk2",
             width = 16,
             height = 16,
         })
-        Cartographer_Notes:RegisterIcon("mk3", {
+        Cartographer_Notes:RegisterIcon("CdbIcon3", {
             text = "Mark 3",
             path = "Interface\\AddOns\\ClassicDB\\symbols\\mk7",
             width = 16,
             height = 16,
         })
-        Cartographer_Notes:RegisterIcon("mk4", {
+        Cartographer_Notes:RegisterIcon("CdbIcon4", {
             text = "Mark 4",
             path = "Interface\\AddOns\\ClassicDB\\symbols\\mk4",
             width = 16,
             height = 16,
         })
-        Cartographer_Notes:RegisterIcon("mk5", {
+        Cartographer_Notes:RegisterIcon("CdbIcon5", {
             text = "Mark 5",
             path = "Interface\\AddOns\\ClassicDB\\symbols\\mk5",
             width = 16,
             height = 16,
         })
-        Cartographer_Notes:RegisterIcon("mk6", {
+        Cartographer_Notes:RegisterIcon("CdbIcon6", {
             text = "Mark 6",
             path = "Interface\\AddOns\\ClassicDB\\symbols\\mk6",
             width = 16,
             height = 16,
         })
-        Cartographer_Notes:RegisterIcon("mk7", {
+        Cartographer_Notes:RegisterIcon("CdbIcon7", {
             text = "Mark 7",
             path = "Interface\\AddOns\\ClassicDB\\symbols\\mk3",
             width = 16,
             height = 16,
         })
-        Cartographer_Notes:RegisterIcon("mk8", {
+        Cartographer_Notes:RegisterIcon("CdbIcon8", {
             text = "Mark 8",
             path = "Interface\\AddOns\\ClassicDB\\symbols\\mk8",
             width = 16,
@@ -471,7 +472,7 @@ function CdbInit()
         elseif (arg1 == "vendor") then
             local itemName = arg2;
             CdbMapNotes = {};
-            CdbPrepareItemNotes(itemName, "Vendors for: "..itemName, "Sells: "..itemName, "Vendor", {DB_VENDOR});
+            CdbPrepareItemNotes(itemName, "Vendors for: "..itemName, "Sells: "..itemName, "CdbVendor", {DB_VENDOR});
             CdbShowMap();
         elseif (arg1 == "spawn") then
             local monsterName = arg2;
@@ -583,22 +584,24 @@ function CdbPrint(string)
 end -- Print(string)
 
 function CdbNextMark()
-  if (cMark == "mk1") then
-    cMark = "mk2";
-  elseif (cMark == "mk2") then
-    cMark = "mk3";
-  elseif (cMark == "mk3") then
-    cMark = "mk4";
-  elseif (cMark == "mk4") then
-    cMark = "mk5";
-  elseif (cMark == "mk5") then
-    cMark = "mk6";
-  elseif (cMark == "mk6") then
-    cMark = "mk7";
-  elseif (cMark == "mk7") then
-    cMark = "mk8";
-  elseif (cMark == "mk8") then
-    cMark = "mk1";
+  if (cMark == "CdbIcon1") then
+    cMark = "CdbIcon2";
+  elseif (cMark == "CdbIcon2") then
+    cMark = "CdbIcon3";
+  elseif (cMark == "CdbIcon3") then
+    cMark = "CdbIcon4";
+  elseif (cMark == "CdbIcon4") then
+    cMark = "CdbIcon5";
+  elseif (cMark == "CdbIcon5") then
+    cMark = "CdbIcon6";
+  elseif (cMark == "CdbIcon6") then
+    cMark = "CdbIcon7";
+  elseif (cMark == "CdbIcon7") then
+    cMark = "CdbIcon8";
+  elseif (cMark == "CdbIcon8") then
+    cMark = "CdbIcon1";
+  else
+    cMark = "CdbIcon1";
   end
 end -- NextCMark()
 
@@ -632,9 +635,9 @@ end -- ShowMap()
 function CdbCheckIcons(a, b)
     if a ~= -1 then
         if a ~= b then
-            if (a == 2 or b == 2 or a == "QuestionMark" or b == "QuestionMark") then
+            if (a == 2 or b == 2 or a == "CdbQuestionMark" or b == "CdbQuestionMark") then
                 a = 2;
-            elseif (a == 5 or b == 5 or a == "ExclamationMark" or b == "ExclamationMark") then
+            elseif (a == 5 or b == 5 or a == "CdbExclamationMark" or b == "CdbExclamationMark") then
                 a = 5;
             else
                 a = 0;
@@ -731,21 +734,21 @@ function CdbDrawNotesOnMap()
         end
         if (Cartographer_Notes ~= nil) and (not instance) then
             if (nData[6] == 0) then
-                Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, "NPC", "ClassicDB", 'title', nData[4], 'info', nData[5]);
+                Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, "CdbCreature", "ClassicDB", 'title', nData[4], 'info', nData[5]);
             elseif (nData[6] == 1) then
                 Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, "Diamond", "ClassicDB", 'title', nData[4], 'info', nData[5]);
             elseif (nData[6] == 2) then
-                Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, "QuestionMark", "ClassicDB", 'title', nData[4], 'info', nData[5]);
+                Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, "CdbQuestionMark", "ClassicDB", 'title', nData[4], 'info', nData[5]);
             elseif (nData[6] == 3) then
-                Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, "Waypoint", "ClassicDB", 'title', nData[4], 'info', nData[5]);
+                Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, "CdbWaypoint", "ClassicDB", 'title', nData[4], 'info', nData[5]);
             elseif (nData[6] == 4) then
                 Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, "Cross", "ClassicDB", 'title', nData[4], 'info', nData[5]);
             elseif (nData[6] == 5) then
-                Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, "ExclamationMark", "ClassicDB", 'title', nData[4], 'info', nData[5]);
+                Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, "CdbExclamationMark", "ClassicDB", 'title', nData[4], 'info', nData[5]);
             elseif (nData[6] == 6) then
-                Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, "Vendor", "ClassicDB", 'title', nData[4], 'info', nData[5]);
+                Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, "CdbVendor", "ClassicDB", 'title', nData[4], 'info', nData[5]);
             elseif (nData[6] == 7) then
-                Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, "AreaTrigger", "ClassicDB", 'title', nData[4], 'info', nData[5]);
+                Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, "CdbAreaTrigger", "ClassicDB", 'title', nData[4], 'info', nData[5]);
             elseif (nData[6] ~= nil) then
                 Cartographer_Notes:SetNote(nData[1], nData[2]/100, nData[3]/100, nData[6], "ClassicDB", 'title', nData[4], 'info', nData[5]);
             end
@@ -1527,7 +1530,7 @@ function CdbGetQuestNotes(questLogID)
                                         else
                                             comment = comment..objectiveText..": "..numItems.."/"..numNeeded.."|r\n";
                                         end
-                                        CdbPrepareForDrawing(DB_OBJ, objectId, title, comment, "Object");
+                                        CdbPrepareForDrawing(DB_OBJ, objectId, title, comment, "CdbObject");
                                     end
                                 end
                             end
@@ -1543,7 +1546,7 @@ function CdbGetQuestNotes(questLogID)
                                             else
                                                 comment = comment..objectiveText..": "..numItems.."/"..numNeeded.."|r\n";
                                             end
-                                            CdbPrepareForDrawing(DB_OBJ, objectId, title, comment, "Object");
+                                            CdbPrepareForDrawing(DB_OBJ, objectId, title, comment, "CdbObject");
                                         end
                                     end
                                 end
@@ -1899,7 +1902,7 @@ function CdbGetQuestNotesById(questId)
                 for _, id in pairs(v) do
                     CdbDebugPrint(8, "    starts ", id)
                     local comment = "-";
-                    local icon = "ExclamationMark";
+                    local icon = "CdbExclamationMark";
                     if k == DB_NPC then comment = "|cFFa6a6a6Creature|r "..npcData[id][DB_NAME].." |cFFa6a6a6starts the quest|r";
                     elseif k == DB_OBJ then comment = "|cFFa6a6a6Object|r "..objData[id][DB_NAME].." |cFFa6a6a6starts the quest|r";
                     elseif k == DB_ITM then comment = "|cFFa6a6a6Aquire item|r "..itemData[id][DB_ITM_NAME].." |cFFa6a6a6 to start the quest|r";
@@ -1913,9 +1916,19 @@ function CdbGetQuestNotesById(questId)
                 for _, id in pairs(v) do
                     CdbDebugPrint(8, "    ends", id)
                     local comment = "+";
-                    local icon = "QuestionMark";
-                    if k == DB_NPC then comment = "|cFFa6a6a6Creature|r "..npcData[id][DB_NAME].." |cFFa6a6a6ends the quest|r";
-                    elseif k == DB_OBJ then comment = "|cFFa6a6a6Object|r "..objData[id][DB_NAME].." |cFFa6a6a6ends the quest|r";
+                    local icon = "CdbQuestionMark";
+                    if k == DB_NPC then
+                        if not npcData[id] then
+                            CdbDebugPrint(16, "Missing creature "..id);
+                        else
+                            comment = "|cFFa6a6a6Creature|r "..npcData[id][DB_NAME].." |cFFa6a6a6ends the quest|r";
+                        end
+                    elseif k == DB_OBJ then
+                        if not objData[id] then
+                            CdbDebugPrint(16, "Missing object "..id);
+                        else
+                            comment = "|cFFa6a6a6Object|r "..objData[id][DB_NAME].." |cFFa6a6a6ends the quest|r";
+                        end
                     end
                     CdbPrepareForDrawing(k, id, title, comment, icon);
                 end
@@ -1934,10 +1947,10 @@ function CdbGetQuestNotesById(questId)
                         local comment, icon = ".", 4;
                         if k == DB_NPC and text == nil and npcData[id] then comment = "|cFFa6a6a6'Creature'-type objective:|r "..npcData[id][DB_NAME]; icon = cMark;
                         elseif k == DB_NPC and text then comment = "|cFFa6a6a6'Creature'-type objective:|r "..text; icon = cMark;
-                        elseif k == DB_OBJ and text == nil and objData[id] then comment = "|cFFa6a6a6'Object'-type objective:|r "..objData[id][DB_NAME]; icon = "Object";
-                        elseif k == DB_OBJ and text then comment = "|cFFa6a6a6'Object'-type objective:|r "..text; icon = "Object";
-                        elseif k == DB_ITM and text == nil and id ~= quest[DB_SRC_ITM] and itemData[id] then comment = "|cFFa6a6a6'Item'-type objective:|r "..itemData[id][DB_ITM_NAME]; icon = "Vendor";
-                        elseif k == DB_ITM and text then comment = "|cFFa6a6a6Item type objective:|r "..text; icon = "Vendor";
+                        elseif k == DB_OBJ and text == nil and objData[id] then comment = "|cFFa6a6a6'Object'-type objective:|r "..objData[id][DB_NAME]; icon = "CdbObject";
+                        elseif k == DB_OBJ and text then comment = "|cFFa6a6a6'Object'-type objective:|r "..text; icon = "CdbObject";
+                        elseif k == DB_ITM and text == nil and id ~= quest[DB_SRC_ITM] and itemData[id] then comment = "|cFFa6a6a6'Item'-type objective:|r "..itemData[id][DB_ITM_NAME]; icon = "CdbVendor";
+                        elseif k == DB_ITM and text then comment = "|cFFa6a6a6Item type objective:|r "..text; icon = "CdbVendor";
                         end
                         if comment ~= "." and icon ~= 4 then CdbPrepareForDrawing(k, id, title, comment, icon); end
                     end
@@ -1946,7 +1959,7 @@ function CdbGetQuestNotesById(questId)
         end
         if quest[DB_SRC_ITM] then
             if not (CdbPrepare[DB_ITM][quest[DB_SRC_ITM]] == true) and itemData[quest[DB_SRC_ITM]] then
-                CdbPrepareForDrawing(DB_ITM, quest[DB_SRC_ITM], title, "|cFFa6a6a6Item related to quest:|r "..quest[DB_NAME], "Vendor");
+                CdbPrepareForDrawing(DB_ITM, quest[DB_SRC_ITM], title, "|cFFa6a6a6Item related to quest:|r "..quest[DB_NAME], "CdbVendor");
             end
         end
     end

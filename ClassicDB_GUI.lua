@@ -1186,7 +1186,7 @@ function CdbSearchGui:SearchItem(search)
                     CdbSearchGui.item.buttons[itemCount].lootObj.icon:SetAllPoints(CdbSearchGui.item.buttons[itemCount].lootObj)
                     CdbSearchGui.item.buttons[itemCount].lootObj:SetScript("OnClick", function(self)
                         CdbMapNotes = {};
-                        CdbPrepareItemNotes(this:GetParent().itemId, "Location for: "..this:GetParent().itemName, "Contains item: "..this:GetParent().itemName, "Object", {DB_OBJ});
+                        CdbPrepareItemNotes(this:GetParent().itemId, "Location for: "..this:GetParent().itemName, "Contains item: "..this:GetParent().itemName, "CdbObject", {DB_OBJ});
                         CdbNextMark();
                         CdbShowMap();
                     end)
@@ -1211,7 +1211,7 @@ function CdbSearchGui:SearchItem(search)
                     CdbSearchGui.item.buttons[itemCount].vendor.icon:SetAllPoints(CdbSearchGui.item.buttons[itemCount].vendor)
                     CdbSearchGui.item.buttons[itemCount].vendor:SetScript("OnClick", function(self)
                         CdbMapNotes = {};
-                        CdbPrepareItemNotes(this:GetParent().itemId, "Location for: "..this:GetParent().itemName, "Sells item: "..this:GetParent().itemName, "Vendor", {DB_VENDOR});
+                        CdbPrepareItemNotes(this:GetParent().itemId, "Location for: "..this:GetParent().itemName, "Sells item: "..this:GetParent().itemName, "CdbVendor", {DB_VENDOR});
                         CdbNextMark();
                         CdbShowMap();
                     end)
