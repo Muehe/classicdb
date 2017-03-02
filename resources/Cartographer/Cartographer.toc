@@ -1,6 +1,6 @@
 ## Interface: 11200
 ## Notes: Addon to manipulate the map. Minor changes to work better with ClassicDB.
-## Title: Cartographer (|cff33ffccClassic|cffffffffDB)|cff7fff7f -Ace2-|r
+## Title: Cartographer |cff7fff7f -Ace2- |cff33ffcc(Classic|cffffffffDB|cff33ffcc)|r
 ## Title-koKR: |CFFFF0000C|CFFFFFFFFartographer |cff7fff7f -Ace2-|r
 ## Author: ckknight
 ## DefaultState: enabled
