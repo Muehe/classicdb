@@ -19,6 +19,8 @@ version = config['default']['version']
 path = config['default']['release_path']
 release_de = config['default']['release_de']
 
+runPath = os.path.dirname(os.path.abspath(__file__))
+
 enPath = path+'ClassicDB-'+version+'-enGB/'
 if os.path.exists(enPath[:-1]):
     sys.exit('Path "'+enPath+'" already exists')
@@ -47,6 +49,10 @@ else:
     shutil.copy2('resources/spawnDB.lua_enGB', enPath+'ClassicDB/db/spawnDB.lua')
     shutil.copy2('resources/zoneDB.lua_enGB', enPath+'ClassicDB/db/zoneDB.lua')
 
+    os.chdir(path)
+    subprocess.run(['zip', '-r', 'ClassicDB-'+version+'-enGB.zip', 'ClassicDB-'+version+'-enGB/'])
+    os.chdir(runPath)
+
 dePath = path+'ClassicDB-'+version+'-deDE/'
 if os.path.exists(dePath[:-1]):
     sys.exit('Path "'+dePath+'" already exists')
@@ -74,3 +80,6 @@ else:
     shutil.copy2('resources/questDB.lua_deDE', dePath+'ClassicDB/db/questDB.lua')
     shutil.copy2('resources/spawnDB.lua_deDE', dePath+'ClassicDB/db/spawnDB.lua')
     shutil.copy2('resources/zoneDB.lua_deDE', dePath+'ClassicDB/db/zoneDB.lua')
+
+    os.chdir(path)
+    subprocess.run(['zip', '-r', 'ClassicDB-'+version+'-deDE.zip', 'ClassicDB-'+version+'-deDE/'])
