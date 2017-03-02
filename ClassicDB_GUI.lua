@@ -73,7 +73,12 @@ CdbSearchGui.minimapButton:SetScript("OnClick", function()
     if ( arg1 == "LeftButton" ) then
         if IsShiftKeyDown() then
             Cartographer_Notes:SetIconSize(1);
-            WorldMapFrame:SetScale(1);
+            Cartographer_LookNFeel:SetScale(1);
+            local size = 1;
+            if Cartographer_LookNFeel.db.profile.largePlayer then
+                size = size*1.5;
+            end
+            Cartographer_LookNFeel.playerModel:SetModelScale(size);
             WorldMapFrame:StartMoving();
             WorldMapFrame:SetPoint("CENTER", 0, 0);
             WorldMapFrame:StopMovingOrSizing();
