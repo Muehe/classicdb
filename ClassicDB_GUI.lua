@@ -849,9 +849,6 @@ function CdbSearchGui.HideButtons()
         if (CdbSearchGui.quest.buttons[i]) then
             CdbSearchGui.quest.buttons[i]:Hide();
         end
-        if (CdbSearchGui.settings.buttons[i]) then
-            CdbSearchGui.settings.buttons[i]:Hide();
-        end
     end
 end
 function CdbSearchGui:SearchSpawn(search)
