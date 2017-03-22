@@ -1175,32 +1175,33 @@ function CdbGetObjIds(objName)
     end
 end -- GetObjID(objName)
 
-function CdbSwitchSetting(setting, ...)
-    text = {
+CdbSettingsText = {
         ["waypoints"] = "Showing waypoints",
         ["auto_plot"] = "Automatically tracking quests",
         ["questStarts"] = "Showing quest starts",
         ["reqLevel"] = "Showing required level in quest start tooltips",
-        ["filterReqLevel"] = "Filtering quest starts by required level",
-        ["questIds"] = "Showing quest IDs in tooltips",
+        ["filterPreQuest"] = "Filter quest starts based on finished quests",
+        ["filterReqLevel"] = "Filter quest starts based on required level",
+        ["questIds"] = "Showing quest IDs in tooltips (currently unused)",
         ["dbMode"] = "DB Mode",
         ["item_item"] = "Showing items dropped by items",
-        ["minDropChance"] = "Minimum drop chance for items to be shown",
-    };
+};
+
+function CdbSwitchSetting(setting, ...)
     if (CdbSettings[setting] == false) then
         CdbSettings[setting] = true;
-        CdbPrint(text[setting].." enabled.");
+        CdbPrint(CdbSettingsText[setting].." enabled.");
     elseif (setting == "minDropChance") then
         local number = tonumber(arg1);
         if (number) and (number >= 0 and number <= 101) then
             CdbSettings[setting] = number;
-            CdbPrint(text[setting].." set to: "..number);
+            CdbPrint(CdbSettingsText[setting].." set to: "..number);
         else
-            CdbPrint(text[setting].." is: "..CdbSettings[setting]);
+            CdbPrint(CdbSettingsText[setting].." is: "..CdbSettings[setting]);
         end
     else
         CdbSettings[setting] = false;
-        CdbPrint(text[setting].." disabled.");
+        CdbPrint(CdbSettingsText[setting].." disabled.");
     end
     CdbCheckSetting(setting);
     if (setting == "auto_plot") and (CdbSettings[setting]) then
@@ -1211,20 +1212,10 @@ function CdbSwitchSetting(setting, ...)
 end -- SwitchSetting(setting)
 
 function CdbGetSetting(setting, ...)
-    text = {
-        ["waypoints"] = "Showing waypoints",
-        ["auto_plot"] = "Automatically tracking quests",
-        ["questStarts"] = "Showing quest starts",
-        ["reqLevel"] = "Showing required level in quest start tooltips",
-        ["filterReqLevel"] = "Filtering quest starts by required level",
-        ["questIds"] = "Showing quest IDs in tooltips",
-        ["dbMode"] = "DB Mode",
-        ["item_item"] = "Showing items dropped by items",
-    };
-    if (text[setting]) and (CdbSettings[setting]) then
-        return text[setting].." is|cFF40C040 enabled|r";
-    elseif (text[setting]) then
-        return text[setting].." is|cFFFF1A1A disabled|r";
+    if (CdbSettingsText[setting]) and (CdbSettings[setting]) then
+        return CdbSettingsText[setting].." is|cFF40C040 enabled|r";
+    elseif (CdbSettingsText[setting]) then
+        return CdbSettingsText[setting].." is|cFFFF1A1A disabled|r";
     end
 end -- GetSetting(setting, ...)
 
@@ -1744,9 +1735,9 @@ function CdbGetQuestStartComment(npcOrGoStarts)
             if level == -1 then level = UnitLevel("player"); end
             if not skip then
                 tooltipText = tooltipText..colorString.."["..level.."] "..qData[questID][DB_NAME].."|r\n";
-                if CdbSettings.questIds and CdbSettings.reqLevel then
+                if CdbSettings.reqLevel then
                     tooltipText = tooltipText.."|cFFa6a6a6(ID: "..questID..") | |r";
-                elseif CdbSettings.questIds then
+                else
                     tooltipText = tooltipText.."|cFFa6a6a6(ID: "..questID..")|r\n";
                 end
                 if CdbSettings.reqLevel then

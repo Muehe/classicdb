@@ -352,34 +352,15 @@ CdbSearchGui.buttonSettings:SetScript("OnClick", function()
     CdbSearchGui.spawn:Hide()
     CdbSearchGui.quest:Hide()
 
-    for i=1,14 do
-        CdbSearchGui.settings.buttons[1]:SetText("DB Mode")
-        CdbSearchGui.settings.buttons[2]:SetText("Show Quest Starts")
-        CdbSearchGui.settings.buttons[3]:SetText("Filter Quest Starts based on finished quests")
-        CdbSearchGui.settings.buttons[4]:SetText("Filter Quest Starts by required level")
-        CdbSearchGui.settings.buttons[5]:SetText("Show Quest IDs")
-        CdbSearchGui.settings.buttons[6]:SetText("Show required level")
-        CdbSearchGui.settings.buttons[7]:SetText("Items dropped by items")
-        CdbSearchGui.settings.buttons[8]:SetText("Waypoints")
-        CdbSearchGui.settings.buttons[9]:SetText("Auto Plot")
-        if (CdbSearchGui.settings.buttons[i]) then
-            CdbSearchGui.settings.buttons[i]:Show();
+    for name, data in pairs(CdbSearchGui.settings.values) do
+        if data.position > 0 then
+            if (CdbSearchGui.settings.buttons[data.position]) then
+                CdbSearchGui.settings.buttons[data.position]:SetText(data.title)
+                CdbSearchGui.settings.buttons[data.position]:Show();
+            end
         end
     end
 end)
-
---[[
-CdbSearchGui.buttonSettings:SetScript("OnEnter", function(self)
-  this:SetBackdropColor(1,1,1,.25)
-end)
-
-CdbSearchGui.buttonSettings:SetScript("OnLeave", function(self)
-  if this.even == true then
-    this:SetBackdropColor(1,1,1,.05)
-  else
-    this:SetBackdropColor(1,1,1,.10)
-  end
-end)--]]
 
 CdbSearchGui.spawn = CreateFrame("Frame",nil,CdbSearchGui)
 CdbSearchGui.spawn:SetPoint("TOP", 0, -75)
@@ -420,6 +401,9 @@ CdbSearchGui.quest:SetBackdropColor(1,1,1,.15)
 CdbSearchGui.quest:Hide()
 CdbSearchGui.quest.buttons = {}
 
+------------------------------------
+-- Definition for the settings frame
+------------------------------------
 CdbSearchGui.settings = CreateFrame("Frame",nil,CdbSearchGui)
 CdbSearchGui.settings:SetPoint("TOP", 0, -75)
 CdbSearchGui.settings:SetWidth(475)
@@ -428,413 +412,210 @@ CdbSearchGui.settings:SetBackdrop(backdrop_noborder)
 CdbSearchGui.settings:SetBackdropColor(1,1,1,.15)
 --CdbSearchGui.settings:SetFrameStrata("DIALOG")
 CdbSearchGui.settings:Hide()
-CdbSearchGui.settings.buttons = {}
 
-CdbSearchGui.settings.buttons[1] = CreateFrame("Button","mybutton",CdbSearchGui.settings,"UIPanelButtonTemplate")
-CdbSearchGui.settings.buttons[1]:SetPoint("TOP", 0, -1*21+11)
-CdbSearchGui.settings.buttons[1]:SetWidth(450)
-CdbSearchGui.settings.buttons[1]:SetHeight(20)
-CdbSearchGui.settings.buttons[1]:SetFont("Fonts\\FRIZQT__.TTF", 10)
-CdbSearchGui.settings.buttons[1]:SetTextColor(1,1,1,1)
-CdbSearchGui.settings.buttons[1]:SetNormalTexture(nil)
-CdbSearchGui.settings.buttons[1]:SetPushedTexture(nil)
-CdbSearchGui.settings.buttons[1]:SetHighlightTexture(nil)
-CdbSearchGui.settings.buttons[1]:SetBackdrop(backdrop_noborder)
-CdbSearchGui.settings.buttons[1]:SetBackdropColor(1,1,1,.10)
-CdbSearchGui.settings.buttons[1]:SetScript("OnEnter", function(self)
-    this:SetBackdropColor(1,1,1,.25)
-    CdbTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
-    CdbTooltip:ClearLines();
-    CdbTooltip:SetText(CdbGetSetting("dbMode")..
-                            "\n\n|cffffffff"..
-                            "When enabled, this option prevents ClassicDB from cleaning quests\n"..
-                            "for other classes and the opposite faction from the quest DB.\n"..
-                            "Not recommended for normal users, as it adds many unatainable\n"..
-                            "quest starts to the map.|r");
-    CdbTooltip:Show();
-end)
-CdbSearchGui.settings.buttons[1]:SetScript("OnLeave", function(self)
-    this:SetBackdropColor(1,1,1,.10)
-    CdbTooltip:Hide()
-end)
-CdbSearchGui.settings.buttons[1].enabled = CreateFrame("CheckButton","mycheckbutton",CdbSearchGui.settings.buttons[1],"UICheckButtonTemplate")
-CdbSearchGui.settings.buttons[1].enabled:SetPoint("RIGHT", -25, 0)
-CdbSearchGui.settings.buttons[1].enabled:SetWidth(20)
-CdbSearchGui.settings.buttons[1].enabled:SetHeight(20)
-CdbSearchGui.settings.buttons[1].enabled:SetScript("OnShow", function(self)
-    if (CdbSettings.dbMode ~= true) then
-        CdbSearchGui.settings.buttons[1].enabled:SetChecked(false);
+---------------------------------
+-- Definition for the button data
+---------------------------------
+CdbSearchGui.settings.values = {}
+CdbSearchGui.settings.values.dbMode = {
+    position = 1,
+    title = CdbSettingsText.dbMode,
+    OnEnterFunction = function(self)
+        this:SetBackdropColor(1,1,1,.25)
+        CdbTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
+        CdbTooltip:ClearLines();
+        CdbTooltip:SetText(CdbGetSetting("dbMode")..
+                           "\n\n|cffffffff"..
+                           "When enabled, this option prevents ClassicDB from cleaning quests\n"..
+                           "for other classes and the opposite faction from the quest DB.\n"..
+                           "Not recommended for normal users, as it adds many unatainable\n"..
+                           "quest starts to the map.|r");
+        CdbTooltip:Show();
+    end,
+}
+CdbSearchGui.settings.values.questStarts = {
+    position = 2,
+    title = CdbSettingsText.questStarts,
+    OnEnterFunction = function(self)
+        this:SetBackdropColor(1,1,1,.25)
+        CdbTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
+        CdbTooltip:ClearLines();
+        CdbTooltip:SetText(CdbGetSetting("questStarts")..
+                           "\n\n|cffffffff"..
+                           "When enabled, this option shows notes for all quests starts\n"..
+                           "in the currently displayed zone. If it doesn't load immediately\n"..
+                           "reopen the map.|r");
+        CdbTooltip:Show();
+    end,
+}
+CdbSearchGui.settings.values.filterPreQuest = {
+    position = 3,
+    title = CdbSettingsText.filterPreQuest,
+    OnEnterFunction = function(self)
+        this:SetBackdropColor(1,1,1,.25)
+        CdbTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
+        CdbTooltip:ClearLines();
+        CdbTooltip:SetText(CdbGetSetting("filterPreQuest")..
+                           "\n\n|cffffffff"..
+                           "When enabled, this option filter quests starts based on\n"..
+                           "their finished status according to ClassicDB. To mark a\n"..
+                           "quest as finished use the search or right-click it's\n"..
+                           "start icon on the map.|r");
+        CdbTooltip:Show();
+    end,
+}
+CdbSearchGui.settings.values.filterReqLevel = {
+    position = 4,
+    title = CdbSettingsText.filterReqLevel,
+    OnEnterFunction = function(self)
+        this:SetBackdropColor(1,1,1,.25)
+        CdbTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
+        CdbTooltip:ClearLines();
+        CdbTooltip:SetText(CdbGetSetting("filterReqLevel")..
+                           "\n\n|cffffffff"..
+                           "When enabled, this option prevents quest starts from being marked\n"..
+                           "if the player doesn't meet the minimum level requirements.|r");
+        CdbTooltip:Show();
+    end,
+}
+CdbSearchGui.settings.values.reqLevel = {
+    position = 5,
+    title = CdbSettingsText.reqLevel,
+    OnEnterFunction = function(self)
+        this:SetBackdropColor(1,1,1,.25)
+        CdbTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
+        CdbTooltip:ClearLines();
+        CdbTooltip:SetText(CdbGetSetting("reqLevel")..
+                           "\n\n|cffffffff"..
+                           "When enabled, this option shows the required level"..
+                           "in the quest start tooltips.|r");
+        CdbTooltip:Show();
+    end,
+}
+CdbSearchGui.settings.values.item_item = {
+    position = 6,
+    title = CdbSettingsText.item_item,
+    OnEnterFunction = function(self)
+        this:SetBackdropColor(1,1,1,.25)
+        CdbTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
+        CdbTooltip:ClearLines();
+        CdbTooltip:SetText(CdbGetSetting("item_item")..
+                           "\n\n|cffffffff"..
+                           "When enabled, this option shows item drops from other items.|r\n"..
+                           "|cFFFF1A1A!WARNING! This option might be unstable!\n"..
+                           "It is recommended to leave it turned of if not needed.|r");
+        CdbTooltip:Show();
+    end,
+}
+CdbSearchGui.settings.values.waypoints = {
+    position = 7,
+    title = CdbSettingsText.waypoints,
+    OnEnterFunction = function(self)
+        this:SetBackdropColor(1,1,1,.25)
+        CdbTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
+        CdbTooltip:ClearLines();
+        CdbTooltip:SetText(CdbGetSetting("waypoints")..
+                           "\n\n|cffffffff"..
+                           "When enabled, mob waypoints are shown on the map.\n"..
+                           "Due to script spawns not yet being included in the DB\n"..
+                           "this can also be helpful in finding some special mobs.|r");
+        CdbTooltip:Show();
+    end,
+}
+CdbSearchGui.settings.values.auto_plot = {
+    position = 8,
+    title = CdbSettingsText.auto_plot,
+    OnEnterFunction = function(self)
+        this:SetBackdropColor(1,1,1,.25)
+        CdbTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
+        CdbTooltip:ClearLines();
+        CdbTooltip:SetText(CdbGetSetting("auto_plot")..
+                           "\n\n|cffffffff"..
+                           "When enabled, this option shows notes for all quests in the log.\n"..
+                           "It will update automatically every time there is a quest\n"..
+                           "event, like looting. If you experience lags when finishing\n"..
+                           "a quest objective, disable and use the 'Show all notes'\n"..
+                           "button as long as the quest drawing too many notes is in\n"..
+                           "in your quest log.|r");
+        CdbTooltip:Show();
+    end,
+}
+CdbSearchGui.settings.values.questIds = {
+    position = 0,
+    title = CdbSettingsText.questIds,
+    OnEnterFunction = function(self)
+        this:SetBackdropColor(1,1,1,.25)
+        CdbTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
+        CdbTooltip:ClearLines();
+        CdbTooltip:SetText(CdbGetSetting("questIds")..
+                           "\n\n|cffffffff"..
+                           "When enabled, this option shows the quest ID in the quest start tooltips.|r");
+                           -- TODO: Update text once this setting has been fixed. Quest IDs in quest start tooltips are needed for their context menu.
+        CdbTooltip:Show();
+    end,
+}
+
+----------------------------------------------------------------
+-- This function adds the data defined above to the button table
+----------------------------------------------------------------
+CdbSearchGui.settings.addLine = function(settingName, position, title, OnEnterFunction)
+    CdbSearchGui.settings.buttons[position] = CreateFrame("Button","mybutton",CdbSearchGui.settings,"UIPanelButtonTemplate")
+    CdbSearchGui.settings.buttons[position]:SetPoint("TOP", 0, -position*21+11)
+    CdbSearchGui.settings.buttons[position]:SetWidth(450)
+    CdbSearchGui.settings.buttons[position]:SetHeight(20)
+    CdbSearchGui.settings.buttons[position]:SetFont("Fonts\\FRIZQT__.TTF", 10)
+    CdbSearchGui.settings.buttons[position]:SetTextColor(1,1,1,1)
+    CdbSearchGui.settings.buttons[position]:SetNormalTexture(nil)
+    CdbSearchGui.settings.buttons[position]:SetPushedTexture(nil)
+    CdbSearchGui.settings.buttons[position]:SetHighlightTexture(nil)
+    CdbSearchGui.settings.buttons[position]:SetBackdrop(backdrop_noborder)
+    if math.mod(position,2) == 0 then
+        CdbSearchGui.settings.buttons[position]:SetBackdropColor(1,1,1,.05)
+        CdbSearchGui.settings.buttons[position].even = true
     else
-        CdbSearchGui.settings.buttons[1].enabled:SetChecked(true);
+        CdbSearchGui.settings.buttons[position]:SetBackdropColor(1,1,1,.10)
+        CdbSearchGui.settings.buttons[position].even = false
     end
-end)
-CdbSearchGui.settings.buttons[1].enabled:SetScript("OnClick", function(self)
-    CdbSwitchSetting("dbMode");
-    if (CdbSettings.dbMode ~= true) then
-        CdbSearchGui.settings.buttons[1].enabled:SetChecked(false);
-    else
-        CdbSearchGui.settings.buttons[1].enabled:SetChecked(true);
+    CdbSearchGui.settings.buttons[position]:SetScript("OnEnter", OnEnterFunction)
+    CdbSearchGui.settings.buttons[position]:SetScript("OnLeave", function(self)
+        if this.even == true then
+            this:SetBackdropColor(1,1,1,.05)
+        else
+            this:SetBackdropColor(1,1,1,.10)
+        end
+        CdbTooltip:Hide();
+    end)
+    CdbSearchGui.settings.buttons[position].enabled = CreateFrame("CheckButton","mycheckbutton",CdbSearchGui.settings.buttons[position],"UICheckButtonTemplate")
+    CdbSearchGui.settings.buttons[position].enabled:SetPoint("RIGHT", -25, 0)
+    CdbSearchGui.settings.buttons[position].enabled:SetWidth(20)
+    CdbSearchGui.settings.buttons[position].enabled:SetHeight(20)
+    CdbSearchGui.settings.buttons[position].enabled:SetScript("OnShow", function(self)
+        if (CdbSettings[settingName] ~= true) then
+            CdbSearchGui.settings.buttons[position].enabled:SetChecked(false);
+        else
+            CdbSearchGui.settings.buttons[position].enabled:SetChecked(true);
+        end
+    end)
+    CdbSearchGui.settings.buttons[position].enabled:SetScript("OnClick", function(self)
+        CdbSwitchSetting(settingName);
+        if (CdbSettings[settingName] ~= true) then
+            CdbSearchGui.settings.buttons[position].enabled:SetChecked(false);
+        else
+            CdbSearchGui.settings.buttons[position].enabled:SetChecked(true);
+        end
+    end)
+end
+
+-------------------------------------------
+-- Create the button table and add the data
+-------------------------------------------
+CdbSearchGui.settings.buttons = {}
+for name, data in pairs(CdbSearchGui.settings.values) do
+    if data.position > 0 then
+        CdbSearchGui.settings.addLine(name, data.position, data.title, data.OnEnterFunction)
     end
-end)
-CdbSearchGui.settings.buttons[2] = CreateFrame("Button","mybutton",CdbSearchGui.settings,"UIPanelButtonTemplate")
-CdbSearchGui.settings.buttons[2]:SetPoint("TOP", 0, -2*21+11)
-CdbSearchGui.settings.buttons[2]:SetWidth(450)
-CdbSearchGui.settings.buttons[2]:SetHeight(20)
-CdbSearchGui.settings.buttons[2]:SetFont("Fonts\\FRIZQT__.TTF", 10)
-CdbSearchGui.settings.buttons[2]:SetTextColor(1,1,1,1)
-CdbSearchGui.settings.buttons[2]:SetNormalTexture(nil)
-CdbSearchGui.settings.buttons[2]:SetPushedTexture(nil)
-CdbSearchGui.settings.buttons[2]:SetHighlightTexture(nil)
-CdbSearchGui.settings.buttons[2]:SetBackdrop(backdrop_noborder)
-CdbSearchGui.settings.buttons[2]:SetBackdropColor(1,1,1,.05)
-CdbSearchGui.settings.buttons[2]:SetScript("OnEnter", function(self)
-    this:SetBackdropColor(1,1,1,.25)
-    CdbTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
-    CdbTooltip:ClearLines();
-    CdbTooltip:SetText(CdbGetSetting("questStarts")..
-                            "\n\n|cffffffff"..
-                            "When enabled, this option shows notes for all quests starts\n"..
-                            "in the currently displayed zone. If it doesn't load immediately\n"..
-                            "reopen the map.|r");
-    CdbTooltip:Show();
-end)
-CdbSearchGui.settings.buttons[2]:SetScript("OnLeave", function(self)
-    this:SetBackdropColor(1,1,1,.05)
-    CdbTooltip:Hide()
-end)
-CdbSearchGui.settings.buttons[2].enabled = CreateFrame("CheckButton","mycheckbutton",CdbSearchGui.settings.buttons[2],"UICheckButtonTemplate")
-CdbSearchGui.settings.buttons[2].enabled:SetPoint("RIGHT", -25, 0)
-CdbSearchGui.settings.buttons[2].enabled:SetWidth(20)
-CdbSearchGui.settings.buttons[2].enabled:SetHeight(20)
-CdbSearchGui.settings.buttons[2].enabled:SetScript("OnShow", function(self)
-    if (CdbSettings.questStarts ~= true) then
-        CdbSearchGui.settings.buttons[2].enabled:SetChecked(false);
-    else
-        CdbSearchGui.settings.buttons[2].enabled:SetChecked(true);
-    end
-end)
-CdbSearchGui.settings.buttons[2].enabled:SetScript("OnClick", function(self)
-    CdbSwitchSetting("questStarts");
-    if (CdbSettings.questStarts ~= true) then
-        CdbSearchGui.settings.buttons[2].enabled:SetChecked(false);
-    else
-        CdbSearchGui.settings.buttons[2].enabled:SetChecked(true);
-    end
-end)
-CdbSearchGui.settings.buttons[3] = CreateFrame("Button","mybutton",CdbSearchGui.settings,"UIPanelButtonTemplate")
-CdbSearchGui.settings.buttons[3]:SetPoint("TOP", 0, -3*21+11)
-CdbSearchGui.settings.buttons[3]:SetWidth(450)
-CdbSearchGui.settings.buttons[3]:SetHeight(20)
-CdbSearchGui.settings.buttons[3]:SetFont("Fonts\\FRIZQT__.TTF", 10)
-CdbSearchGui.settings.buttons[3]:SetTextColor(1,1,1,1)
-CdbSearchGui.settings.buttons[3]:SetNormalTexture(nil)
-CdbSearchGui.settings.buttons[3]:SetPushedTexture(nil)
-CdbSearchGui.settings.buttons[3]:SetHighlightTexture(nil)
-CdbSearchGui.settings.buttons[3]:SetBackdrop(backdrop_noborder)
-CdbSearchGui.settings.buttons[3]:SetBackdropColor(1,1,1,.05)
-CdbSearchGui.settings.buttons[3]:SetScript("OnEnter", function(self)
-    this:SetBackdropColor(1,1,1,.25)
-    CdbTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
-    CdbTooltip:ClearLines();
-    CdbTooltip:SetText(CdbGetSetting("questStarts")..
-                            "\n\n|cffffffff"..
-                            "When enabled, this option shows notes for all quests starts\n"..
-                            "in the currently displayed zone. If it doesn't load immediately\n"..
-                            "reopen the map.|r");
-    CdbTooltip:Show();
-end)
-CdbSearchGui.settings.buttons[3]:SetScript("OnLeave", function(self)
-    this:SetBackdropColor(1,1,1,.05)
-    CdbTooltip:Hide()
-end)
-CdbSearchGui.settings.buttons[3].enabled = CreateFrame("CheckButton","mycheckbutton",CdbSearchGui.settings.buttons[3],"UICheckButtonTemplate")
-CdbSearchGui.settings.buttons[3].enabled:SetPoint("RIGHT", -25, 0)
-CdbSearchGui.settings.buttons[3].enabled:SetWidth(20)
-CdbSearchGui.settings.buttons[3].enabled:SetHeight(20)
-CdbSearchGui.settings.buttons[3].enabled:SetScript("OnShow", function(self)
-    if (CdbSettings.questStarts ~= true) then
-        CdbSearchGui.settings.buttons[3].enabled:SetChecked(false);
-    else
-        CdbSearchGui.settings.buttons[3].enabled:SetChecked(true);
-    end
-end)
-CdbSearchGui.settings.buttons[3].enabled:SetScript("OnClick", function(self)
-    CdbSwitchSetting("questStarts");
-    if (CdbSettings.questStarts ~= true) then
-        CdbSearchGui.settings.buttons[3].enabled:SetChecked(false);
-    else
-        CdbSearchGui.settings.buttons[3].enabled:SetChecked(true);
-    end
-end)
-CdbSearchGui.settings.buttons[4] = CreateFrame("Button","mybutton",CdbSearchGui.settings,"UIPanelButtonTemplate")
-CdbSearchGui.settings.buttons[4]:SetPoint("TOP", 0, -4*21+11)
-CdbSearchGui.settings.buttons[4]:SetWidth(450)
-CdbSearchGui.settings.buttons[4]:SetHeight(20)
-CdbSearchGui.settings.buttons[4]:SetFont("Fonts\\FRIZQT__.TTF", 10)
-CdbSearchGui.settings.buttons[4]:SetTextColor(1,1,1,1)
-CdbSearchGui.settings.buttons[4]:SetNormalTexture(nil)
-CdbSearchGui.settings.buttons[4]:SetPushedTexture(nil)
-CdbSearchGui.settings.buttons[4]:SetHighlightTexture(nil)
-CdbSearchGui.settings.buttons[4]:SetBackdrop(backdrop_noborder)
-CdbSearchGui.settings.buttons[4]:SetBackdropColor(1,1,1,.10)
-CdbSearchGui.settings.buttons[4]:SetScript("OnEnter", function(self)
-    this:SetBackdropColor(1,1,1,.25)
-    CdbTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
-    CdbTooltip:ClearLines();
-    CdbTooltip:SetText(CdbGetSetting("filterReqLevel")..
-                            "\n\n|cffffffff"..
-                            "When enabled, this option prevents quest starts from being marked\n"..
-                            "if the player doesn't meet the minimum level requirements.|r");
-    CdbTooltip:Show();
-end)
-CdbSearchGui.settings.buttons[4]:SetScript("OnLeave", function(self)
-    this:SetBackdropColor(1,1,1,.10)
-    CdbTooltip:Hide()
-end)
-CdbSearchGui.settings.buttons[4].enabled = CreateFrame("CheckButton","mycheckbutton",CdbSearchGui.settings.buttons[4],"UICheckButtonTemplate")
-CdbSearchGui.settings.buttons[4].enabled:SetPoint("RIGHT", -25, 0)
-CdbSearchGui.settings.buttons[4].enabled:SetWidth(20)
-CdbSearchGui.settings.buttons[4].enabled:SetHeight(20)
-CdbSearchGui.settings.buttons[4].enabled:SetScript("OnShow", function(self)
-    if (CdbSettings.filterReqLevel ~= true) then
-        CdbSearchGui.settings.buttons[4].enabled:SetChecked(false);
-    else
-        CdbSearchGui.settings.buttons[4].enabled:SetChecked(true);
-    end
-end)
-CdbSearchGui.settings.buttons[4].enabled:SetScript("OnClick", function(self)
-    CdbSwitchSetting("filterReqLevel");
-    if (CdbSettings.filterReqLevel ~= true) then
-        CdbSearchGui.settings.buttons[4].enabled:SetChecked(false);
-    else
-        CdbSearchGui.settings.buttons[4].enabled:SetChecked(true);
-    end
-end)
-CdbSearchGui.settings.buttons[5] = CreateFrame("Button","mybutton",CdbSearchGui.settings,"UIPanelButtonTemplate")
-CdbSearchGui.settings.buttons[5]:SetPoint("TOP", 0, -5*21+11)
-CdbSearchGui.settings.buttons[5]:SetWidth(450)
-CdbSearchGui.settings.buttons[5]:SetHeight(20)
-CdbSearchGui.settings.buttons[5]:SetFont("Fonts\\FRIZQT__.TTF", 10)
-CdbSearchGui.settings.buttons[5]:SetTextColor(1,1,1,1)
-CdbSearchGui.settings.buttons[5]:SetNormalTexture(nil)
-CdbSearchGui.settings.buttons[5]:SetPushedTexture(nil)
-CdbSearchGui.settings.buttons[5]:SetHighlightTexture(nil)
-CdbSearchGui.settings.buttons[5]:SetBackdrop(backdrop_noborder)
-CdbSearchGui.settings.buttons[5]:SetBackdropColor(1,1,1,.05)
-CdbSearchGui.settings.buttons[5]:SetScript("OnEnter", function(self)
-    this:SetBackdropColor(1,1,1,.25)
-    CdbTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
-    CdbTooltip:ClearLines();
-    CdbTooltip:SetText(CdbGetSetting("questIds")..
-                            "\n\n|cffffffff"..
-                            "When enabled, this option shows the quest ID in the quest start tooltips.|r");
-                            -- TODO: Update text once this setting has been fixed. Quest IDs in quest start tooltips are needed for their context menu.
-    CdbTooltip:Show();
-end)
-CdbSearchGui.settings.buttons[5]:SetScript("OnLeave", function(self)
-    this:SetBackdropColor(1,1,1,.05)
-    CdbTooltip:Hide()
-end)
-CdbSearchGui.settings.buttons[5].enabled = CreateFrame("CheckButton","mycheckbutton",CdbSearchGui.settings.buttons[5],"UICheckButtonTemplate")
-CdbSearchGui.settings.buttons[5].enabled:SetPoint("RIGHT", -25, 0)
-CdbSearchGui.settings.buttons[5].enabled:SetWidth(20)
-CdbSearchGui.settings.buttons[5].enabled:SetHeight(20)
-CdbSearchGui.settings.buttons[5].enabled:SetScript("OnShow", function(self)
-    if (CdbSettings.questIds ~= true) then
-        CdbSearchGui.settings.buttons[5].enabled:SetChecked(false);
-    else
-        CdbSearchGui.settings.buttons[5].enabled:SetChecked(true);
-    end
-end)
-CdbSearchGui.settings.buttons[5].enabled:SetScript("OnClick", function(self)
-    CdbSwitchSetting("questIds");
-    if (CdbSettings.questIds ~= true) then
-        CdbSearchGui.settings.buttons[5].enabled:SetChecked(false);
-    else
-        CdbSearchGui.settings.buttons[5].enabled:SetChecked(true);
-    end
-end)
-CdbSearchGui.settings.buttons[6] = CreateFrame("Button","mybutton",CdbSearchGui.settings,"UIPanelButtonTemplate")
-CdbSearchGui.settings.buttons[6]:SetPoint("TOP", 0, -6*21+11)
-CdbSearchGui.settings.buttons[6]:SetWidth(450)
-CdbSearchGui.settings.buttons[6]:SetHeight(20)
-CdbSearchGui.settings.buttons[6]:SetFont("Fonts\\FRIZQT__.TTF", 10)
-CdbSearchGui.settings.buttons[6]:SetTextColor(1,1,1,1)
-CdbSearchGui.settings.buttons[6]:SetNormalTexture(nil)
-CdbSearchGui.settings.buttons[6]:SetPushedTexture(nil)
-CdbSearchGui.settings.buttons[6]:SetHighlightTexture(nil)
-CdbSearchGui.settings.buttons[6]:SetBackdrop(backdrop_noborder)
-CdbSearchGui.settings.buttons[6]:SetBackdropColor(1,1,1,.10)
-CdbSearchGui.settings.buttons[6]:SetScript("OnEnter", function(self)
-    this:SetBackdropColor(1,1,1,.25)
-    CdbTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
-    CdbTooltip:ClearLines();
-    CdbTooltip:SetText(CdbGetSetting("reqLevel")..
-                            "\n\n|cffffffff"..
-                            "When enabled, this option shows the required level in the quest start tooltips.|r");
-    CdbTooltip:Show();
-end)
-CdbSearchGui.settings.buttons[6]:SetScript("OnLeave", function(self)
-    this:SetBackdropColor(1,1,1,.10)
-    CdbTooltip:Hide()
-end)
-CdbSearchGui.settings.buttons[6].enabled = CreateFrame("CheckButton","mycheckbutton",CdbSearchGui.settings.buttons[6],"UICheckButtonTemplate")
-CdbSearchGui.settings.buttons[6].enabled:SetPoint("RIGHT", -25, 0)
-CdbSearchGui.settings.buttons[6].enabled:SetWidth(20)
-CdbSearchGui.settings.buttons[6].enabled:SetHeight(20)
-CdbSearchGui.settings.buttons[6].enabled:SetScript("OnShow", function(self)
-    if (CdbSettings.reqLevel ~= true) then
-        CdbSearchGui.settings.buttons[6].enabled:SetChecked(false);
-    else
-        CdbSearchGui.settings.buttons[6].enabled:SetChecked(true);
-    end
-end)
-CdbSearchGui.settings.buttons[6].enabled:SetScript("OnClick", function(self)
-    CdbSwitchSetting("reqLevel");
-    if (CdbSettings.reqLevel ~= true) then
-        CdbSearchGui.settings.buttons[6].enabled:SetChecked(false);
-    else
-        CdbSearchGui.settings.buttons[6].enabled:SetChecked(true);
-    end
-end)
-CdbSearchGui.settings.buttons[7] = CreateFrame("Button","mybutton",CdbSearchGui.settings,"UIPanelButtonTemplate")
-CdbSearchGui.settings.buttons[7]:SetPoint("TOP", 0, -7*21+11)
-CdbSearchGui.settings.buttons[7]:SetWidth(450)
-CdbSearchGui.settings.buttons[7]:SetHeight(20)
-CdbSearchGui.settings.buttons[7]:SetFont("Fonts\\FRIZQT__.TTF", 10)
-CdbSearchGui.settings.buttons[7]:SetTextColor(1,1,1,1)
-CdbSearchGui.settings.buttons[7]:SetNormalTexture(nil)
-CdbSearchGui.settings.buttons[7]:SetPushedTexture(nil)
-CdbSearchGui.settings.buttons[7]:SetHighlightTexture(nil)
-CdbSearchGui.settings.buttons[7]:SetBackdrop(backdrop_noborder)
-CdbSearchGui.settings.buttons[7]:SetBackdropColor(1,1,1,.05)
-CdbSearchGui.settings.buttons[7]:SetScript("OnEnter", function(self)
-    this:SetBackdropColor(1,1,1,.25)
-    CdbTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
-    CdbTooltip:ClearLines();
-    CdbTooltip:SetText(CdbGetSetting("item_item")..
-                            "\n\n|cffffffff"..
-                            "When enabled, this option enables showing item drops from other items.|r\n"..
-                            "|cFFFF1A1A!WARNING! This option might be unstable!\n"..
-                            "It is recommended to leave it turned of if not needed.|r");
-    CdbTooltip:Show();
-end)
-CdbSearchGui.settings.buttons[7]:SetScript("OnLeave", function(self)
-    this:SetBackdropColor(1,1,1,.05)
-    CdbTooltip:Hide()
-end)
-CdbSearchGui.settings.buttons[7].enabled = CreateFrame("CheckButton","mycheckbutton",CdbSearchGui.settings.buttons[7],"UICheckButtonTemplate")
-CdbSearchGui.settings.buttons[7].enabled:SetPoint("RIGHT", -25, 0)
-CdbSearchGui.settings.buttons[7].enabled:SetWidth(20)
-CdbSearchGui.settings.buttons[7].enabled:SetHeight(20)
-CdbSearchGui.settings.buttons[7].enabled:SetScript("OnShow", function(self)
-    if (CdbSettings.item_item ~= true) then
-        CdbSearchGui.settings.buttons[7].enabled:SetChecked(false);
-    else
-        CdbSearchGui.settings.buttons[7].enabled:SetChecked(true);
-    end
-end)
-CdbSearchGui.settings.buttons[7].enabled:SetScript("OnClick", function(self)
-    CdbSwitchSetting("item_item");
-    if (CdbSettings.item_item ~= true) then
-        CdbSearchGui.settings.buttons[7].enabled:SetChecked(false);
-    else
-        CdbSearchGui.settings.buttons[7].enabled:SetChecked(true);
-    end
-end)
-CdbSearchGui.settings.buttons[8] = CreateFrame("Button","mybutton",CdbSearchGui.settings,"UIPanelButtonTemplate")
-CdbSearchGui.settings.buttons[8]:SetPoint("TOP", 0, -8*21+11)
-CdbSearchGui.settings.buttons[8]:SetWidth(450)
-CdbSearchGui.settings.buttons[8]:SetHeight(20)
-CdbSearchGui.settings.buttons[8]:SetFont("Fonts\\FRIZQT__.TTF", 10)
-CdbSearchGui.settings.buttons[8]:SetTextColor(1,1,1,1)
-CdbSearchGui.settings.buttons[8]:SetNormalTexture(nil)
-CdbSearchGui.settings.buttons[8]:SetPushedTexture(nil)
-CdbSearchGui.settings.buttons[8]:SetHighlightTexture(nil)
-CdbSearchGui.settings.buttons[8]:SetBackdrop(backdrop_noborder)
-CdbSearchGui.settings.buttons[8]:SetBackdropColor(1,1,1,.10)
-CdbSearchGui.settings.buttons[8]:SetScript("OnEnter", function(self)
-    this:SetBackdropColor(1,1,1,.25)
-    CdbTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
-    CdbTooltip:ClearLines();
-    CdbTooltip:SetText(CdbGetSetting("waypoints")..
-                            "\n\n|cffffffff"..
-                            "When enabled, mob waypoints are shown on the map.\n"..
-                            "Due to script spawns not yet being included in the DB\n"..
-                            "this can be helpful in finding some special mobs.|r");
-    CdbTooltip:Show();
-end)
-CdbSearchGui.settings.buttons[8]:SetScript("OnLeave", function(self)
-    this:SetBackdropColor(1,1,1,.10)
-    CdbTooltip:Hide()
-end)
-CdbSearchGui.settings.buttons[8].enabled = CreateFrame("CheckButton","mycheckbutton",CdbSearchGui.settings.buttons[8],"UICheckButtonTemplate")
-CdbSearchGui.settings.buttons[8].enabled:SetPoint("RIGHT", -25, 0)
-CdbSearchGui.settings.buttons[8].enabled:SetWidth(20)
-CdbSearchGui.settings.buttons[8].enabled:SetHeight(20)
-CdbSearchGui.settings.buttons[8].enabled:SetScript("OnShow", function(self)
-    if (CdbSettings.waypoints ~= true) then
-        CdbSearchGui.settings.buttons[8].enabled:SetChecked(false);
-    else
-        CdbSearchGui.settings.buttons[8].enabled:SetChecked(true);
-    end
-end)
-CdbSearchGui.settings.buttons[8].enabled:SetScript("OnClick", function(self)
-    CdbSwitchSetting("waypoints");
-    if (CdbSettings.waypoints ~= true) then
-        CdbSearchGui.settings.buttons[8].enabled:SetChecked(false);
-    else
-        CdbSearchGui.settings.buttons[8].enabled:SetChecked(true);
-    end
-end)
-CdbSearchGui.settings.buttons[9] = CreateFrame("Button","mybutton",CdbSearchGui.settings,"UIPanelButtonTemplate")
-CdbSearchGui.settings.buttons[9]:SetPoint("TOP", 0, -9*21+11)
-CdbSearchGui.settings.buttons[9]:SetWidth(450)
-CdbSearchGui.settings.buttons[9]:SetHeight(20)
-CdbSearchGui.settings.buttons[9]:SetFont("Fonts\\FRIZQT__.TTF", 10)
-CdbSearchGui.settings.buttons[9]:SetTextColor(1,1,1,1)
-CdbSearchGui.settings.buttons[9]:SetNormalTexture(nil)
-CdbSearchGui.settings.buttons[9]:SetPushedTexture(nil)
-CdbSearchGui.settings.buttons[9]:SetHighlightTexture(nil)
-CdbSearchGui.settings.buttons[9]:SetBackdrop(backdrop_noborder)
-CdbSearchGui.settings.buttons[9]:SetBackdropColor(1,1,1,.05)
-CdbSearchGui.settings.buttons[9]:SetScript("OnEnter", function(self)
-    this:SetBackdropColor(1,1,1,.25)
-    CdbTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
-    CdbTooltip:ClearLines();
-    CdbTooltip:SetText(CdbGetSetting("auto_plot")..
-                            "\n\n|cffffffff"..
-                            "When enabled, this option shows notes for all quests in the log.\n"..
-                            "It will update automatically every time there is a quest\n"..
-                            "event, like looting. If you experience lags when finishing\n"..
-                            "a quest objective, disable and use the 'Show all notes'\n"..
-                            "button as long as the quest drawing too many notes is in\n"..
-                            "in your quest log.|r");
-    CdbTooltip:Show();
-end)
-CdbSearchGui.settings.buttons[9]:SetScript("OnLeave", function(self)
-    this:SetBackdropColor(1,1,1,.05)
-    CdbTooltip:Hide()
-end)
-CdbSearchGui.settings.buttons[9].enabled = CreateFrame("CheckButton","mycheckbutton",CdbSearchGui.settings.buttons[9],"UICheckButtonTemplate")
-CdbSearchGui.settings.buttons[9].enabled:SetPoint("RIGHT", -25, 0)
-CdbSearchGui.settings.buttons[9].enabled:SetWidth(20)
-CdbSearchGui.settings.buttons[9].enabled:SetHeight(20)
-CdbSearchGui.settings.buttons[9].enabled:SetScript("OnShow", function(self)
-    if (CdbSettings.auto_plot ~= true) then
-        CdbSearchGui.settings.buttons[9].enabled:SetChecked(false);
-    else
-        CdbSearchGui.settings.buttons[9].enabled:SetChecked(true);
-    end
-end)
-CdbSearchGui.settings.buttons[9].enabled:SetScript("OnClick", function(self)
-    CdbSwitchSetting("auto_plot");
-    if (CdbSettings.auto_plot ~= true) then
-        CdbSearchGui.settings.buttons[9].enabled:SetChecked(false);
-    else
-        CdbSearchGui.settings.buttons[9].enabled:SetChecked(true);
-    end
-end)
+end
+
 function CdbSearchGui.HideButtons()
     for i=1,14 do
         if (CdbSearchGui.spawn.buttons[i]) then
