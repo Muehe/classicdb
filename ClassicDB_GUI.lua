@@ -959,11 +959,11 @@ function CdbSearchGui:SearchSpawn(search)
                     this.icon:SetVertexColor(1,1,1,1)
                 end
             end)
-            spawnCount = spawnCount + 1
         end
+        spawnCount = spawnCount + 1
       end
     end
-    if spawnCount >= 14 then spawnCount = "*" else spawnCount = spawnCount -1 end
+    spawnCount = spawnCount -1
     if spawnCount == 0 then
         CdbSearchGui.buttonSpawn.text:SetText("Mobs")
     else
@@ -1070,11 +1070,11 @@ function CdbSearchGui:SearchObject(search)
                         this.icon:SetVertexColor(1,1,1,1)
                     end
                 end)
-                objectCount = objectCount + 1
             end
+            objectCount = objectCount + 1
         end
     end
-    if objectCount >= 14 then objectCount = "*" else objectCount = objectCount -1 end
+    objectCount = objectCount -1
     if objectCount == 0 then
         CdbSearchGui.buttonObject.text:SetText("Objects")
     else
@@ -1248,11 +1248,11 @@ function CdbSearchGui:SearchItem(search)
                         this.icon:SetVertexColor(1,1,1,1)
                     end
                 end)
-                itemCount = itemCount + 1
             end
+            itemCount = itemCount + 1
         end
     end
-    if itemCount >= 14 then itemCount = "*" else itemCount = itemCount -1 end
+    itemCount = itemCount -1
     if itemCount == 0 then
         CdbSearchGui.buttonItem.text:SetText("Items")
     else
@@ -1437,11 +1437,11 @@ function CdbSearchGui:SearchQuest(search)
                     end
                     CdbTooltip:Hide();
                 end)
-                questCount = questCount + 1
             end
+            questCount = questCount + 1
         end
     end
-    if questCount >= 14 then questCount = "*" else questCount = questCount -1 end
+    questCount = questCount -1
     if questCount == 0 then
         CdbSearchGui.buttonQuest.text:SetText("Quests")
     else
