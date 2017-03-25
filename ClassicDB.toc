@@ -4,8 +4,8 @@
 ## Notes: A Quest-, Item-, Vendor- and Spawn-database. Notes are shown via Cartographer.
 ## Version: oooVersionooo-oooLocaleooo
 ## RequiredDeps: Cartographer
-## SavedVariables: CdbMinimapPosition CdbMinimapEnabled
-## SavedVariablesPerCharacter: CdbFavourites CdbSettings CdbFinishedQuests
+## SavedVariables:
+## SavedVariablesPerCharacter: CdbFavourites CdbSettings CdbFinishedQuests CdbMinimapPosition CdbMinimapEnabled
 
 # database
 db\zoneDB.lua
