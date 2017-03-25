@@ -20,17 +20,14 @@ if not CdbFavourites["object"] then CdbFavourites["object"] = {} end
 if not CdbFavourites["item"] then CdbFavourites["item"] = {} end
 if not CdbFavourites["quest"] then CdbFavourites["quest"] = {} end
 
+------------------------------
+-- Create the search GUI frame
+------------------------------
 CdbSearchGui = CreateFrame("Frame",nil,UIParent)
-CdbSearchGui:RegisterEvent("PLAYER_ENTERING_WORLD");
-CdbSearchGui:SetScript("OnEvent", function(self, event, ...)
-    CdbSearchGui.minimapButton:SetPoint("TOPLEFT", Minimap, "TOPLEFT", 52-(80*cos(CdbMinimapPosition)),(80*sin(CdbMinimapPosition))-52)
-end)
-
 CdbSearchGui:Hide()
 CdbSearchGui:SetFrameStrata("DIALOG")
 CdbSearchGui:SetWidth(500)
 CdbSearchGui:SetHeight(445)
-
 CdbSearchGui:SetBackdrop(backdrop)
 CdbSearchGui:SetBackdropColor(0,0,0,.85);
 CdbSearchGui:SetPoint("CENTER",0,0)
@@ -43,32 +40,49 @@ CdbSearchGui:SetScript("OnMouseUp",function()
     CdbSearchGui:StopMovingOrSizing()
 end)
 
-CdbSearchGui.minimapButton = CreateFrame('Button', "CdbMinimap", Minimap)
-if (CdbMinimapPosition == nil) then
-    CdbMinimapPosition = 125
-end
-
-CdbSearchGui.minimapButton:SetMovable(true)
-CdbSearchGui.minimapButton:EnableMouse(true)
-CdbSearchGui.minimapButton:RegisterForDrag('LeftButton')
-CdbSearchGui.minimapButton:RegisterForClicks("LeftButtonUp", "RightButtonUp");
-CdbSearchGui.minimapButton:SetScript("OnDragStop", function()
-    local xpos,ypos = GetCursorPosition()
-    local xmin,ymin = Minimap:GetLeft(), Minimap:GetBottom()
-
-    xpos = xmin-xpos/UIParent:GetScale()+70
-    ypos = ypos/UIParent:GetScale()-ymin-70
-
-    CdbMinimapPosition = math.deg(math.atan2(ypos,xpos))
+--------------------------------------------------
+-- Minimap button re-positioning on login/reloadUI
+--------------------------------------------------
+CdbSearchGui:RegisterEvent("PLAYER_ENTERING_WORLD");
+CdbSearchGui:SetScript("OnEvent", function(self, event, ...)
     CdbSearchGui.minimapButton:SetPoint("TOPLEFT", Minimap, "TOPLEFT", 52-(80*cos(CdbMinimapPosition)),(80*sin(CdbMinimapPosition))-52)
 end)
 
+----------------------------
+-- Minimap button definition
+----------------------------
+CdbSearchGui.minimapButton = CreateFrame('Button', "CdbMinimap", Minimap)
+CdbSearchGui.minimapButton:SetMovable(true)
+CdbSearchGui.minimapButton:EnableMouse(true)
 CdbSearchGui.minimapButton:SetFrameStrata('HIGH')
 CdbSearchGui.minimapButton:SetWidth(31)
 CdbSearchGui.minimapButton:SetHeight(31)
 CdbSearchGui.minimapButton:SetFrameLevel(9)
 CdbSearchGui.minimapButton:SetHighlightTexture('Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight')
+-- The lines below will always set the button to default position 125, since
+-- CdbMinimapPosition is not yet loaded from SavedVariables at this point. The
+-- actual position is set above by an event. This condition is needed for first
+-- time users.
+if (CdbMinimapPosition == nil) then
+    CdbMinimapPosition = 125
+end
 CdbSearchGui.minimapButton:SetPoint("TOPLEFT", Minimap, "TOPLEFT", 52-(80*cos(CdbMinimapPosition)),(80*sin(CdbMinimapPosition))-52)
+CdbSearchGui.minimapButton.overlay = CdbSearchGui.minimapButton:CreateTexture(nil, 'OVERLAY')
+CdbSearchGui.minimapButton.overlay:SetWidth(53)
+CdbSearchGui.minimapButton.overlay:SetHeight(53)
+CdbSearchGui.minimapButton.overlay:SetTexture('Interface\\Minimap\\MiniMap-TrackingBorder')
+CdbSearchGui.minimapButton.overlay:SetPoint('TOPLEFT', 0,0)
+CdbSearchGui.minimapButton.icon = CdbSearchGui.minimapButton:CreateTexture(nil, 'BACKGROUND')
+CdbSearchGui.minimapButton.icon:SetWidth(20)
+CdbSearchGui.minimapButton.icon:SetHeight(20)
+CdbSearchGui.minimapButton.icon:SetTexture('Interface\\AddOns\\ClassicDB\\symbols\\sq')
+CdbSearchGui.minimapButton.icon:SetTexCoord(0.05, 0.95, 0.05, 0.95)
+CdbSearchGui.minimapButton.icon:SetPoint('CENTER',1,1)
+
+------------------------
+-- Minimap button clicks
+------------------------
+CdbSearchGui.minimapButton:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 CdbSearchGui.minimapButton:SetScript("OnClick", function()
     if ( arg1 == "LeftButton" ) then
         if IsShiftKeyDown() then
@@ -104,6 +118,10 @@ CdbSearchGui.minimapButton:SetScript("OnClick", function()
         end
     end
 end)
+
+-------------------------
+-- Minimap button tooltip
+-------------------------
 CdbSearchGui.minimapButton:SetScript("OnEnter", function()
     CdbTooltip:SetOwner(CdbSearchGui.minimapButton, "ANCHOR_BOTTOMLEFT");
     CdbTooltip:ClearLines();
@@ -114,18 +132,34 @@ CdbSearchGui.minimapButton:SetScript("OnLeave", function()
     CdbTooltip:Hide();
 end)
 
-CdbSearchGui.minimapButton.overlay = CdbSearchGui.minimapButton:CreateTexture(nil, 'OVERLAY')
-CdbSearchGui.minimapButton.overlay:SetWidth(53)
-CdbSearchGui.minimapButton.overlay:SetHeight(53)
-CdbSearchGui.minimapButton.overlay:SetTexture('Interface\\Minimap\\MiniMap-TrackingBorder')
-CdbSearchGui.minimapButton.overlay:SetPoint('TOPLEFT', 0,0)
-CdbSearchGui.minimapButton.icon = CdbSearchGui.minimapButton:CreateTexture(nil, 'BACKGROUND')
-CdbSearchGui.minimapButton.icon:SetWidth(20)
-CdbSearchGui.minimapButton.icon:SetHeight(20)
-CdbSearchGui.minimapButton.icon:SetTexture('Interface\\AddOns\\ClassicDB\\symbols\\sq')
-CdbSearchGui.minimapButton.icon:SetTexCoord(0.05, 0.95, 0.05, 0.95)
-CdbSearchGui.minimapButton.icon:SetPoint('CENTER',1,1)
+--------------------------
+-- Minimap button dragging
+--------------------------
+CdbSearchGui.minimapButton:RegisterForDrag('LeftButton')
+CdbSearchGui.minimapButton:SetScript("OnDragStart", function()
+    this:LockHighlight();
+    CdbSearchGui.minimapButton.draggingFrame:Show();
+end)
+CdbSearchGui.minimapButton:SetScript("OnDragStop", function()
+    this:UnlockHighlight();
+    CdbSearchGui.minimapButton.draggingFrame:Hide();
+end)
+CdbSearchGui.minimapButton.draggingFrame = CreateFrame("Frame", "CdbMinimapDragging", CdbSearchGui.minimapButton)
+CdbSearchGui.minimapButton.draggingFrame:Hide()
+CdbSearchGui.minimapButton.draggingFrame:SetScript("OnUpdate", function()
+    local xpos,ypos = GetCursorPosition()
+    local xmin,ymin = Minimap:GetLeft(), Minimap:GetBottom()
 
+    xpos = xmin-xpos/UIParent:GetScale()+70
+    ypos = ypos/UIParent:GetScale()-ymin-70
+
+    CdbMinimapPosition = math.deg(math.atan2(ypos,xpos))
+    CdbSearchGui.minimapButton:SetPoint("TOPLEFT", Minimap, "TOPLEFT", 52-(80*cos(CdbMinimapPosition)),(80*sin(CdbMinimapPosition))-52)
+end)
+
+------------------
+-- Fill search GUI
+------------------
 CdbSearchGui.closeButton = CreateFrame("Button", nil, CdbSearchGui, "UIPanelCloseButton")
 CdbSearchGui.closeButton:SetWidth(30)
 CdbSearchGui.closeButton:SetHeight(30) -- width, height
