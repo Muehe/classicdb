@@ -955,6 +955,7 @@ end -- ResetGui()
 
 function CdbGetAllQuestNotes()
     CdbDebugPrint(2, "PlotAllQuests() called");
+    local oldQuestLogId = GetQuestLogSelection();
     local questLogID=1;
     CdbMapNotes = {};
     while (GetQuestLogTitle(questLogID) ~= nil) do
@@ -968,6 +969,7 @@ function CdbGetAllQuestNotes()
     else
         CdbShowMap();
     end
+    SelectQuestLogEntry(oldQuestLogId);
 end -- PlotAllQuests()
 
 -- called from xml
