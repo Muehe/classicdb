@@ -1179,7 +1179,7 @@ end -- GetObjID(objName)
 
 CdbSettingsText = {
         ["waypoints"] = "Showing waypoints",
-        ["auto_plot"] = "Automatically tracking quests",
+        ["auto_plot"] = "Automatically updating quest notes",
         ["questStarts"] = "Showing quest starts",
         ["reqLevel"] = "Showing required level in quest start tooltips",
         ["filterPreQuest"] = "Filter quest starts based on finished quests",
@@ -1226,9 +1226,9 @@ function CdbCheckSetting(setting)
         return;
     end
     if (CdbSettings[setting] == true) then
-        getglobal(setting):SetChecked(true);
+        CdbControlGui.checkButtons[CdbControlGui.checkButtonValues[setting].position]:SetChecked(true);
     else
-        getglobal(setting):SetChecked(false);
+        CdbControlGui.checkButtons[CdbControlGui.checkButtonValues[setting].position]:SetChecked(false);
     end
 end -- CheckSetting(setting)
 
@@ -2059,4 +2059,19 @@ function CdbMarkQuestAsFinished(questId)
     else
         WorldMapFrame:Show();
     end
+end
+
+function CdbResetMapAndIconSize()
+    Cartographer_Notes:SetIconSize(1);
+    Cartographer_LookNFeel:SetScale(1);
+    local size = 1;
+    if Cartographer_LookNFeel.db.profile.largePlayer then
+        size = size*1.5;
+    end
+    Cartographer_LookNFeel.playerModel:SetModelScale(size);
+    WorldMapFrame:StartMoving();
+    WorldMapFrame:SetPoint("CENTER", 0, 0);
+    WorldMapFrame:StopMovingOrSizing();
+    WorldMapFrame:ClearAllPoints();
+    WorldMapFrame:SetAllPoints(UIParent);
 end

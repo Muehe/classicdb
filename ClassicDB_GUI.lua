@@ -23,7 +23,8 @@ if not CdbFavourites["quest"] then CdbFavourites["quest"] = {} end
 ------------------------------
 -- Create the search GUI frame
 ------------------------------
-CdbSearchGui = CreateFrame("Frame",nil,UIParent)
+CdbSearchGui = CreateFrame("Frame","CdbSearchGui",UIParent)
+tinsert(UISpecialFrames, "CdbSearchGui")
 CdbSearchGui:Hide()
 CdbSearchGui:SetFrameStrata("DIALOG")
 CdbSearchGui:SetWidth(500)
@@ -42,10 +43,20 @@ end)
 
 --------------------------------------------------
 -- Minimap button re-positioning on login/reloadUI
+-- Checking setting marks in the control GUI
+-- Control GUI re-positioning in login/reloadUI
 --------------------------------------------------
 CdbSearchGui:RegisterEvent("PLAYER_ENTERING_WORLD");
 CdbSearchGui:SetScript("OnEvent", function(self, event, ...)
     CdbSearchGui.minimapButton:SetPoint("TOPLEFT", Minimap, "TOPLEFT", 52-(80*cos(CdbMinimapPosition)),(80*sin(CdbMinimapPosition))-52)
+    for _, button in pairs(CdbControlGui.checkButtons) do
+        CdbCheckSetting(button.settingName)
+    end
+    if CdbSettings.x ~= nil then
+        CdbControlGui:SetPoint("TOPLEFT", CdbSettings.x, CdbSettings.y)
+    else
+        CdbControlGui:SetPoint("CENTER", 0, 0)
+    end
 end)
 
 ----------------------------
@@ -86,18 +97,7 @@ CdbSearchGui.minimapButton:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 CdbSearchGui.minimapButton:SetScript("OnClick", function()
     if ( arg1 == "LeftButton" ) then
         if IsShiftKeyDown() then
-            Cartographer_Notes:SetIconSize(1);
-            Cartographer_LookNFeel:SetScale(1);
-            local size = 1;
-            if Cartographer_LookNFeel.db.profile.largePlayer then
-                size = size*1.5;
-            end
-            Cartographer_LookNFeel.playerModel:SetModelScale(size);
-            WorldMapFrame:StartMoving();
-            WorldMapFrame:SetPoint("CENTER", 0, 0);
-            WorldMapFrame:StopMovingOrSizing();
-            WorldMapFrame:ClearAllPoints();
-            WorldMapFrame:SetAllPoints(UIParent);
+             CdbResetMapAndIconSize()
         else
             if (CdbSearchGui:IsShown()) then
                 CdbSearchGui:Hide();
@@ -123,13 +123,13 @@ end)
 -- Minimap button tooltip
 -------------------------
 CdbSearchGui.minimapButton:SetScript("OnEnter", function()
-    CdbTooltip:SetOwner(CdbSearchGui.minimapButton, "ANCHOR_BOTTOMLEFT");
-    CdbTooltip:ClearLines();
-    CdbTooltip:SetText("ClassicDB\n\n<LeftClick>: Toggle search window\n<RightClick>: Toggle control window\n<Shift>+<LeftClick>: Reset Map and Icon Size\n<Shift>+<RightClick>: Reset and show both windows");
-    CdbTooltip:Show();
+    GameTooltip:SetOwner(CdbSearchGui.minimapButton, "ANCHOR_BOTTOMLEFT");
+    GameTooltip:ClearLines();
+    GameTooltip:SetText("ClassicDB\n\n<LeftClick>: Toggle search window\n<RightClick>: Toggle control window\n<Shift>+<LeftClick>: Reset Map and Icon Size\n<Shift>+<RightClick>: Reset and show both windows");
+    GameTooltip:Show();
 end)
 CdbSearchGui.minimapButton:SetScript("OnLeave", function()
-    CdbTooltip:Hide();
+    GameTooltip:Hide();
 end)
 
 --------------------------
@@ -456,15 +456,15 @@ CdbSearchGui.settings.values.dbMode = {
     title = CdbSettingsText.dbMode,
     OnEnterFunction = function(self)
         this:SetBackdropColor(1,1,1,.25)
-        CdbTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
-        CdbTooltip:ClearLines();
-        CdbTooltip:SetText(CdbGetSetting("dbMode")..
+        GameTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
+        GameTooltip:ClearLines();
+        GameTooltip:SetText(CdbGetSetting("dbMode")..
                            "\n\n|cffffffff"..
                            "When enabled, this option prevents ClassicDB from cleaning quests\n"..
                            "for other classes and the opposite faction from the quest DB.\n"..
                            "Not recommended for normal users, as it adds many unatainable\n"..
                            "quest starts to the map.|r");
-        CdbTooltip:Show();
+        GameTooltip:Show();
     end,
 }
 CdbSearchGui.settings.values.questStarts = {
@@ -472,14 +472,14 @@ CdbSearchGui.settings.values.questStarts = {
     title = CdbSettingsText.questStarts,
     OnEnterFunction = function(self)
         this:SetBackdropColor(1,1,1,.25)
-        CdbTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
-        CdbTooltip:ClearLines();
-        CdbTooltip:SetText(CdbGetSetting("questStarts")..
+        GameTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
+        GameTooltip:ClearLines();
+        GameTooltip:SetText(CdbGetSetting("questStarts")..
                            "\n\n|cffffffff"..
                            "When enabled, this option shows notes for all quests starts\n"..
                            "in the currently displayed zone. If it doesn't load immediately\n"..
                            "reopen the map.|r");
-        CdbTooltip:Show();
+        GameTooltip:Show();
     end,
 }
 CdbSearchGui.settings.values.filterPreQuest = {
@@ -487,15 +487,15 @@ CdbSearchGui.settings.values.filterPreQuest = {
     title = CdbSettingsText.filterPreQuest,
     OnEnterFunction = function(self)
         this:SetBackdropColor(1,1,1,.25)
-        CdbTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
-        CdbTooltip:ClearLines();
-        CdbTooltip:SetText(CdbGetSetting("filterPreQuest")..
+        GameTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
+        GameTooltip:ClearLines();
+        GameTooltip:SetText(CdbGetSetting("filterPreQuest")..
                            "\n\n|cffffffff"..
                            "When enabled, this option filter quests starts based on\n"..
                            "their finished status according to ClassicDB. To mark a\n"..
                            "quest as finished use the search or right-click it's\n"..
                            "start icon on the map.|r");
-        CdbTooltip:Show();
+        GameTooltip:Show();
     end,
 }
 CdbSearchGui.settings.values.filterReqLevel = {
@@ -503,13 +503,13 @@ CdbSearchGui.settings.values.filterReqLevel = {
     title = CdbSettingsText.filterReqLevel,
     OnEnterFunction = function(self)
         this:SetBackdropColor(1,1,1,.25)
-        CdbTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
-        CdbTooltip:ClearLines();
-        CdbTooltip:SetText(CdbGetSetting("filterReqLevel")..
+        GameTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
+        GameTooltip:ClearLines();
+        GameTooltip:SetText(CdbGetSetting("filterReqLevel")..
                            "\n\n|cffffffff"..
                            "When enabled, this option prevents quest starts from being marked\n"..
                            "if the player doesn't meet the minimum level requirements.|r");
-        CdbTooltip:Show();
+        GameTooltip:Show();
     end,
 }
 CdbSearchGui.settings.values.reqLevel = {
@@ -517,13 +517,13 @@ CdbSearchGui.settings.values.reqLevel = {
     title = CdbSettingsText.reqLevel,
     OnEnterFunction = function(self)
         this:SetBackdropColor(1,1,1,.25)
-        CdbTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
-        CdbTooltip:ClearLines();
-        CdbTooltip:SetText(CdbGetSetting("reqLevel")..
+        GameTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
+        GameTooltip:ClearLines();
+        GameTooltip:SetText(CdbGetSetting("reqLevel")..
                            "\n\n|cffffffff"..
                            "When enabled, this option shows the required level"..
                            "in the quest start tooltips.|r");
-        CdbTooltip:Show();
+        GameTooltip:Show();
     end,
 }
 CdbSearchGui.settings.values.item_item = {
@@ -531,14 +531,14 @@ CdbSearchGui.settings.values.item_item = {
     title = CdbSettingsText.item_item,
     OnEnterFunction = function(self)
         this:SetBackdropColor(1,1,1,.25)
-        CdbTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
-        CdbTooltip:ClearLines();
-        CdbTooltip:SetText(CdbGetSetting("item_item")..
+        GameTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
+        GameTooltip:ClearLines();
+        GameTooltip:SetText(CdbGetSetting("item_item")..
                            "\n\n|cffffffff"..
                            "When enabled, this option shows item drops from other items.|r\n"..
                            "|cFFFF1A1A!WARNING! This option might be unstable!\n"..
                            "It is recommended to leave it turned of if not needed.|r");
-        CdbTooltip:Show();
+        GameTooltip:Show();
     end,
 }
 CdbSearchGui.settings.values.waypoints = {
@@ -546,14 +546,14 @@ CdbSearchGui.settings.values.waypoints = {
     title = CdbSettingsText.waypoints,
     OnEnterFunction = function(self)
         this:SetBackdropColor(1,1,1,.25)
-        CdbTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
-        CdbTooltip:ClearLines();
-        CdbTooltip:SetText(CdbGetSetting("waypoints")..
+        GameTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
+        GameTooltip:ClearLines();
+        GameTooltip:SetText(CdbGetSetting("waypoints")..
                            "\n\n|cffffffff"..
                            "When enabled, mob waypoints are shown on the map.\n"..
                            "Due to script spawns not yet being included in the DB\n"..
                            "this can also be helpful in finding some special mobs.|r");
-        CdbTooltip:Show();
+        GameTooltip:Show();
     end,
 }
 CdbSearchGui.settings.values.auto_plot = {
@@ -561,9 +561,9 @@ CdbSearchGui.settings.values.auto_plot = {
     title = CdbSettingsText.auto_plot,
     OnEnterFunction = function(self)
         this:SetBackdropColor(1,1,1,.25)
-        CdbTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
-        CdbTooltip:ClearLines();
-        CdbTooltip:SetText(CdbGetSetting("auto_plot")..
+        GameTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
+        GameTooltip:ClearLines();
+        GameTooltip:SetText(CdbGetSetting("auto_plot")..
                            "\n\n|cffffffff"..
                            "When enabled, this option shows notes for all quests in the log.\n"..
                            "It will update automatically every time there is a quest\n"..
@@ -571,7 +571,7 @@ CdbSearchGui.settings.values.auto_plot = {
                            "a quest objective, disable and use the 'Show all notes'\n"..
                            "button as long as the quest drawing too many notes is in\n"..
                            "in your quest log.|r");
-        CdbTooltip:Show();
+        GameTooltip:Show();
     end,
 }
 CdbSearchGui.settings.values.questIds = {
@@ -579,13 +579,13 @@ CdbSearchGui.settings.values.questIds = {
     title = CdbSettingsText.questIds,
     OnEnterFunction = function(self)
         this:SetBackdropColor(1,1,1,.25)
-        CdbTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
-        CdbTooltip:ClearLines();
-        CdbTooltip:SetText(CdbGetSetting("questIds")..
+        GameTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
+        GameTooltip:ClearLines();
+        GameTooltip:SetText(CdbGetSetting("questIds")..
                            "\n\n|cffffffff"..
                            "When enabled, this option shows the quest ID in the quest start tooltips.|r");
                            -- TODO: Update text once this setting has been fixed. Quest IDs in quest start tooltips are needed for their context menu.
-        CdbTooltip:Show();
+        GameTooltip:Show();
     end,
 }
 
@@ -617,7 +617,7 @@ CdbSearchGui.settings.addLine = function(settingName, position, title, OnEnterFu
         else
             this:SetBackdropColor(1,1,1,.10)
         end
-        CdbTooltip:Hide();
+        GameTooltip:Hide();
     end)
     CdbSearchGui.settings.buttons[position].enabled = CreateFrame("CheckButton","mycheckbutton",CdbSearchGui.settings.buttons[position],"UICheckButtonTemplate")
     CdbSearchGui.settings.buttons[position].enabled:SetPoint("RIGHT", -25, 0)
@@ -1106,23 +1106,20 @@ function CdbSearchGui:SearchQuest(search)
                 -- linefeed for tooltip
                 -- simplest method choosen for performance reasons
                 if q[DB_OBJECTIVES] then
-                    CdbSearchGui.quest.buttons[questCount].questObjectives = "";
-                    local rest = q[DB_OBJECTIVES];
-                    while string.len(rest) > 100 do
-                        CdbSearchGui.quest.buttons[questCount].questObjectives = CdbSearchGui.quest.buttons[questCount].questObjectives..string.sub(rest, 1, 99).."-\n";
-                        rest = string.sub(rest, 100)
-                    end
-                    CdbSearchGui.quest.buttons[questCount].questObjectives = CdbSearchGui.quest.buttons[questCount].questObjectives..rest;
+                    CdbSearchGui.quest.buttons[questCount].questObjectives = q[DB_OBJECTIVES];
                 end
                 CdbSearchGui.quest.buttons[questCount]:SetText("|cffffcc00["..q[DB_LEVEL].."] |Hquest:0:0:0:0|h["..name.."]|h|r|r (ID:"..id..")")
                 CdbSearchGui.quest.buttons[questCount]:SetScript("OnEnter", function(self)
                     this:SetBackdropColor(1,1,1,.25)
+                    GameTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
+                    GameTooltip:ClearLines();
+                    GameTooltip:AddLine(this:GetText())
+                    GameTooltip:AddLine("\n")
                     if this.questObjectives then
-                        CdbTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
-                        CdbTooltip:ClearLines();
-                        CdbTooltip:SetText(this:GetText().."\n|cFFffffffObjectives:|r\n|cFFa6a6a6"..this.questObjectives.."|r");
-                        CdbTooltip:Show();
+                        GameTooltip:AddLine("|cffffffffObjectives: |r"..this.questObjectives, 0.7, 0.7, 0.7, true)
                     end
+                    GameTooltip:AddLine("|cffffffffMinLevel: |r"..qData[this.questId][DB_MIN_LEVEL], 0.7, 0.7, 0.7)
+                    GameTooltip:Show();
                 end)
                 CdbSearchGui.quest.buttons[questCount]:SetScript("OnLeave", function(self)
                     if this.even == true then
@@ -1130,7 +1127,7 @@ function CdbSearchGui:SearchQuest(search)
                     else
                         this:SetBackdropColor(1,1,1,.10)
                     end
-                    if this.questObjectives then CdbTooltip:Hide(); end
+                    GameTooltip:Hide()
                 end)
                 CdbSearchGui.quest.buttons[questCount]:SetScript("OnClick", function(self)
                     if IsShiftKeyDown() then
@@ -1203,10 +1200,10 @@ function CdbSearchGui:SearchQuest(search)
                 end)
                 CdbSearchGui.quest.buttons[questCount].fav:SetScript("OnEnter", function(self)
                     this:SetBackdropColor(1,1,1,.25)
-                    CdbTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
-                    CdbTooltip:ClearLines();
-                    CdbTooltip:SetText("Mark as Favourite\n\n|cffffffffFavourites are shown when the search bar is empty.|r");
-                    CdbTooltip:Show();
+                    GameTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
+                    GameTooltip:ClearLines();
+                    GameTooltip:SetText("Mark as Favourite\n\n|cffffffffFavourites are shown when the search bar is empty.|r");
+                    GameTooltip:Show();
                 end)
                 CdbSearchGui.quest.buttons[questCount].fav:SetScript("OnLeave", function(self)
                     if this.even == true then
@@ -1214,7 +1211,7 @@ function CdbSearchGui:SearchQuest(search)
                     else
                         this:SetBackdropColor(1,1,1,.10)
                     end
-                    CdbTooltip:Hide();
+                    GameTooltip:Hide();
                 end)
                 -- show quest finished buttonQuest
                 CdbSearchGui.quest.buttons[questCount].finished = CreateFrame("CheckButton","mycheckbutton",CdbSearchGui.quest.buttons[questCount],"UICheckButtonTemplate")
@@ -1236,10 +1233,10 @@ function CdbSearchGui:SearchQuest(search)
                 end)
                 CdbSearchGui.quest.buttons[questCount].finished:SetScript("OnEnter", function(self)
                     this:SetBackdropColor(1,1,1,.25)
-                    CdbTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
-                    CdbTooltip:ClearLines();
-                    CdbTooltip:SetText("Mark as finished\n\n|cffffffffQuests that are marked as finished do not appear when Quest Starts are plotted.\nTo refresh your Quest Start display, clean the map and then reenable Quest Starts.|r");
-                    CdbTooltip:Show();
+                    GameTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
+                    GameTooltip:ClearLines();
+                    GameTooltip:SetText("Mark as finished\n\n|cffffffffQuests that are marked as finished do not appear when Quest Starts are plotted.\nTo refresh your Quest Start display, clean the map and then reenable Quest Starts.|r");
+                    GameTooltip:Show();
                 end)
                 CdbSearchGui.quest.buttons[questCount].finished:SetScript("OnLeave", function(self)
                     if this.even == true then
@@ -1247,7 +1244,7 @@ function CdbSearchGui:SearchQuest(search)
                     else
                         this:SetBackdropColor(1,1,1,.10)
                     end
-                    CdbTooltip:Hide();
+                    GameTooltip:Hide();
                 end)
             end
             questCount = questCount + 1
@@ -1259,4 +1256,201 @@ function CdbSearchGui:SearchQuest(search)
     else
         CdbSearchGui.buttonQuest.text:SetText("Quests |cffaaaaaa(" .. questCount .. ")")
     end
+end
+
+------------------------------
+-- Create the control GUI frame
+------------------------------
+CdbControlGui = CreateFrame("Frame",nil,UIParent)
+CdbControlGui:SetFrameStrata("DIALOG")
+CdbControlGui:SetWidth(40)
+CdbControlGui:SetHeight(164)
+CdbControlGui:SetBackdrop(backdrop)
+CdbControlGui:SetBackdropColor(0,0,0,.85)
+CdbControlGui:SetMovable(true)
+CdbControlGui:EnableMouse(true)
+CdbControlGui:RegisterForDrag("LeftButton")
+CdbControlGui:SetScript("OnMouseDown",function()
+    CdbControlGui:StartMoving()
+end)
+CdbControlGui:SetScript("OnMouseUp",function()
+    CdbControlGui:StopMovingOrSizing()
+    local _, _, _, x, y = CdbControlGui:GetPoint()
+    CdbSettings.x = x
+    CdbSettings.y = y
+end)
+CdbControlGui:Show()
+
+--------------------------------------------
+-- Function for adding buttons with graphics
+--------------------------------------------
+CdbControlGui.AddButton = function(name, position, textureFile, OnEnterFunctionString, OnClickFunction)
+    CdbControlGui.buttons[position] = CreateFrame("Button",name,CdbControlGui,"OptionsButtonTemplate")
+    CdbControlGui.buttons[position].nTex = {
+        bgFile = textureFile,
+        tile = false,
+        tileSize = 24,
+        insets = {left = 0, right = 0, top = 0, bottom = 0},
+    }
+    CdbControlGui.buttons[position]:SetPoint("TOP", 0, -position*24-5)
+    CdbControlGui.buttons[position]:SetWidth(24)
+    CdbControlGui.buttons[position]:SetHeight(24)
+    CdbControlGui.buttons[position]:SetBackdrop(CdbControlGui.buttons[position].nTex)
+    CdbControlGui.buttons[position]:SetNormalTexture(nil)
+    CdbControlGui.buttons[position]:SetPushedTexture(nil)
+    CdbControlGui.buttons[position]:SetHighlightTexture(nil)
+    CdbControlGui.buttons[position]:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
+        GameTooltip:ClearLines();
+        GameTooltip:SetText(OnEnterFunctionString);
+        GameTooltip:Show();
+    end)
+    CdbControlGui.buttons[position]:SetScript("OnLeave", function(self)
+        GameTooltip:Hide();
+    end)
+    CdbControlGui.buttons[position]:SetScript("OnClick", OnClickFunction)
+end
+
+----------------------------
+-- Define the button content
+----------------------------
+CdbControlGui.buttonValues = {}
+CdbControlGui.buttonValues.CleanMap = {
+    position = 0,
+    textureFile = "Interface\\Addons\\ClassicDB\\symbols\\Map",
+    OnEnterFunctionString = "Clean Map"..
+                            "\n\n|cffffffff"..
+                            "Clear all ClassicDB notes from the map. This disables the\n"..
+                            "settings \"Automatic note update\" and \"Show quest starts\".\n"..
+                            "They can be reenabled at the bottom of the control GUI.|r",
+    OnClickFunction = function(self)
+        CdbCleanMapAndPreventRedraw();
+    end,
+}
+CdbControlGui.buttonValues.ShowAllQuests = {
+    position = 1,
+    textureFile = "Interface\\Addons\\ClassicDB\\symbols\\MarkMap",
+    OnEnterFunctionString = "Show all current quests"..
+                            "\n\n|cffffffff"..
+                            "Plot notes on the map for all quest currently in the quest log.\n"..
+                            "This draws notes only once, for automatic updates enable the\n"..
+                            "corresponding option at the bottom of the control GUI.|r",
+    OnClickFunction = function(self)
+        CdbGetAllQuestNotes();
+        WorldMapFrame:Show();
+    end,
+}
+CdbControlGui.buttonValues.CycleMap = {
+    position = 2,
+    textureFile = "Interface\\Addons\\ClassicDB\\symbols\\MapCycle",
+    OnEnterFunctionString = "Cycle zones"..
+                            "\n\n|cffffffff"..
+                            "Cycle through the currently marked zones.|r",
+    OnClickFunction = function(self)
+        CdbCycleMarkedZones();
+    end,
+}
+CdbControlGui.buttonValues.ShowSelectedQuest = {
+    position = 3,
+    textureFile = "Interface\\Addons\\ClassicDB\\symbols\\Log",
+    OnEnterFunctionString = "Show currently selected Quest"..
+                            "\n\n|cffffffff"..
+                            "Plot notes on the map for the quest currently selected\n"..
+                            "in the quest log.|r",
+    OnClickFunction = function(self)
+        CdbGetSelectionQuestNotes();
+        WorldMapFrame:Show();
+    end,
+}
+CdbControlGui.buttonValues.ResizeMap = {
+    position = 4,
+    textureFile = "Interface\\Addons\\ClassicDB\\symbols\\Arrows",
+    OnEnterFunctionString = "Reset map and icons to default size",
+    OnClickFunction = function(self)
+         CdbResetMapAndIconSize()
+    end,
+}
+CdbControlGui.buttonValues.ShowSearch = {
+    position = 5,
+    textureFile = "Interface\\Addons\\ClassicDB\\symbols\\Glass",
+    OnEnterFunctionString = "Toggle settings and search window"..
+                            "\n\n|cffffffff"..
+                            "Show a window where you can adjust the ClassicDB settings\n"..
+                            "or search for creatures, objects, items, and quests.|r",
+    OnClickFunction = function(self)
+        if (CdbSearchGui:IsShown()) then
+            CdbSearchGui:Hide()
+        else
+            CdbSearchGui:Show()
+        end
+    end,
+}
+
+------------------
+-- Add the buttons
+------------------
+CdbControlGui.buttons = {}
+for name, data in pairs(CdbControlGui.buttonValues) do
+    CdbControlGui.AddButton(name, data.position, data.textureFile, data.OnEnterFunctionString, data.OnClickFunction)
+end
+
+------------------------------------
+-- Function for adding check buttons
+------------------------------------
+CdbControlGui.AddCheckButton = function(name, position, OnEnterFunctionString)
+    CdbControlGui.checkButtons[position] = CreateFrame("CheckButton", "mycheckbutton", CdbControlGui, "UICheckButtonTemplate")
+    CdbControlGui.checkButtons[position].settingName = name
+    CdbControlGui.checkButtons[position]:SetPoint("BOTTOMLEFT", position*12+2, 2)
+    CdbControlGui.checkButtons[position]:SetWidth(12)
+    CdbControlGui.checkButtons[position]:SetHeight(12)
+    CdbControlGui.checkButtons[position]:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
+        GameTooltip:ClearLines();
+        GameTooltip:SetText(CdbGetSetting(this.settingName)..OnEnterFunctionString);
+        GameTooltip:Show();
+    end)
+    CdbControlGui.checkButtons[position]:SetScript("OnLeave", function(self)
+        GameTooltip:Hide();
+    end)
+    CdbControlGui.checkButtons[position]:SetScript("OnClick", function()
+        CdbSwitchSetting(this.settingName)
+    end)
+end
+
+----------------------------------
+-- Define the check button content
+----------------------------------
+CdbControlGui.checkButtonValues = {}
+
+CdbControlGui.checkButtonValues.auto_plot = {
+    position = 0,
+    OnEnterFunctionString = "\n\n|cffffffff"..
+                            "When enabled, this option shows notes for all quests in the log.\n"..
+                            "It will update automatically every time there is a quest\n"..
+                            "event, like looting. If you experience lags when finishing\n"..
+                            "a quest objective, disable and use the 'Show all notes'\n"..
+                            "button as long as the quest drawing too many notes is in\n"..
+                            "in your quest log.|r",
+}
+CdbControlGui.checkButtonValues.questStarts = {
+    position = 1,
+    OnEnterFunctionString = "\n\n|cffffffff"..
+                            "When enabled, this option shows notes for all quests starts\n"..
+                            "in the currently displayed zone. If it doesn't load immediately\n"..
+                            "reopen the map.|r",
+}
+CdbControlGui.checkButtonValues.waypoints = {
+    position = 2,
+    OnEnterFunctionString = "\n\n|cffffffff"..
+                            "When enabled, mob waypoints are shown on the map.\n"..
+                            "Due to script spawns not yet being included in the DB\n"..
+                            "this can also be helpful in finding some special mobs.|r",
+}
+
+------------------
+-- Add the buttons
+------------------
+CdbControlGui.checkButtons = {}
+for name, data in pairs(CdbControlGui.checkButtonValues) do
+    CdbControlGui.AddCheckButton(name, data.position, data.OnEnterFunctionString)
 end
