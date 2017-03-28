@@ -20,6 +20,23 @@ if not CdbFavourites["object"] then CdbFavourites["object"] = {} end
 if not CdbFavourites["item"] then CdbFavourites["item"] = {} end
 if not CdbFavourites["quest"] then CdbFavourites["quest"] = {} end
 
+
+------------------------------------------------------------
+-- Auxiliary frame for registering events and initialization
+------------------------------------------------------------
+CdbAuxiliaryFrame = CreateFrame("Frame", "CdbAuxiliaryFrame", UIParent)
+CdbAuxiliaryFrame:SetScript("OnLoad", function() CdbInit() end)
+CdbAuxiliaryFrame:SetScript("OnEvent", function() CdbOnEvent(self, event) end)
+-- Register Events (some unused)
+CdbAuxiliaryFrame:RegisterEvent("PLAYER_LOGIN");
+CdbAuxiliaryFrame:RegisterEvent("PLAYER_ENTERING_WORLD");
+CdbAuxiliaryFrame:RegisterEvent("QUEST_WATCH_UPDATE");
+CdbAuxiliaryFrame:RegisterEvent("QUEST_LOG_UPDATE");
+CdbAuxiliaryFrame:RegisterEvent("QUEST_PROGRESS");
+CdbAuxiliaryFrame:RegisterEvent("QUEST_FINISHED");
+CdbAuxiliaryFrame:RegisterEvent("UNIT_QUEST_LOG_CHANGED");
+CdbAuxiliaryFrame:RegisterEvent("WORLD_MAP_UPDATE");
+
 ------------------------------
 -- Create the search GUI frame
 ------------------------------
@@ -39,24 +56,6 @@ CdbSearchGui:SetScript("OnMouseDown",function()
 end)
 CdbSearchGui:SetScript("OnMouseUp",function()
     CdbSearchGui:StopMovingOrSizing()
-end)
-
---------------------------------------------------
--- Minimap button re-positioning on login/reloadUI
--- Checking setting marks in the control GUI
--- Control GUI re-positioning in login/reloadUI
---------------------------------------------------
-CdbSearchGui:RegisterEvent("PLAYER_ENTERING_WORLD");
-CdbSearchGui:SetScript("OnEvent", function(self, event, ...)
-    CdbSearchGui.minimapButton:SetPoint("TOPLEFT", Minimap, "TOPLEFT", 52-(80*cos(CdbMinimapPosition)),(80*sin(CdbMinimapPosition))-52)
-    for _, button in pairs(CdbControlGui.checkButtons) do
-        CdbCheckSetting(button.settingName)
-    end
-    if CdbSettings.x ~= nil then
-        CdbControlGui:SetPoint("TOPLEFT", CdbSettings.x, CdbSettings.y)
-    else
-        CdbControlGui:SetPoint("CENTER", 0, 0)
-    end
 end)
 
 ----------------------------

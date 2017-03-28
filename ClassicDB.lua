@@ -51,25 +51,8 @@ DB_SUB_QUESTS = 14;
 DB_QUEST_GROUP = 15;
 DB_EXCLUSIVE_QUEST_GROUP = 16;
 
--- functions for event handeling and control gui
-
-function CdbOnMouseDown(arg1)
-    if (arg1 == "LeftButton") then
-        CdbControlGui:StartMoving();
-    end
-end -- OnMouseDown(arg1)
-
-function CdbOnMouseUp(arg1)
-    if (arg1 == "LeftButton") then
-        CdbControlGui:StopMovingOrSizing();
-    end
-end -- OnMouseUp(arg1)
-
-function CdbOnFrameShow()
-    --
-end -- OnFrameShow()
-
-function CdbOnEvent(event, ...)
+-- function for event handeling
+function CdbOnEvent(self, event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10)
     CdbDebugPrint(20, "Event() called", event, arg1, arg2, arg3);
     if (event == "PLAYER_LOGIN") then
         if (Cartographer_Notes ~= nil) then
@@ -250,6 +233,16 @@ function CdbOnEvent(event, ...)
         fillQuestLookup();
         CdbControlGui:Show();
         CdbPrint("ClassicDB Loaded.");
+    elseif (event == "PLAYER_ENTERING_WORLD") then
+        CdbSearchGui.minimapButton:SetPoint("TOPLEFT", Minimap, "TOPLEFT", 52-(80*cos(CdbMinimapPosition)),(80*sin(CdbMinimapPosition))-52)
+        for _, button in pairs(CdbControlGui.checkButtons) do
+            CdbCheckSetting(button.settingName)
+        end
+        if CdbSettings.x ~= nil then
+            CdbControlGui:SetPoint("TOPLEFT", CdbSettings.x, CdbSettings.y)
+        else
+            CdbControlGui:SetPoint("CENTER", 0, 0)
+        end
     elseif (event == "WORLD_MAP_UPDATE") and (WorldMapFrame:IsVisible()) and (CdbSettings.questStarts) then
         CdbDebugPrint(4, "    ", zone);
         CdbInEvent = true;
@@ -385,16 +378,7 @@ function range(from, to, step)
 end
 
  -- Called from xml
-function CdbInit()
-    -- Register Events (some unused)
-    this:RegisterEvent("PLAYER_LOGIN");
-    this:RegisterEvent("QUEST_WATCH_UPDATE");
-    this:RegisterEvent("QUEST_LOG_UPDATE");
-    this:RegisterEvent("QUEST_PROGRESS");
-    this:RegisterEvent("QUEST_FINISHED");
-    this:RegisterEvent("UNIT_QUEST_LOG_CHANGED");
-    this:RegisterEvent("WORLD_MAP_UPDATE");
-
+function CdbInit(frame)
     -- Hook buttons for abandoning quests.
     -- Credit for this approach goes to Questie: https://github.com/AeroScripts/QuestieDev
     CdbQuestAbandonOnAccept = StaticPopupDialogs["ABANDON_QUEST"].OnAccept;

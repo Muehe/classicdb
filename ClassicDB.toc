@@ -17,4 +17,3 @@ db\objectDB.lua
 # addon
 ClassicDB.lua
 ClassicDB_GUI.lua
-ClassicDB.xml
