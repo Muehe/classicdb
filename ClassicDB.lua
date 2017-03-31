@@ -287,7 +287,6 @@ function CdbOnEvent(self, event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8,
                 CdbInEvent = false;
             end
         end
-        CdbDebugPrint(4, "    footprint", {footprint, count, change});
         if CdbWatchUpdate == true then
             local questTitle, level, questTag, isHeader, isCollapsed, isComplete = GetQuestLogTitle(CdbWatchUpdateQuestLogId);
             CdbDebugPrint(16, "    title", questTitle);
@@ -776,6 +775,7 @@ SetItemRef = function (link, text, button)
 
   _, _, questLevel = string.find(link, "quest:%d+:(%d+)");
   local playerHasQuest = false
+  local oldQuestLogId = GetQuestLogSelection();
 
   if isQuest then
     -- A usual Quest Link introduced in 2.0x
@@ -849,6 +849,7 @@ SetItemRef = function (link, text, button)
   else
     HookSetItemRef(link, text, button)
   end
+  SelectQuestLogEntry(oldQuestLogId);
 end -- SetItemRef (link, text, button)
 
 ----------------------------------------------------
@@ -999,6 +1000,7 @@ end -- SearchEndObj(questID)
 function CdbGetQuestEndNotes(questLogID)
     CdbDebugPrint(2, "GetQuestEndNotes(", questLogID, ") called");
     local questTitle, level = GetQuestLogTitle(questLogID);
+    local oldQuestLogId = GetQuestLogSelection();
     SelectQuestLogEntry(questLogID);
     local questDescription, questObjectives = GetQuestLogQuestText();
     if (questObjectives == nil) then questObjectives = ''; end
@@ -1088,6 +1090,7 @@ function CdbGetQuestEndNotes(questLogID)
     else
         return false;
     end
+    SelectQuestLogEntry(oldQuestLogId);
 end -- GetQuestEndNotes(questLogID)
 
 function CdbGetQuestIds(questName, objectives, ...)
@@ -1426,6 +1429,7 @@ end -- GetSpecialNpcNotes(qId, objectiveText, numItems, numNeeded, title)
 
 function CdbGetQuestNotes(questLogID)
     CdbDebugPrint(2, "GetQuestNotes(", questLogID, ") called");
+    local oldQuestLogId = GetQuestLogSelection();
     local questTitle, level, questTag, isHeader, isCollapsed, isComplete = GetQuestLogTitle(questLogID);
     local showMap = false;
     if (not isHeader and questTitle ~= nil) then
@@ -1588,6 +1592,7 @@ function CdbGetQuestNotes(questLogID)
     if showMap then
         CdbNextMark();
     end
+    SelectQuestLogEntry(oldQuestLogId);
     return showMap;
 end -- GetQuestNotes(questLogID)
 
@@ -1996,6 +2001,7 @@ end -- PrintTable(tab, indent)
 
 function CdbGetQuestLogFootprint()
     CdbDebugPrint(4, "GetQuestLogFootprint() called");
+    local oldQuestLogId = GetQuestLogSelection();
     local questLogID=1;
     local footprint = "";
     local ids = {};
@@ -2029,6 +2035,7 @@ function CdbGetQuestLogFootprint()
             footprint = footprint.."'"..questTitle.."'"..level.."#"..uId.."#"..isComplete;
         end
     end
+    SelectQuestLogEntry(oldQuestLogId);
     return {strlower(footprint), ids}
 end
 
