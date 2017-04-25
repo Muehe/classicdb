@@ -138,7 +138,11 @@ end)
 CdbSearchGui.minimapButton:SetScript("OnEnter", function()
     GameTooltip:SetOwner(CdbSearchGui.minimapButton, "ANCHOR_BOTTOMLEFT");
     GameTooltip:ClearLines();
-    GameTooltip:SetText("ClassicDB\n\n<LeftClick>: Toggle search window\n<RightClick>: Toggle control window\n<Shift>+<LeftClick>: Reset Map and Icon Size\n<Shift>+<RightClick>: Reset and show both windows");
+    GameTooltip:AddLine("ClassicDB");
+    GameTooltip:AddLine("\n|cffffffffLeftClick:|r Toggle search window"..
+                        "\n|cffffffffRightClick:|r Toggle control window"..
+                        "\n|cffffffffShift + LeftClick:|r Reset Map and Icon Size"..
+                        "\n|cffffffffShift + RightClick:|r Reset and show both windows");
     GameTooltip:Show();
 end)
 CdbSearchGui.minimapButton:SetScript("OnLeave", function()
@@ -468,12 +472,8 @@ CdbSearchGui.settings.values.dbMode = {
         this:SetBackdropColor(1,1,1,.25)
         GameTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
         GameTooltip:ClearLines();
-        GameTooltip:SetText(CdbGetSetting("dbMode")..
-                           "\n\n|cffffffff"..
-                           "When enabled, this option prevents ClassicDB from cleaning quests\n"..
-                           "for other classes and the opposite faction from the quest DB.\n"..
-                           "Not recommended for normal users, as it adds many unatainable\n"..
-                           "quest starts to the map.|r");
+        GameTooltip:AddLine(CdbGetSetting("dbMode"));
+        GameTooltip:AddLine("\n|cffffffffWhen enabled, this option prevents ClassicDB from cleaning quests for other classes and the opposite faction from the quest DB. Not recommended for normal users, as it adds many unatainable quest starts to the map.|r", nil, nil, nil, true);
         GameTooltip:Show();
     end,
 }
@@ -484,11 +484,8 @@ CdbSearchGui.settings.values.questStarts = {
         this:SetBackdropColor(1,1,1,.25)
         GameTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
         GameTooltip:ClearLines();
-        GameTooltip:SetText(CdbGetSetting("questStarts")..
-                           "\n\n|cffffffff"..
-                           "When enabled, this option shows notes for all quests starts\n"..
-                           "in the currently displayed zone. If it doesn't load immediately\n"..
-                           "reopen the map.|r");
+        GameTooltip:AddLine(CdbGetSetting("questStarts"));
+        GameTooltip:AddLine("\n|cffffffffWhen enabled, this option shows notes for all quests starts in the currently displayed zone. If it doesn't load immediately reopen the map.|r", nil, nil, nil, true);
         GameTooltip:Show();
     end,
 }
@@ -499,12 +496,8 @@ CdbSearchGui.settings.values.filterPreQuest = {
         this:SetBackdropColor(1,1,1,.25)
         GameTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
         GameTooltip:ClearLines();
-        GameTooltip:SetText(CdbGetSetting("filterPreQuest")..
-                           "\n\n|cffffffff"..
-                           "When enabled, this option filter quests starts based on\n"..
-                           "their finished status according to ClassicDB. To mark a\n"..
-                           "quest as finished use the search or right-click it's\n"..
-                           "start icon on the map.|r");
+        GameTooltip:AddLine(CdbGetSetting("filterPreQuest"));
+        GameTooltip:AddLine("\n|cffffffffWhen enabled, this option filter quests starts based on their finished status according to ClassicDB. To mark a quest as finished use the search or right-click its start icon on the map.|r", nil, nil, nil, true);
         GameTooltip:Show();
     end,
 }
@@ -515,10 +508,8 @@ CdbSearchGui.settings.values.filterReqLevel = {
         this:SetBackdropColor(1,1,1,.25)
         GameTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
         GameTooltip:ClearLines();
-        GameTooltip:SetText(CdbGetSetting("filterReqLevel")..
-                           "\n\n|cffffffff"..
-                           "When enabled, this option prevents quest starts from being marked\n"..
-                           "if the player doesn't meet the minimum level requirements.|r");
+        GameTooltip:AddLine(CdbGetSetting("filterReqLevel"));
+        GameTooltip:AddLine("\n|cffffffffWhen enabled, this option prevents quest starts from being marked if the player doesn't meet the minimum level requirements.|r", nil, nil, nil, true);
         GameTooltip:Show();
     end,
 }
@@ -529,10 +520,8 @@ CdbSearchGui.settings.values.reqLevel = {
         this:SetBackdropColor(1,1,1,.25)
         GameTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
         GameTooltip:ClearLines();
-        GameTooltip:SetText(CdbGetSetting("reqLevel")..
-                           "\n\n|cffffffff"..
-                           "When enabled, this option shows the required level"..
-                           "in the quest start tooltips.|r");
+        GameTooltip:AddLine(CdbGetSetting("reqLevel"));
+        GameTooltip:AddLine("\n|cffffffffWhen enabled, this option shows the required level in the quest start tooltips.|r", nil, nil, nil, true);
         GameTooltip:Show();
     end,
 }
@@ -543,11 +532,8 @@ CdbSearchGui.settings.values.item_item = {
         this:SetBackdropColor(1,1,1,.25)
         GameTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
         GameTooltip:ClearLines();
-        GameTooltip:SetText(CdbGetSetting("item_item")..
-                           "\n\n|cffffffff"..
-                           "When enabled, this option shows item drops from other items.|r\n"..
-                           "|cFFFF1A1A!WARNING! This option might be unstable!\n"..
-                           "It is recommended to leave it turned of if not needed.|r");
+        GameTooltip:AddLine(CdbGetSetting("item_item"));
+        GameTooltip:AddLine("\n|cffffffffWhen enabled, this option shows item drops from other items. Experimental.|r\n\n|cFFFF1A1AWARNING! This option might crash your client! It is recommended to leave it turned off.|r", nil, nil, nil, true);
         GameTooltip:Show();
     end,
 }
@@ -558,11 +544,8 @@ CdbSearchGui.settings.values.waypoints = {
         this:SetBackdropColor(1,1,1,.25)
         GameTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
         GameTooltip:ClearLines();
-        GameTooltip:SetText(CdbGetSetting("waypoints")..
-                           "\n\n|cffffffff"..
-                           "When enabled, mob waypoints are shown on the map.\n"..
-                           "Due to script spawns not yet being included in the DB\n"..
-                           "this can also be helpful in finding some special mobs.|r");
+        GameTooltip:AddLine(CdbGetSetting("waypoints"))
+        GameTooltip:AddLine("\n|cffffffffWhen enabled, creature waypoints are shown on the map. Due to script spawns not yet being included in the DB this may also be helpful in finding some special mobs.|r", nil, nil, nil, true);
         GameTooltip:Show();
     end,
 }
@@ -573,14 +556,8 @@ CdbSearchGui.settings.values.auto_plot = {
         this:SetBackdropColor(1,1,1,.25)
         GameTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
         GameTooltip:ClearLines();
-        GameTooltip:SetText(CdbGetSetting("auto_plot")..
-                           "\n\n|cffffffff"..
-                           "When enabled, this option shows notes for all quests in the log.\n"..
-                           "It will update automatically every time there is a quest\n"..
-                           "event, like looting. If you experience lags when finishing\n"..
-                           "a quest objective, disable and use the 'Show all notes'\n"..
-                           "button as long as the quest drawing too many notes is in\n"..
-                           "in your quest log.|r");
+        GameTooltip:AddLine(CdbGetSetting("auto_plot"));
+        GameTooltip:AddLine("\n|cffffffffWhen enabled, this option shows notes for all quests in the log. It will update automatically every time there is a quest event, like looting. If you experience lags when finishing a quest objective, disable this and use the |rShow all current quests|cffffffff button in the control GUI, as long as the quest drawing too many notes is in your quest log.|r", nil, nil, nil, true);
         GameTooltip:Show();
     end,
 }
@@ -591,9 +568,8 @@ CdbSearchGui.settings.values.questIds = {
         this:SetBackdropColor(1,1,1,.25)
         GameTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
         GameTooltip:ClearLines();
-        GameTooltip:SetText(CdbGetSetting("questIds")..
-                           "\n\n|cffffffff"..
-                           "When enabled, this option shows the quest ID in the quest start tooltips.|r");
+        GameTooltip:AddLine(CdbGetSetting("questIds"));
+        GameTooltip:AddLine("\n|cffffffffWhen enabled, this option shows the quest ID in the quest start tooltips.|r", nil, nil, nil, true);
                            -- TODO: Update text once this setting has been fixed. Quest IDs in quest start tooltips are needed for their context menu.
         GameTooltip:Show();
     end,
@@ -1015,7 +991,7 @@ CdbControlGui:Show()
 --------------------------------------------
 -- Function for adding buttons with graphics
 --------------------------------------------
-CdbControlGui.AddButton = function(name, position, textureFile, OnEnterFunctionString, OnClickFunction)
+CdbControlGui.AddButton = function(name, position, textureFile, OnEnterFunctionTitle, OnEnterFunctionString, OnClickFunction)
     CdbControlGui.buttons[position] = CreateFrame("Button",name,CdbControlGui,"OptionsButtonTemplate")
     CdbControlGui.buttons[position].nTex = {
         bgFile = textureFile,
@@ -1033,7 +1009,10 @@ CdbControlGui.AddButton = function(name, position, textureFile, OnEnterFunctionS
     CdbControlGui.buttons[position]:SetScript("OnEnter", function(self)
         GameTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
         GameTooltip:ClearLines();
-        GameTooltip:SetText(OnEnterFunctionString);
+        GameTooltip:AddLine(OnEnterFunctionTitle);
+        if OnEnterFunctionString ~= nil then
+            GameTooltip:AddLine(OnEnterFunctionString, nil, nil, nil, true);
+        end
         GameTooltip:Show();
     end)
     CdbControlGui.buttons[position]:SetScript("OnLeave", function(self)
@@ -1049,11 +1028,8 @@ CdbControlGui.buttonValues = {}
 CdbControlGui.buttonValues.CleanMap = {
     position = 0,
     textureFile = "Interface\\Addons\\ClassicDB\\symbols\\Map",
-    OnEnterFunctionString = "Clean Map"..
-                            "\n\n|cffffffff"..
-                            "Clear all ClassicDB notes from the map. This disables the\n"..
-                            "settings \"Automatic note update\" and \"Show quest starts\".\n"..
-                            "They can be reenabled at the bottom of the control GUI.|r",
+    OnEnterFunctionTitle = "Clean Map",
+    OnEnterFunctionString = "\n|cffffffffClear all ClassicDB notes from the map. This disables the settings |r"..CdbSettingsText["auto_plot"].."|cffffffff and |r"..CdbSettingsText["questStarts"].."|cffffffff. They can be reenabled at the bottom of the control GUI.|r",
     OnClickFunction = function(self)
         CdbCleanMapAndPreventRedraw();
     end,
@@ -1061,11 +1037,8 @@ CdbControlGui.buttonValues.CleanMap = {
 CdbControlGui.buttonValues.ShowAllQuests = {
     position = 1,
     textureFile = "Interface\\Addons\\ClassicDB\\symbols\\MarkMap",
-    OnEnterFunctionString = "Show all current quests"..
-                            "\n\n|cffffffff"..
-                            "Plot notes on the map for all quest currently in the quest log.\n"..
-                            "This draws notes only once, for automatic updates enable the\n"..
-                            "corresponding option at the bottom of the control GUI.|r",
+    OnEnterFunctionTitle = "Show all current quests",
+    OnEnterFunctionString = "\n|cffffffffPlot notes on the map for all quest currently in the quest log. This draws notes only once, for automatic updates enable the corresponding option at the bottom of the control GUI.|r",
     OnClickFunction = function(self)
         CdbGetAllQuestNotes();
         WorldMapFrame:Show();
@@ -1074,9 +1047,8 @@ CdbControlGui.buttonValues.ShowAllQuests = {
 CdbControlGui.buttonValues.CycleMap = {
     position = 2,
     textureFile = "Interface\\Addons\\ClassicDB\\symbols\\MapCycle",
-    OnEnterFunctionString = "Cycle zones"..
-                            "\n\n|cffffffff"..
-                            "Cycle through the currently marked zones.|r",
+    OnEnterFunctionTitle = "Cycle zones",
+    OnEnterFunctionString = "\n|cffffffffCycle through the currently marked zones.|r",
     OnClickFunction = function(self)
         CdbCycleMarkedZones();
     end,
@@ -1084,10 +1056,8 @@ CdbControlGui.buttonValues.CycleMap = {
 CdbControlGui.buttonValues.ShowSelectedQuest = {
     position = 3,
     textureFile = "Interface\\Addons\\ClassicDB\\symbols\\Log",
-    OnEnterFunctionString = "Show currently selected Quest"..
-                            "\n\n|cffffffff"..
-                            "Plot notes on the map for the quest currently selected\n"..
-                            "in the quest log.|r",
+    OnEnterFunctionTitle = "Show currently selected quest",
+    OnEnterFunctionString = "\n|cffffffffPlot notes on the map for the quest currently selected in the quest log.|r",
     OnClickFunction = function(self)
         CdbGetSelectionQuestNotes();
         WorldMapFrame:Show();
@@ -1096,7 +1066,8 @@ CdbControlGui.buttonValues.ShowSelectedQuest = {
 CdbControlGui.buttonValues.ResizeMap = {
     position = 4,
     textureFile = "Interface\\Addons\\ClassicDB\\symbols\\Arrows",
-    OnEnterFunctionString = "Reset map and icons to default size",
+    OnEnterFunctionTitle = "Reset map and icons to default size",
+    OnEnterFunctionString = nil,
     OnClickFunction = function(self)
          CdbResetMapAndIconSize()
     end,
@@ -1104,10 +1075,8 @@ CdbControlGui.buttonValues.ResizeMap = {
 CdbControlGui.buttonValues.ShowSearch = {
     position = 5,
     textureFile = "Interface\\Addons\\ClassicDB\\symbols\\Glass",
-    OnEnterFunctionString = "Toggle settings and search window"..
-                            "\n\n|cffffffff"..
-                            "Show a window where you can adjust the ClassicDB settings\n"..
-                            "or search for creatures, objects, items, and quests.|r",
+    OnEnterFunctionTitle = "Toggle settings and search window",
+    OnEnterFunctionString = "\n|cffffffffShow a window where you can adjust the ClassicDB settings or search for creatures, objects, items, and quests.|r",
     OnClickFunction = function(self)
         if (CdbSearchGui:IsShown()) then
             CdbSearchGui:Hide()
@@ -1122,7 +1091,7 @@ CdbControlGui.buttonValues.ShowSearch = {
 ------------------
 CdbControlGui.buttons = {}
 for name, data in pairs(CdbControlGui.buttonValues) do
-    CdbControlGui.AddButton(name, data.position, data.textureFile, data.OnEnterFunctionString, data.OnClickFunction)
+    CdbControlGui.AddButton(name, data.position, data.textureFile, data.OnEnterFunctionTitle, data.OnEnterFunctionString, data.OnClickFunction)
 end
 
 ------------------------------------
@@ -1137,7 +1106,8 @@ CdbControlGui.AddCheckButton = function(name, position, OnEnterFunctionString)
     CdbControlGui.checkButtons[position]:SetScript("OnEnter", function(self)
         GameTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
         GameTooltip:ClearLines();
-        GameTooltip:SetText(CdbGetSetting(this.settingName)..OnEnterFunctionString);
+        GameTooltip:AddLine(CdbGetSetting(this.settingName));
+        GameTooltip:AddLine(OnEnterFunctionString, nil, nil, nil, true);
         GameTooltip:Show();
     end)
     CdbControlGui.checkButtons[position]:SetScript("OnLeave", function(self)
@@ -1155,27 +1125,15 @@ CdbControlGui.checkButtonValues = {}
 
 CdbControlGui.checkButtonValues.auto_plot = {
     position = 0,
-    OnEnterFunctionString = "\n\n|cffffffff"..
-                            "When enabled, this option shows notes for all quests in the log.\n"..
-                            "It will update automatically every time there is a quest\n"..
-                            "event, like looting. If you experience lags when finishing\n"..
-                            "a quest objective, disable and use the 'Show all notes'\n"..
-                            "button as long as the quest drawing too many notes is in\n"..
-                            "in your quest log.|r",
+    OnEnterFunctionString = "\n|cffffffffWhen enabled, this option shows notes for all quests in the log. It will update automatically every time there is a quest event, like looting. If you experience lags when finishing a quest objective, disable and use the |rShow all current quests|cffffffff button as long as the quest drawing too many notes is in in your quest log.|r",
 }
 CdbControlGui.checkButtonValues.questStarts = {
     position = 1,
-    OnEnterFunctionString = "\n\n|cffffffff"..
-                            "When enabled, this option shows notes for all quests starts\n"..
-                            "in the currently displayed zone. If it doesn't load immediately\n"..
-                            "reopen the map.|r",
+    OnEnterFunctionString = "\n|cffffffffWhen enabled, this option shows notes for all quests starts in the currently displayed zone. If it doesn't load immediately reopen the map.|r",
 }
 CdbControlGui.checkButtonValues.waypoints = {
     position = 2,
-    OnEnterFunctionString = "\n\n|cffffffff"..
-                            "When enabled, mob waypoints are shown on the map.\n"..
-                            "Due to script spawns not yet being included in the DB\n"..
-                            "this can also be helpful in finding some special mobs.|r",
+    OnEnterFunctionString = "\n|cffffffffWhen enabled, mob waypoints are shown on the map. Due to script spawns not yet being included in the DB this can also be helpful in finding some special mobs.|r",
 }
 
 ------------------

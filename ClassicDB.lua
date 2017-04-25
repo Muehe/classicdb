@@ -1165,15 +1165,15 @@ function CdbGetObjIds(objName)
 end -- GetObjID(objName)
 
 CdbSettingsText = {
-        ["waypoints"] = "Showing waypoints",
-        ["auto_plot"] = "Automatically updating quest notes",
-        ["questStarts"] = "Showing quest starts",
-        ["reqLevel"] = "Showing required level in quest start tooltips",
+        ["waypoints"] = "Show waypoints",
+        ["auto_plot"] = "Automatic quest note update",
+        ["questStarts"] = "Show quest starts",
+        ["reqLevel"] = "Show required level in quest start tooltips",
         ["filterPreQuest"] = "Filter quest starts based on finished quests",
         ["filterReqLevel"] = "Filter quest starts based on required level",
-        ["questIds"] = "Showing quest IDs in tooltips (currently unused)",
+        ["questIds"] = "Show quest IDs in tooltips (currently unused)",
         ["dbMode"] = "DB Mode",
-        ["item_item"] = "Showing items dropped by items",
+        ["item_item"] = "Show items dropped by items",
 };
 
 function CdbSwitchSetting(setting, ...)
