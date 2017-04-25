@@ -449,14 +449,14 @@ function CdbInit(frame)
             if (itemName and itemName ~= "") then
                 if ((itemLookup[itemName]) and (itemData[itemLookup[itemName]])) then
                     CdbPrepareForDrawing(DB_ITM, itemName, itemName, "", 0);
-                    CdbShowMap();
+                    CdbDrawNotesAndShowMap();
                 end
             end
         elseif (arg1 == "vendor") then
             local itemName = arg2;
             CdbMapNotes = {};
             CdbPrepareItemNotes(itemName, "Vendors for: "..itemName, "Sells: "..itemName, "CdbVendor", {DB_VENDOR});
-            CdbShowMap();
+            CdbDrawNotesAndShowMap();
         elseif (arg1 == "spawn") then
             local monsterName = arg2;
             if (monsterName and monsterName ~= "") then
@@ -468,7 +468,7 @@ function CdbInit(frame)
                         if (zoneName == nil) then zoneName = npcData[npcID][DB_ZONE]; end
                         CdbPrint("    Zone: " .. zoneName);
                         if (CdbPrepareForDrawing(DB_NPC, monsterName, monsterName, CdbGetNpcStatsComment(monsterName, true), 0)) then
-                            CdbShowMap();
+                            CdbDrawNotesAndShowMap();
                         end
                     else
                         CdbPrint("No location found.");
@@ -482,7 +482,7 @@ function CdbInit(frame)
             end
             CdbMapNotes = {};
             CdbGetQuestStartNotes(zoneName);
-            CdbShowMap();
+            CdbDrawNotesAndShowMap();
         elseif (arg1 == "quest") then
             local questTitle = arg2;
             CdbMapNotes = {};
@@ -501,7 +501,7 @@ function CdbInit(frame)
                     CdbNextMark();
                 end
             end
-            CdbShowMap();
+            CdbDrawNotesAndShowMap();
         elseif (arg1 == "minimap") then
             if (CdbSearchGui.minimapButton:IsShown()) then
                 CdbSearchGui.minimapButton:Hide()
@@ -534,7 +534,7 @@ function CdbInit(frame)
                 CdbPrint("Locations for: "..objName);
                 if (objName ~= nil) then
                     if (CdbPrepareForDrawing(DB_OBJ, objName, objName, "This object can be found here", 0)) then
-                        CdbShowMap();
+                        CdbDrawNotesAndShowMap();
                     else
                         CdbPrint("No locations found.");
                     end
@@ -602,7 +602,7 @@ function CdbCleanMap()
     CdbMapNotes = {};
 end -- CleanMap()
 
-function CdbShowMap()
+function CdbDrawNotesAndShowMap()
     CdbDebugPrint(2, "ShowMap() called");
     local ShowMapZone, ShowMapTitle, ShowMapID = CdbDrawNotesOnMap();
     if (Cartographer) then
@@ -952,7 +952,7 @@ function CdbGetAllQuestNotes()
     if CdbInEvent == true then
         CdbDrawNotesOnMap();
     else
-        CdbShowMap();
+        CdbDrawNotesAndShowMap();
     end
     SelectQuestLogEntry(oldQuestLogId);
 end -- PlotAllQuests()
@@ -1763,7 +1763,7 @@ end -- GetCurrentZoneID()
 function CdbGetSelectionQuestNotes()
     CdbPrepare = CdbCurrentNotes;
     CdbGetQuestNotes(GetQuestLogSelection())
-    CdbShowMap();
+    CdbDrawNotesAndShowMap();
 end -- GetSelectionQuestNotes()
 
 function CdbGetTableLength(tab)

@@ -739,14 +739,14 @@ function CdbSearchGui:Search(query, searchType)
                     CdbSearchGui[searchType].buttons[searchCount]:SetScript("OnClick", function(self)
                         CdbMapNotes = {};
                         CdbPrepareForDrawing(DB_NPC, this.name, this.name, "Spawnpoint", 0);
-                        CdbShowMap();
+                        CdbDrawNotesAndShowMap();
                     end)
                 elseif searchType == "object" then
                     CdbSearchGui[searchType].buttons[searchCount]:SetText(name .. " |cffaaaaaa(ID:" .. id .. ")")
                     CdbSearchGui.object.buttons[searchCount]:SetScript("OnClick", function(self)
                         CdbMapNotes = {};
                         CdbPrepareForDrawing(DB_OBJ, this.name, this.name, "Object Spawnpoint", 0);
-                        CdbShowMap();
+                        CdbDrawNotesAndShowMap();
                     end)
                 elseif searchType == "item" then
                     local itemColor
@@ -800,7 +800,7 @@ function CdbSearchGui:Search(query, searchType)
                             CdbMapNotes = {};
                             CdbPrepareItemNotes(this:GetParent().id, "Location for: "..this:GetParent().name, "Drops item: "..this:GetParent().name, cMark, {DB_NPC});
                             CdbNextMark();
-                            CdbShowMap();
+                            CdbDrawNotesAndShowMap();
                         end)
                     end
                     -- show object button
@@ -823,7 +823,7 @@ function CdbSearchGui:Search(query, searchType)
                             CdbMapNotes = {};
                             CdbPrepareItemNotes(this:GetParent().id, "Location for: "..this:GetParent().name, "Contains item: "..this:GetParent().name, "CdbObject", {DB_OBJ});
                             CdbNextMark();
-                            CdbShowMap();
+                            CdbDrawNotesAndShowMap();
                         end)
                     end
                     -- show vendor button
@@ -848,7 +848,7 @@ function CdbSearchGui:Search(query, searchType)
                             CdbMapNotes = {};
                             CdbPrepareItemNotes(this:GetParent().id, "Location for: "..this:GetParent().name, "Sells item: "..this:GetParent().name, "CdbVendor", {DB_VENDOR});
                             CdbNextMark();
-                            CdbShowMap();
+                            CdbDrawNotesAndShowMap();
                         end)
                     end
                 elseif searchType == "quest" then
@@ -866,7 +866,7 @@ function CdbSearchGui:Search(query, searchType)
                             CdbMapNotes = {};
                             CdbGetQuestNotesById(this.id)
                             CdbNextMark();
-                            CdbShowMap();
+                            CdbDrawNotesAndShowMap();
                         end
                     end)
                     CdbSearchGui[searchType].buttons[searchCount]:SetScript("OnEnter", function(self)
