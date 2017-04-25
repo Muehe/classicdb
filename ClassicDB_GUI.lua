@@ -40,7 +40,7 @@ CdbLastSearchResults.quest = {}
 ------------------------------------------------------------
 CdbAuxiliaryFrame = CreateFrame("Frame", "CdbAuxiliaryFrame", UIParent)
 CdbAuxiliaryFrame:SetScript("OnLoad", function() CdbInit() end)
-CdbAuxiliaryFrame:SetScript("OnEvent", function() CdbOnEvent(self, event) end)
+CdbAuxiliaryFrame:SetScript("OnEvent", function() CdbOnEvent(self, event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10) end)
 -- Register Events (some unused)
 CdbAuxiliaryFrame:RegisterEvent("PLAYER_LOGIN");
 CdbAuxiliaryFrame:RegisterEvent("PLAYER_ENTERING_WORLD");
