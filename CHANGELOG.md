@@ -1,4 +1,4 @@
-Version 8.0 (beta)
+## Version 8.0 (beta)
 - Merged code from a separately developed version of WHDB (https://github.com/Muehe/WHDB). Most changes are related to this
 - New database, more recent data and also more information retrieved from server DB
 - Moved objects to a new tab
@@ -7,50 +7,50 @@ Version 8.0 (beta)
 - Note display for quests changed significantly. E.g. quest finishing notes are displayed as question marks, new icons, etc.
 - Changes to Cartographer. Map size, note size and map position can be changed by key and mouse combinations (see the top left corner of Cartographer ingame for a list)
 
-Version 6.7 (28.12.2015)
+## Version 6.7 (28.12.2015)
 - Eliminated Freeze on Loadscreen
 - A Message appears if using EQL3 and ShaguQuest at the same time.
 - The Minimap Icon now has a valid Name instead of "nil"
 
-Version 6.6 (07.12.2015)
+## Version 6.6 (07.12.2015)
 - Fixed some Game-freeze Issues
 - Moved the minimap icon to a lower framestrata
 
-Version 6.5 (01.12.2015)
+## Version 6.5 (01.12.2015)
 - New Slashcommands
 - Added the ability to hide the Minimap Button
 
-Version 6.4 (19.11.2015)
+## Version 6.4 (19.11.2015)
 - Fixed Eastern Plaguelands spawns
 
-Version 6.3 (16.11.2015)
+## Version 6.3 (16.11.2015)
 - Disable Autotracking per default
 - Don't save the Autotracking state because of loadscreen freezes
 
-Version 6.2 (06.11.2015)
+## Version 6.2 (06.11.2015)
 - Separated ShaguDB and ShaguQuest. You can now use ShaguDB without any Quest features
 - Added automatic quest tracking to ShaguQuest
 
-Version 6.1 (31.10.2015)
+## Version 6.1 (31.10.2015)
 - Fixed appearance of Buttons in ShaguDatabase GUI
 
-Version 6.0 (30.10.2015)
+## Version 6.0 (30.10.2015)
 - Added a Graphical User Interface for Database
 - Added experimental Dungeon and Battleground Maps
 
-Version 5.0 (03.10.2015)
+## Version 5.0 (03.10.2015)
 - Fixed Thunderbluff spawn points
 - Implemented a vendor search which allows you to search for items being sold.
 - Quests are now filtered by the own faction (e.g /shagu quests)
 
-Version 4.2 (18.05.2015)
+## Version 4.2 (18.05.2015)
 - Fixed the Button overlapping bug
 - Only show required Questobjectives
 
-Version 4.1 (28.03.2015)
+## Version 4.1 (28.03.2015)
 - Changed the appearance of the cartographer symbols. Looks now much clearer.
 
-Version 4.0 (25.03.2015)
+## Version 4.0 (25.03.2015)
 - The map will now open on the correct zone everytime (99.99%). The issue where a nearby map is opened instead, is now fixed.
 - Overlapping spawnpoints are removed. Only the spawns that are really on the map will now be shown.
 - The size of the addon and thus the RAM usage has been reduced.
@@ -59,17 +59,17 @@ Version 4.0 (25.03.2015)
 - Slashcommand /shagu item  has been cleaned up. Alot of wrong zones has been removed.
 - Some other minor fixes and code cleanups.
 
-Version 3.1.1 (22.03.2015)
+## Version 3.1.1 (22.03.2015)
 - Killquests on enGB Clients should now work correctly. Might impact some deDE Quests as well.
 
-Version 3.1 (06.03.2015)
+## Version 3.1 (06.03.2015)
 - Introducing: Slashcommand "shagu quest  <questname>" will search for a questgiver of the desired quest.
 - Slashcommand "shagu quests" will now print all quests of the current map, if no parameters are given.
 - Slashcommand "shagu item" now opens the map on the best dropchance.
 - Slashcommand "shagu item" will now print all zones instead of one broken zone.
 - Re-designed the formatting on the ShaguQuest slashcommands.
 
-Version 3.0 (05.03.2015)
+## Version 3.0 (05.03.2015)
 - Alot(!) of Quests will now work better, as there was a bug in the object-database.
 - Removed many of Lua Errors.
 - Intruducing: Slashcommand "shagu quests <map>" will print every Questgiver of the desired  <map>.
@@ -78,15 +78,15 @@ Version 3.0 (05.03.2015)
 - Many parts of the Code where rewritten. Merged alot of redundant code to functions.
 - Fixed parse errors in spawnData.lua for enGB clients
 
-Version 2.1 (18.01.2015)
+## Version 2.1 (18.01.2015)
 - Fixed NullPointer Error for enGB (issue in spawnData.lua)
 - Rewritten the code of the database export scripts.
 - Changed Addon Description (Ingame), to avoid confusion with EQL3 <=> Extended Quest Log3.
 
-Version 2.0 (20.08.2014)
+## Version 2.0 (20.08.2014)
 - The Map won't open automatically anymore. Instead, all spawns on every Map will now be shown.
 - Questgivers and everything related to a Quest will be shown on the Map as a "Questionmark".
 - Changed the structure of questData.lua to make all this possible.
 
-Version 1.0 (07.08.2014)
+## Version 1.0 (07.08.2014)
 - Initial Release. Alot of confusing Errors and Issues.
