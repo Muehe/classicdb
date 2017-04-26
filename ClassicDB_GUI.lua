@@ -1006,6 +1006,7 @@ CdbControlGui.AddButton = function(name, position, textureFile, OnEnterFunctionT
     CdbControlGui.buttons[position]:SetNormalTexture(nil)
     CdbControlGui.buttons[position]:SetPushedTexture(nil)
     CdbControlGui.buttons[position]:SetHighlightTexture(nil)
+    CdbControlGui.buttons[position]:RegisterForClicks("LeftButtonUp", "RightButtonUp")
     CdbControlGui.buttons[position]:SetScript("OnEnter", function(self)
         GameTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
         GameTooltip:ClearLines();
@@ -1048,9 +1049,13 @@ CdbControlGui.buttonValues.CycleMap = {
     position = 2,
     textureFile = "Interface\\Addons\\ClassicDB\\symbols\\MapCycle",
     OnEnterFunctionTitle = "Cycle zones",
-    OnEnterFunctionString = "\n|cffffffffCycle through the currently marked zones.|r",
+    OnEnterFunctionString = "\nLeftClick|cffffffff to cycle through the currently marked zones.|r RightClick|cffffffff to cycle backwards.",
     OnClickFunction = function(self)
-        CdbCycleMarkedZones();
+        if arg1 == "LeftButton" then
+            CdbCycleMarkedZones();
+        elseif arg1 == "RightButton" then
+            CdbCycleMarkedZones(true)
+        end
     end,
 }
 CdbControlGui.buttonValues.ShowSelectedQuest = {

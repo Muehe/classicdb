@@ -862,29 +862,44 @@ end -- SetItemRef (link, text, button)
 -- Wowhead DB Continued By: Muehe
 --------------------------------------------------------
 
-function CdbCycleMarkedZones()
+function CdbCycleMarkedZones(reversed)
     local currentlyShown = zoneData[CdbGetCurrentZoneId()];
     if CdbCycleZone == "" and currentlyShown then CdbCycleZone = currentlyShown; end
+    local lastZone = nil;
     if CdbCycleZone ~= "" then
         local found = false;
         for k, v in pairs(CdbMarkedZones) do
-            if found then
+            if found then -- last loop was match, cycle forward to current entry
                 CdbCycleZone = k;
                 SetMapZoom(CdbGetZoneIdFromZoneName(k));
                 return;
             end
             if k == CdbCycleZone then
-                found = true;
+                if reversed and lastZone ~= nil then -- cycle backwards
+                    CdbCycleZone = lastZone;
+                    SetMapZoom(CdbGetZoneIdFromZoneName(lastZone));
+                    return;
+                elseif reversed then -- first entry is match, cycle backwards to last
+                    for k, v in pairs(CdbMarkedZones) do
+                        lastZone = k;
+                    end
+                    CdbCycleZone = lastZone;
+                    SetMapZoom(CdbGetZoneIdFromZoneName(lastZone));
+                    return;
+                else -- cycle forward in the next loop or after leaving the loop
+                    found = true;
+                end
+            else
+                lastZone = k;
             end
         end
-        if found then
-            for k, v in pairs(CdbMarkedZones) do
-                CdbCycleZone = k;
-                SetMapZoom(CdbGetZoneIdFromZoneName(k));
-                return;
-            end
+        -- last entry is match or no match, cycle forward to first
+        for k, v in pairs(CdbMarkedZones) do
+            CdbCycleZone = k;
+            SetMapZoom(CdbGetZoneIdFromZoneName(k));
+            return;
         end
-    else
+    else -- no last cycled-to zone is set
         for k, v in pairs(CdbMarkedZones) do
             CdbCycleZone = k;
             SetMapZoom(CdbGetZoneIdFromZoneName(k));
