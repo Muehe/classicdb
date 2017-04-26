@@ -606,11 +606,11 @@ function CdbDrawNotesAndShowMap()
     CdbDebugPrint(2, "ShowMap() called");
     local ShowMapZone, ShowMapTitle, ShowMapID = CdbDrawNotesOnMap();
     if (Cartographer) then
-        if (ShowMapZone ~= nil) then
+        if WorldMapFrame:IsVisible() then
+            CdbReopenMapIfVisible();
+        elseif (ShowMapZone ~= nil) then
             WorldMapFrame:Show();
-            if (ShowMapZone) then
-                SetMapZoom(CdbGetZoneIdFromZoneName(ShowMapZone));
-            end
+            SetMapZoom(CdbGetZoneIdFromZoneName(ShowMapZone));
         end
     end
 end -- ShowMap()
@@ -1176,7 +1176,7 @@ CdbSettingsText = {
         ["item_item"] = "Show items dropped by items",
 };
 
-function CdbSwitchSetting(setting, ...)
+function CdbSwitchSetting(setting, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10)
     if (CdbSettings[setting] == false) then
         CdbSettings[setting] = true;
         CdbPrint(CdbSettingsText[setting].." enabled.");
@@ -1197,6 +1197,15 @@ function CdbSwitchSetting(setting, ...)
         CdbGetAllQuestNotes();
     elseif (setting == "auto_plot") and (not CdbSettings[setting]) then
         CdbCleanMap();
+        CdbReopenMapIfVisible();
+    elseif (setting == "questStarts") and (CdbSettings[setting]) then
+        CdbReopenMapIfVisible();
+    elseif (setting == "questStarts") and (not CdbSettings[setting]) then
+        CdbCleanMap();
+        if CdbSettings.auto_plot then
+            CdbGetAllQuestNotes();
+        end
+        CdbReopenMapIfVisible();
     end
 end -- SwitchSetting(setting)
 
@@ -2065,4 +2074,14 @@ function CdbResetMapAndIconSize()
     WorldMapFrame:StopMovingOrSizing();
     WorldMapFrame:ClearAllPoints();
     WorldMapFrame:SetAllPoints(UIParent);
+end
+
+function CdbReopenMapIfVisible()
+    if WorldMapFrame:IsVisible() then
+        local continent = GetCurrentMapContinent();
+        local zone = GetCurrentMapZone();
+        WorldMapFrame:Hide();
+        WorldMapFrame:Show();
+        SetMapZoom(continent, zone);
+    end
 end

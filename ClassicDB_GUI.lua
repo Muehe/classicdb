@@ -485,7 +485,7 @@ CdbSearchGui.settings.values.questStarts = {
         GameTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
         GameTooltip:ClearLines();
         GameTooltip:AddLine(CdbGetSetting("questStarts"));
-        GameTooltip:AddLine("\n|cffffffffWhen enabled, this option shows notes for all quests starts in the currently displayed zone. If it doesn't load immediately reopen the map.|r", nil, nil, nil, true);
+        GameTooltip:AddLine("\n|cffffffffWhen enabled, the map will show quests starts. There are further options controlling which quest starts are shown in the search GUI.|r", nil, nil, nil, true);
         GameTooltip:Show();
     end,
 }
@@ -1129,7 +1129,7 @@ CdbControlGui.checkButtonValues.auto_plot = {
 }
 CdbControlGui.checkButtonValues.questStarts = {
     position = 1,
-    OnEnterFunctionString = "\n|cffffffffWhen enabled, this option shows notes for all quests starts in the currently displayed zone. If it doesn't load immediately reopen the map.|r",
+    OnEnterFunctionString = "\n|cffffffffWhen enabled, the map will show quests starts. There are further options controlling which quest starts are shown in the search GUI.|r",
 }
 CdbControlGui.checkButtonValues.waypoints = {
     position = 2,
