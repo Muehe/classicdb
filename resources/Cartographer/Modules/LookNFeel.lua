@@ -249,7 +249,7 @@ function Cartographer_LookNFeel:OnEnable()
 	Cartographer:AddToMagnifyingGlass(L["Ctrl-Alt-MouseWheel to change note size"]) -- WHDB related
 	Cartographer:AddToMagnifyingGlass(L["Shift-MouseWheel to change transparency"])
 	UIPanelWindows["WorldMapFrame"] = nil
-	WorldMapFrame:SetFrameStrata("HIGH")
+	WorldMapFrame:SetFrameStrata("FULLSCREEN")
 	WorldMapFrame:EnableMouse(not self.db.profile.locked)
 	WorldMapFrame:EnableMouseWheel(not self.db.profile.locked)
 	WorldMapButton:EnableMouse(not self.db.profile.locked)
