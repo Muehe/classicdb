@@ -55,7 +55,7 @@
 - Added a Graphical User Interface for Database
 - Added experimental Dungeon and Battleground Maps
 
-## ShaguQuest Version 5.0 (03.10.2015)
+## ShaguQuest Version 5.0 (2015-10-03)
 - Fixed Thunderbluff spawn points
 - Implemented a vendor search which allows you to search for items being sold.
 - Quests are now filtered by the own faction (e.g /shagu quests)
