@@ -26,7 +26,9 @@ if not CdbFavourites["quest"] then CdbFavourites["quest"] = {} end
 --------------------------
 -- Set up global variables
 --------------------------
-CdbMaxSearchLines = 14
+CDB_MAX_SEARCH_PAGE_LINES = 14;
+CDB_MIN_SEARCH_CHARS = 3;
+CDB_MIN_SEARCH_INTS = 1;
 CdbLastSearchQuery = ""
 CdbLastSearchResults = {}
 CdbLastSearchResults.spawn = {}
@@ -228,11 +230,19 @@ CdbSearchGui.inputField.updateSearch = function()
     if query == "Search" then
         query = "";
     end
+    -- Clear the last results if the search query got shorter
+    if (strlen(query) < strlen(CdbLastSearchQuery)) or (CdbLastSearchQuery == "") then
+        CdbClearTable(CdbLastSearchResults.spawn);
+        CdbClearTable(CdbLastSearchResults.object);
+        CdbClearTable(CdbLastSearchResults.item);
+        CdbClearTable(CdbLastSearchResults.quest);
+    end
     CdbSearchGui:Search(query, "spawn");
     CdbSearchGui:Search(query, "object");
     CdbSearchGui:Search(query, "item");
     CdbSearchGui:Search(query, "quest");
-    -- CdbLastSearchQuery = query;
+    -- This update needs to be done last, so the search function can use it above
+    CdbLastSearchQuery = query;
 end
 
 CdbSearchGui.inputField:SetScript("OnTextChanged", function(self)
@@ -410,44 +420,50 @@ CdbSearchGui.buttonSettings:SetScript("OnClick", function()
     end
 end)
 
-CdbSearchGui.spawn = CreateFrame("Frame",nil,CdbSearchGui)
-CdbSearchGui.spawn:SetPoint("TOP", 0, -75)
-CdbSearchGui.spawn:SetWidth(475)
-CdbSearchGui.spawn:SetHeight(315)
-CdbSearchGui.spawn:SetBackdrop(backdrop_noborder)
-CdbSearchGui.spawn:SetBackdropColor(1,1,1,.15)
---CdbSearchGui.spawn:SetFrameStrata("DIALOG")
-CdbSearchGui.spawn:Hide()
-CdbSearchGui.spawn.buttons = {}
+-- Create the result frames
+function CdbCreateResultFrame(searchType)
+    CdbSearchGui[searchType] = CreateFrame("ScrollFrame",nil,CdbSearchGui)
+    CdbSearchGui[searchType]:SetPoint("TOP", 0, -75)
+    CdbSearchGui[searchType]:SetWidth(475)
+    CdbSearchGui[searchType]:SetHeight(315)
+    CdbSearchGui[searchType]:SetBackdrop(backdrop_noborder)
+    CdbSearchGui[searchType]:SetBackdropColor(1,1,1,.15)
+    CdbSearchGui[searchType]:EnableMouseWheel(1)
+    CdbSearchGui[searchType]:SetScript("OnMouseWheel", function()
+        this.scrollBar:SetValue(this.scrollBar:GetValue() - arg1);
+    end)
+    CdbSearchGui[searchType]:Hide()
+    CdbSearchGui[searchType].buttons = {}
+    CdbSearchGui[searchType].scrollBar = CreateFrame("Slider",nil,CdbSearchGui[searchType],"UIPanelScrollBarTemplate")
+    CdbSearchGui[searchType].scrollBar:SetPoint("TOPRIGHT",CdbSearchGui[searchType],"TOPRIGHT",0,-27)
+    CdbSearchGui[searchType].scrollBar:SetPoint("BOTTOMRIGHT",CdbSearchGui[searchType],"BOTTOMRIGHT",0,28)
+    CdbSearchGui[searchType].scrollBar:SetWidth(16)
+    CdbSearchGui[searchType].scrollBar:SetMinMaxValues(1,1)
+    CdbSearchGui[searchType].scrollBar:SetValue(1)
+    CdbSearchGui[searchType].scrollBar:SetValueStep(1)
+    if (searchType == "spawn") then
+        CdbSearchGui[searchType].scrollBar.database = npcData;
+        CdbSearchGui[searchType].scrollBar.NAME_KEY = DB_NAME;
+    elseif (searchType == "object") then
+        CdbSearchGui[searchType].scrollBar.database = objData;
+        CdbSearchGui[searchType].scrollBar.NAME_KEY = DB_NAME;
+    elseif (searchType == "item") then
+        CdbSearchGui[searchType].scrollBar.database = itemData;
+        CdbSearchGui[searchType].scrollBar.NAME_KEY = DB_ITM_NAME;
+    elseif (searchType == "quest") then
+        CdbSearchGui[searchType].scrollBar.database = qData;
+        CdbSearchGui[searchType].scrollBar.NAME_KEY = DB_NAME;
+    end
+    CdbSearchGui[searchType].scrollBar:SetScript("OnValueChanged", function()
+        CdbUpdateResultButtons(searchType);
+    end)
+end
 
-CdbSearchGui.object = CreateFrame("Frame",nil,CdbSearchGui)
-CdbSearchGui.object:SetPoint("TOP", 0, -75)
-CdbSearchGui.object:SetWidth(475)
-CdbSearchGui.object:SetHeight(315)
-CdbSearchGui.object:SetBackdrop(backdrop_noborder)
-CdbSearchGui.object:SetBackdropColor(1,1,1,.15)
---CdbSearchGui.object:SetFrameStrata("DIALOG")
-CdbSearchGui.object:Hide()
-CdbSearchGui.object.buttons = {}
-
-CdbSearchGui.item = CreateFrame("Frame",nil,CdbSearchGui)
-CdbSearchGui.item:SetPoint("TOP", 0, -75)
-CdbSearchGui.item:SetWidth(475)
-CdbSearchGui.item:SetHeight(315)
-CdbSearchGui.item:SetBackdrop(backdrop_noborder)
-CdbSearchGui.item:SetBackdropColor(1,1,1,.15)
---CdbSearchGui.item:SetFrameStrata("DIALOG")
-CdbSearchGui.item.buttons = {}
-
-CdbSearchGui.quest = CreateFrame("Frame",nil,CdbSearchGui)
-CdbSearchGui.quest:SetPoint("TOP", 0, -75)
-CdbSearchGui.quest:SetWidth(475)
-CdbSearchGui.quest:SetHeight(315)
-CdbSearchGui.quest:SetBackdrop(backdrop_noborder)
-CdbSearchGui.quest:SetBackdropColor(1,1,1,.15)
---CdbSearchGui.quest:SetFrameStrata("DIALOG")
-CdbSearchGui.quest:Hide()
-CdbSearchGui.quest.buttons = {}
+CdbCreateResultFrame("spawn")
+CdbCreateResultFrame("object")
+CdbCreateResultFrame("item")
+CdbSearchGui.item:Show()
+CdbCreateResultFrame("quest")
 
 ------------------------------------
 -- Definition for the settings frame
@@ -636,8 +652,11 @@ for name, data in pairs(CdbSearchGui.settings.values) do
     end
 end
 
+---------------------------
+-- Search related functions
+---------------------------
 function CdbSearchGui.HideButtons()
-    for i=1,CdbMaxSearchLines do
+    for i=1, CDB_MAX_SEARCH_PAGE_LINES do
         if (CdbSearchGui.spawn.buttons[i]) then
             CdbSearchGui.spawn.buttons[i]:Hide();
         end
@@ -653,9 +672,299 @@ function CdbSearchGui.HideButtons()
     end
 end
 
--- Do a search
-function CdbSearchGui:Search(query, searchType)
+-- Create a single search result button with additional sub-buttons, depending on the searchType
+-- TODO: Reuse frames?
+function CdbCreateResultButtons(searchType, searchCount, dbEntry, id, NAME_KEY)
+    -- General button setup
+    local name = dbEntry[NAME_KEY];
+    CdbSearchGui[searchType].buttons[searchCount] = CreateFrame("Button","mybutton",CdbSearchGui[searchType],"UIPanelButtonTemplate");
+    CdbSearchGui[searchType].buttons[searchCount]:Show();
+    CdbSearchGui[searchType].buttons[searchCount]:SetPoint("TOP", 0, -searchCount*21+11);
+    CdbSearchGui[searchType].buttons[searchCount]:SetWidth(440);
+    CdbSearchGui[searchType].buttons[searchCount]:SetHeight(20);
+    CdbSearchGui[searchType].buttons[searchCount]:SetFont("Fonts\\FRIZQT__.TTF", 10);
+    CdbSearchGui[searchType].buttons[searchCount]:SetTextColor(1,1,1,1);
+    CdbSearchGui[searchType].buttons[searchCount]:SetNormalTexture(nil);
+    CdbSearchGui[searchType].buttons[searchCount]:SetPushedTexture(nil);
+    CdbSearchGui[searchType].buttons[searchCount]:SetHighlightTexture(nil);
+    CdbSearchGui[searchType].buttons[searchCount]:SetBackdrop(backdrop_noborder);
+    if math.mod(searchCount,2) == 0 then
+        CdbSearchGui[searchType].buttons[searchCount]:SetBackdropColor(1,1,1,.05);
+        CdbSearchGui[searchType].buttons[searchCount].even = true;
+    else
+        CdbSearchGui[searchType].buttons[searchCount]:SetBackdropColor(1,1,1,.10);
+        CdbSearchGui[searchType].buttons[searchCount].even = false;
+    end
+    CdbSearchGui[searchType].buttons[searchCount]:SetTextColor(1,1,1);
+    CdbSearchGui[searchType].buttons[searchCount].name = name;
+    CdbSearchGui[searchType].buttons[searchCount].id = id;
+
+    -- Type specific setup
+    if searchType == "spawn" then
+        if dbEntry[DB_LEVEL] ~= "" then
+            CdbSearchGui[searchType].buttons[searchCount]:SetText(name .. " |cffaaaaaa(Lv." .. dbEntry[DB_LEVEL] .. ", ID:" .. id .. ")")
+        else
+            CdbSearchGui[searchType].buttons[searchCount]:SetText(name)
+        end
+        CdbSearchGui[searchType].buttons[searchCount]:SetScript("OnClick", function(self)
+            CdbMapNotes = {};
+            CdbPrepareForDrawing(DB_NPC, this.name, this.name, "Spawnpoint", 0);
+            CdbDrawNotesAndShowMap();
+        end)
+    elseif searchType == "object" then
+        CdbSearchGui[searchType].buttons[searchCount]:SetText(name .. " |cffaaaaaa(ID:" .. id .. ")")
+        CdbSearchGui.object.buttons[searchCount]:SetScript("OnClick", function(self)
+            CdbMapNotes = {};
+            CdbPrepareForDrawing(DB_OBJ, this.name, this.name, "Object Spawnpoint", 0);
+            CdbDrawNotesAndShowMap();
+        end)
+    elseif searchType == "item" then
+        local itemColor
+        GameTooltip:SetHyperlink("item:" .. id .. ":0:0:0")
+        GameTooltip:Hide()
+        local _, itemLink, itemQuality, _, _, _, _, _, itemTexture = GetItemInfo(id)
+        if itemQuality then itemColor = "|c" .. string.format("%02x%02x%02x%02x", 255,
+                                        ITEM_QUALITY_COLORS[itemQuality].r * 255,
+                                        ITEM_QUALITY_COLORS[itemQuality].g * 255,
+                                        ITEM_QUALITY_COLORS[itemQuality].b * 255)
+        else itemColor = "|cffffffff"
+        end
+        CdbSearchGui[searchType].buttons[searchCount].itemColor = itemColor
+        CdbSearchGui[searchType].buttons[searchCount].itemLink = itemLink
+        CdbSearchGui[searchType].buttons[searchCount]:SetText(itemColor .."|Hitem:"..id..":0:0:0|h["..name.."]|h|r |cffaaaaaa(ID:" .. id .. ")")
+        CdbSearchGui[searchType].buttons[searchCount]:SetScript("OnClick", function(self)
+            if IsShiftKeyDown() then
+                if not ChatFrameEditBox:IsVisible() then
+                    ChatFrameEditBox:Show()
+                end
+               ChatFrameEditBox:Insert(this.itemColor .."|Hitem:"..this.id..":0:0:0|h["..this.name.."]|h|r")
+            elseif IsControlKeyDown() then
+                DressUpItemLink(this.id);
+            else
+                ShowUIPanel(ItemRefTooltip);
+                if ( not ItemRefTooltip:IsVisible() ) then
+                    ItemRefTooltip:SetOwner(UIParent, "ANCHOR_PRESERVE");
+                end
+                ItemRefTooltip:SetHyperlink("item:" .. this.id .. ":0:0:0")
+            end
+        end)
+        CdbSearchGui[searchType].buttons[searchCount]:SetScript("OnEnter", function(self)
+            this:SetBackdropColor(1,1,1,.25)
+            GameTooltip:SetOwner(CdbSearchGui, "ANCHOR_CURSOR")
+            GameTooltip:SetHyperlink("item:" .. this.id .. ":0:0:0")
+            GameTooltip:Show()
+        end)
+        -- show npc button
+        if CdbGetTableLength(dbEntry[DB_NPC]) ~= 0 then
+            CdbSearchGui[searchType].buttons[searchCount].lootNpc = CreateFrame("Button","mybutton",CdbSearchGui[searchType].buttons[searchCount],"UIPanelButtonTemplate")
+            CdbSearchGui[searchType].buttons[searchCount].lootNpc:SetPoint("RIGHT", -5, 0)
+            CdbSearchGui[searchType].buttons[searchCount].lootNpc:SetWidth(20)
+            CdbSearchGui[searchType].buttons[searchCount].lootNpc:SetHeight(20)
+            CdbSearchGui[searchType].buttons[searchCount].lootNpc:SetNormalTexture(nil)
+            CdbSearchGui[searchType].buttons[searchCount].lootNpc:SetPushedTexture(nil)
+            CdbSearchGui[searchType].buttons[searchCount].lootNpc:SetHighlightTexture(nil)
+            CdbSearchGui[searchType].buttons[searchCount].lootNpc.icon = CdbSearchGui[searchType].buttons[searchCount].lootNpc:CreateTexture(nil,"BACKGROUND")
+            CdbSearchGui[searchType].buttons[searchCount].lootNpc.icon:SetTexture("Interface\\AddOns\\ClassicDB\\symbols\\icon_npc")
+            CdbSearchGui[searchType].buttons[searchCount].lootNpc.icon:SetAllPoints(CdbSearchGui[searchType].buttons[searchCount].lootNpc)
+            CdbSearchGui[searchType].buttons[searchCount].lootNpc:SetScript("OnClick", function(self)
+                CdbMapNotes = {};
+                CdbPrepareItemNotes(this:GetParent().id, "Location for: "..this:GetParent().name, "Drops item: "..this:GetParent().name, cMark, {DB_NPC});
+                CdbNextMark();
+                CdbDrawNotesAndShowMap();
+            end)
+        end
+        -- show object button
+        if CdbGetTableLength(dbEntry[DB_OBJ]) ~= 0 then
+            CdbSearchGui[searchType].buttons[searchCount].lootObj = CreateFrame("Button","mybutton",CdbSearchGui[searchType].buttons[searchCount],"UIPanelButtonTemplate")
+            if CdbSearchGui[searchType].buttons[searchCount].lootNpc then
+                CdbSearchGui[searchType].buttons[searchCount].lootObj:SetPoint("RIGHT", -30, 0)
+            else
+                CdbSearchGui[searchType].buttons[searchCount].lootObj:SetPoint("RIGHT", -5, 0)
+            end
+            CdbSearchGui[searchType].buttons[searchCount].lootObj:SetWidth(20)
+            CdbSearchGui[searchType].buttons[searchCount].lootObj:SetHeight(20)
+            CdbSearchGui[searchType].buttons[searchCount].lootObj:SetNormalTexture(nil)
+            CdbSearchGui[searchType].buttons[searchCount].lootObj:SetPushedTexture(nil)
+            CdbSearchGui[searchType].buttons[searchCount].lootObj:SetHighlightTexture(nil)
+            CdbSearchGui[searchType].buttons[searchCount].lootObj.icon = CdbSearchGui[searchType].buttons[searchCount].lootObj:CreateTexture(nil,"BACKGROUND")
+            CdbSearchGui[searchType].buttons[searchCount].lootObj.icon:SetTexture("Interface\\AddOns\\ClassicDB\\symbols\\icon_object")
+            CdbSearchGui[searchType].buttons[searchCount].lootObj.icon:SetAllPoints(CdbSearchGui[searchType].buttons[searchCount].lootObj)
+            CdbSearchGui[searchType].buttons[searchCount].lootObj:SetScript("OnClick", function(self)
+                CdbMapNotes = {};
+                CdbPrepareItemNotes(this:GetParent().id, "Location for: "..this:GetParent().name, "Contains item: "..this:GetParent().name, "CdbObject", {DB_OBJ});
+                CdbNextMark();
+                CdbDrawNotesAndShowMap();
+            end)
+        end
+        -- show vendor button
+        if CdbGetTableLength(dbEntry[DB_VENDOR]) ~= 0 then
+            CdbSearchGui[searchType].buttons[searchCount].vendor = CreateFrame("Button","mybutton",CdbSearchGui[searchType].buttons[searchCount],"UIPanelButtonTemplate")
+            if CdbSearchGui[searchType].buttons[searchCount].lootNpc and CdbSearchGui[searchType].buttons[searchCount].lootObj then
+                CdbSearchGui[searchType].buttons[searchCount].vendor:SetPoint("RIGHT", -55, 0)
+            elseif CdbSearchGui[searchType].buttons[searchCount].lootNpc or CdbSearchGui[searchType].buttons[searchCount].lootObj then
+                CdbSearchGui[searchType].buttons[searchCount].vendor:SetPoint("RIGHT", -30, 0)
+            else
+                CdbSearchGui[searchType].buttons[searchCount].vendor:SetPoint("RIGHT", -5, 0)
+            end
+            CdbSearchGui[searchType].buttons[searchCount].vendor:SetWidth(20)
+            CdbSearchGui[searchType].buttons[searchCount].vendor:SetHeight(20)
+            CdbSearchGui[searchType].buttons[searchCount].vendor:SetNormalTexture(nil)
+            CdbSearchGui[searchType].buttons[searchCount].vendor:SetPushedTexture(nil)
+            CdbSearchGui[searchType].buttons[searchCount].vendor:SetHighlightTexture(nil)
+            CdbSearchGui[searchType].buttons[searchCount].vendor.icon = CdbSearchGui[searchType].buttons[searchCount].vendor:CreateTexture(nil,"BACKGROUND")
+            CdbSearchGui[searchType].buttons[searchCount].vendor.icon:SetTexture("Interface\\AddOns\\ClassicDB\\symbols\\icon_vendor")
+            CdbSearchGui[searchType].buttons[searchCount].vendor.icon:SetAllPoints(CdbSearchGui[searchType].buttons[searchCount].vendor)
+            CdbSearchGui[searchType].buttons[searchCount].vendor:SetScript("OnClick", function(self)
+                CdbMapNotes = {};
+                CdbPrepareItemNotes(this:GetParent().id, "Location for: "..this:GetParent().name, "Sells item: "..this:GetParent().name, "CdbVendor", {DB_VENDOR});
+                CdbNextMark();
+                CdbDrawNotesAndShowMap();
+            end)
+        end
+    elseif searchType == "quest" then
+        if dbEntry[DB_OBJECTIVES] then
+            CdbSearchGui[searchType].buttons[searchCount].questObjectives = dbEntry[DB_OBJECTIVES];
+        end
+        CdbSearchGui[searchType].buttons[searchCount]:SetText("|cffffcc00["..dbEntry[DB_LEVEL].."] |Hquest:0:0:0:0|h["..name.."]|h|r|r (ID:"..id..")")
+        CdbSearchGui[searchType].buttons[searchCount]:SetScript("OnClick", function(self)
+            if IsShiftKeyDown() then
+                if not ChatFrameEditBox:IsVisible() then
+                    ChatFrameEditBox:Show()
+                end
+                ChatFrameEditBox:Insert("|cffffff00|Hquest:0:0:0:0|h["..this.name.."]|h|r")
+            else
+                CdbMapNotes = {};
+                CdbGetQuestNotesById(this.id)
+                CdbNextMark();
+                CdbDrawNotesAndShowMap();
+            end
+        end)
+        CdbSearchGui[searchType].buttons[searchCount]:SetScript("OnEnter", function(self)
+            this:SetBackdropColor(1,1,1,.25)
+            GameTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
+            GameTooltip:ClearLines();
+            GameTooltip:AddLine(this:GetText())
+            GameTooltip:AddLine("\n")
+            if this.questObjectives then
+                GameTooltip:AddLine("|cffffffffObjectives: |r"..this.questObjectives, 0.7, 0.7, 0.7, true)
+            end
+            GameTooltip:AddLine("|cffffffffMinLevel: |r"..qData[this.id][DB_MIN_LEVEL], 0.7, 0.7, 0.7)
+            GameTooltip:Show();
+        end)
+        -- show quest finished check-button
+        CdbSearchGui[searchType].buttons[searchCount].finished = CreateFrame("CheckButton","mycheckbutton",CdbSearchGui[searchType].buttons[searchCount],"UICheckButtonTemplate")
+        CdbSearchGui[searchType].buttons[searchCount].finished.id = CdbSearchGui[searchType].buttons[searchCount].id;
+        CdbSearchGui[searchType].buttons[searchCount].finished:SetPoint("RIGHT", -25, 0)
+        CdbSearchGui[searchType].buttons[searchCount].finished:SetWidth(20)
+        CdbSearchGui[searchType].buttons[searchCount].finished:SetHeight(20)
+        if (CdbFinishedQuests[id] ~= true) then
+            CdbSearchGui[searchType].buttons[searchCount].finished:SetChecked(false);
+        else
+            CdbSearchGui[searchType].buttons[searchCount].finished:SetChecked(true);
+        end
+    end
+    -- Common setup. Spawns and objects are missing a tooltip.
+    if searchType == "spawn" or searchType == "object" then
+        CdbSearchGui[searchType].buttons[searchCount]:SetScript("OnEnter", function(self)
+            this:SetBackdropColor(1,1,1,.25)
+        end)
+    end
+    CdbSearchGui[searchType].buttons[searchCount]:SetScript("OnLeave", function(self)
+        if this.even == true then
+            this:SetBackdropColor(1,1,1,.05)
+        else
+            this:SetBackdropColor(1,1,1,.10)
+        end
+        GameTooltip:Hide();
+    end)
+    --[[
+    -- type specific
+    -- show faction icons (deactivated until faction is added to NPC data)
+    local faction = "HA" --spawnDB[CdbSearchGui[searchType].buttons[searchCount].name]['faction']
+    if strfind(faction, "H") and faction ~= "HA" then
+        CdbSearchGui[searchType].buttons[searchCount].horde = CreateFrame("Frame", nil, CdbSearchGui[searchType].buttons[searchCount])
+        CdbSearchGui[searchType].buttons[searchCount].horde:SetPoint("RIGHT", -5, 0)
+        CdbSearchGui[searchType].buttons[searchCount].horde:SetWidth(20)
+        CdbSearchGui[searchType].buttons[searchCount].horde:SetHeight(20)
+        CdbSearchGui[searchType].buttons[searchCount].horde.icon = CdbSearchGui[searchType].buttons[searchCount].horde:CreateTexture(nil,"BACKGROUND")
+        CdbSearchGui[searchType].buttons[searchCount].horde.icon:SetTexture("Interface\\AddOns\\ClassicDB\\symbols\\icon_horde")
+        CdbSearchGui[searchType].buttons[searchCount].horde.icon:SetAllPoints(CdbSearchGui[searchType].buttons[searchCount].horde)
+    end
+    if strfind(faction, "A") and faction ~= "HA" then
+        CdbSearchGui[searchType].buttons[searchCount].alliance = CreateFrame("Frame", nil, CdbSearchGui[searchType].buttons[searchCount])
+        if CdbSearchGui[searchType].buttons[searchCount].horde then
+            CdbSearchGui[searchType].buttons[searchCount].alliance:SetPoint("RIGHT", -30, 0)
+        else
+            CdbSearchGui[searchType].buttons[searchCount].alliance:SetPoint("RIGHT", -5, 0)
+        end
+        CdbSearchGui[searchType].buttons[searchCount].alliance:SetWidth(20)
+        CdbSearchGui[searchType].buttons[searchCount].alliance:SetHeight(20)
+        CdbSearchGui[searchType].buttons[searchCount].alliance.icon = CdbSearchGui[searchType].buttons[searchCount].alliance:CreateTexture(nil,"BACKGROUND")
+        CdbSearchGui[searchType].buttons[searchCount].alliance.icon:SetTexture("Interface\\AddOns\\ClassicDB\\symbols\\icon_alliance")
+        CdbSearchGui[searchType].buttons[searchCount].alliance.icon:SetAllPoints(CdbSearchGui[searchType].buttons[searchCount].alliance)
+    end
+    --]]
+    -- Show favourite button
+    CdbSearchGui[searchType].buttons[searchCount].fav = CreateFrame("Button","mybutton",CdbSearchGui[searchType].buttons[searchCount],"UIPanelButtonTemplate")
+    CdbSearchGui[searchType].buttons[searchCount].fav:SetPoint("LEFT", 5, 0)
+    CdbSearchGui[searchType].buttons[searchCount].fav:SetWidth(20)
+    CdbSearchGui[searchType].buttons[searchCount].fav:SetHeight(20)
+    CdbSearchGui[searchType].buttons[searchCount].fav:SetNormalTexture(nil)
+    CdbSearchGui[searchType].buttons[searchCount].fav:SetPushedTexture(nil)
+    CdbSearchGui[searchType].buttons[searchCount].fav:SetHighlightTexture(nil)
+    CdbSearchGui[searchType].buttons[searchCount].fav.icon = CdbSearchGui[searchType].buttons[searchCount].fav:CreateTexture(nil,"BACKGROUND")
+    CdbSearchGui[searchType].buttons[searchCount].fav.icon:SetTexture("Interface\\AddOns\\ClassicDB\\img\\fav")
+    if CdbFavourites[searchType][id] then
+        CdbSearchGui[searchType].buttons[searchCount].fav.icon:SetVertexColor(1,1,1,1)
+    else
+        CdbSearchGui[searchType].buttons[searchCount].fav.icon:SetVertexColor(0,0,0,1)
+    end
+    CdbSearchGui[searchType].buttons[searchCount].fav.icon:SetAllPoints(CdbSearchGui[searchType].buttons[searchCount].fav)
+    CdbSearchGui[searchType].buttons[searchCount].fav:SetScript("OnClick", function(self)
+        if CdbFavourites[searchType][this:GetParent().id] then
+            CdbFavourites[searchType][this:GetParent().id] = nil
+            this.icon:SetVertexColor(0,0,0,1)
+            CdbSearchGui.inputField:updateSearch()
+        else
+            CdbFavourites[searchType][this:GetParent().id] = true
+            this.icon:SetVertexColor(1,1,1,1)
+        end
+    end)
+end
+
+-- This function (re-)draws the search result page
+function CdbUpdateResultButtons(searchType, query)
+    if (not query) then
+        query = CdbLastSearchQuery;
+    end
+    for i=1, CDB_MAX_SEARCH_PAGE_LINES do
+        if (CdbSearchGui[searchType].buttons[i]) and (CdbSearchGui[searchType].buttons[i]:IsShown()) then
+            CdbSearchGui[searchType].buttons[i]:Hide();
+        end
+    end
+    local resultCount = 1;
     local searchCount = 1;
+    local max = (CdbSearchGui[searchType].scrollBar:GetValue() * CDB_MAX_SEARCH_PAGE_LINES) + 1;
+    local min = max - CDB_MAX_SEARCH_PAGE_LINES;
+    local db = CdbFavourites[searchType];
+    if  ((strlen(query) >= CDB_MIN_SEARCH_CHARS)
+        or
+        ((tonumber(query) ~= nil) and (strlen(query) >= CDB_MIN_SEARCH_INTS)))
+    then
+        db = CdbLastSearchResults[searchType];
+    end
+    for id, _ in pairsByKeys(db) do
+        if (resultCount >= min) and (resultCount < max) then
+            CdbCreateResultButtons(searchType, searchCount, CdbSearchGui[searchType].scrollBar.database[id], id, CdbSearchGui[searchType].scrollBar.NAME_KEY);
+            searchCount = searchCount + 1;
+        end
+        resultCount = resultCount + 1;
+    end
+end
+
+-- Do a search or display favourites
+function CdbSearchGui:Search(query, searchType)
+    -- Search type specific preparations
     local actualDatabase;
     local NAME_KEY;
     if searchType == "spawn" then
@@ -671,277 +980,69 @@ function CdbSearchGui:Search(query, searchType)
         actualDatabase = qData;
         NAME_KEY = DB_NAME;
     end
+    -- By default the favourites are displayed
     local database = CdbFavourites[searchType];
-    if ((strlen(query) > 2) or (tonumber(query) ~= nil)) then database = actualDatabase end
+    local queryLength = strlen(query)
+    -- We have a query meeting the minimal search length criteria, change to actualDatabase
+    if  (queryLength >= CDB_MIN_SEARCH_CHARS)
+        or
+        ((tonumber(query) ~= nil) and (queryLength >= CDB_MIN_SEARCH_INTS))
+    then
+        database = actualDatabase;
+        -- We had a previous whole database search, we can use the smaller CdbLastSearchResults to search now
+        if  ((tonumber(query) ~= nil) and (queryLength > CDB_MIN_SEARCH_INTS))
+            or
+            ((queryLength > CDB_MIN_SEARCH_CHARS) and (queryLength > strlen(CdbLastSearchQuery)))
+        then
+            database = CdbLastSearchResults[searchType];
+        end
+    end
+    -- iterate the seleceted database
+    local searchCount = 0;
     for id, entryOrBoolean in pairs(database) do
         local dbEntry;
-        if type(entryOrBoolean) == "boolean" then -- No search, display favourites.
+         -- No search (displaying favourites), or search within previous set of results
+        if type(entryOrBoolean) == "boolean" then
             dbEntry = actualDatabase[id];
+        -- Search in whole database
         else
             dbEntry = entryOrBoolean;
         end
-        if dbEntry ~= nil and ((tonumber(query) == nil and (strlen(query) <= 2 or strfind(strlower(dbEntry[NAME_KEY]), strlower(query)))) or (tonumber(query) ~= nil and strfind(tostring(id), query))) then
-            if ( searchCount <= CdbMaxSearchLines) then
-                -- General button setup
-                local name = dbEntry[NAME_KEY];
-                CdbSearchGui[searchType].buttons[searchCount] = CreateFrame("Button","mybutton",CdbSearchGui[searchType],"UIPanelButtonTemplate");
-                CdbSearchGui[searchType].buttons[searchCount]:SetPoint("TOP", 0, -searchCount*21+11);
-                CdbSearchGui[searchType].buttons[searchCount]:SetWidth(450);
-                CdbSearchGui[searchType].buttons[searchCount]:SetHeight(20);
-                CdbSearchGui[searchType].buttons[searchCount]:SetFont("Fonts\\FRIZQT__.TTF", 10);
-                CdbSearchGui[searchType].buttons[searchCount]:SetTextColor(1,1,1,1);
-                CdbSearchGui[searchType].buttons[searchCount]:SetNormalTexture(nil);
-                CdbSearchGui[searchType].buttons[searchCount]:SetPushedTexture(nil);
-                CdbSearchGui[searchType].buttons[searchCount]:SetHighlightTexture(nil);
-                CdbSearchGui[searchType].buttons[searchCount]:SetBackdrop(backdrop_noborder);
-                if math.mod(searchCount,2) == 0 then
-                    CdbSearchGui[searchType].buttons[searchCount]:SetBackdropColor(1,1,1,.05);
-                    CdbSearchGui[searchType].buttons[searchCount].even = true;
-                else
-                    CdbSearchGui[searchType].buttons[searchCount]:SetBackdropColor(1,1,1,.10);
-                    CdbSearchGui[searchType].buttons[searchCount].even = false;
-                end
-                CdbSearchGui[searchType].buttons[searchCount]:SetTextColor(1,1,1);
-                CdbSearchGui[searchType].buttons[searchCount].name = name;
-                CdbSearchGui[searchType].buttons[searchCount].id = id;
-
-                -- Type specific setup
-                if searchType == "spawn" then
-                    if dbEntry[DB_LEVEL] ~= "" then
-                        CdbSearchGui[searchType].buttons[searchCount]:SetText(name .. " |cffaaaaaa(Lv." .. dbEntry[DB_LEVEL] .. ", ID:" .. id .. ")")
-                    else
-                        CdbSearchGui[searchType].buttons[searchCount]:SetText(name)
-                    end
-                    CdbSearchGui[searchType].buttons[searchCount]:SetScript("OnClick", function(self)
-                        CdbMapNotes = {};
-                        CdbPrepareForDrawing(DB_NPC, this.name, this.name, "Spawnpoint", 0);
-                        CdbDrawNotesAndShowMap();
-                    end)
-                elseif searchType == "object" then
-                    CdbSearchGui[searchType].buttons[searchCount]:SetText(name .. " |cffaaaaaa(ID:" .. id .. ")")
-                    CdbSearchGui.object.buttons[searchCount]:SetScript("OnClick", function(self)
-                        CdbMapNotes = {};
-                        CdbPrepareForDrawing(DB_OBJ, this.name, this.name, "Object Spawnpoint", 0);
-                        CdbDrawNotesAndShowMap();
-                    end)
-                elseif searchType == "item" then
-                    local itemColor
-                    GameTooltip:SetHyperlink("item:" .. id .. ":0:0:0")
-                    GameTooltip:Hide()
-                    local _, itemLink, itemQuality, _, _, _, _, _, itemTexture = GetItemInfo(id)
-                    if itemQuality then itemColor = "|c" .. string.format("%02x%02x%02x%02x", 255,
-                                                    ITEM_QUALITY_COLORS[itemQuality].r * 255,
-                                                    ITEM_QUALITY_COLORS[itemQuality].g * 255,
-                                                    ITEM_QUALITY_COLORS[itemQuality].b * 255)
-                    else itemColor = "|cffffffff"
-                    end
-                    CdbSearchGui[searchType].buttons[searchCount].itemColor = itemColor
-                    CdbSearchGui[searchType].buttons[searchCount].itemLink = itemLink
-                    CdbSearchGui[searchType].buttons[searchCount]:SetText(itemColor .."|Hitem:"..id..":0:0:0|h["..name.."]|h|r |cffaaaaaa(ID:" .. id .. ")")
-                    CdbSearchGui[searchType].buttons[searchCount]:SetScript("OnClick", function(self)
-                        if IsShiftKeyDown() then
-                            if not ChatFrameEditBox:IsVisible() then
-                                ChatFrameEditBox:Show()
-                            end
-                           ChatFrameEditBox:Insert(this.itemColor .."|Hitem:"..this.id..":0:0:0|h["..this.name.."]|h|r")
-                        elseif IsControlKeyDown() then
-                            DressUpItemLink(this.id);
-                        else
-                            ShowUIPanel(ItemRefTooltip);
-                            if ( not ItemRefTooltip:IsVisible() ) then
-                                ItemRefTooltip:SetOwner(UIParent, "ANCHOR_PRESERVE");
-                            end
-                            ItemRefTooltip:SetHyperlink("item:" .. this.id .. ":0:0:0")
-                        end
-                    end)
-                    CdbSearchGui[searchType].buttons[searchCount]:SetScript("OnEnter", function(self)
-                        this:SetBackdropColor(1,1,1,.25)
-                        GameTooltip:SetOwner(CdbSearchGui, "ANCHOR_CURSOR")
-                        GameTooltip:SetHyperlink("item:" .. this.id .. ":0:0:0")
-                        GameTooltip:Show()
-                    end)
-                    -- show npc button
-                    if CdbGetTableLength(dbEntry[DB_NPC]) ~= 0 then
-                        CdbSearchGui[searchType].buttons[searchCount].lootNpc = CreateFrame("Button","mybutton",CdbSearchGui[searchType].buttons[searchCount],"UIPanelButtonTemplate")
-                        CdbSearchGui[searchType].buttons[searchCount].lootNpc:SetPoint("RIGHT", -5, 0)
-                        CdbSearchGui[searchType].buttons[searchCount].lootNpc:SetWidth(20)
-                        CdbSearchGui[searchType].buttons[searchCount].lootNpc:SetHeight(20)
-                        CdbSearchGui[searchType].buttons[searchCount].lootNpc:SetNormalTexture(nil)
-                        CdbSearchGui[searchType].buttons[searchCount].lootNpc:SetPushedTexture(nil)
-                        CdbSearchGui[searchType].buttons[searchCount].lootNpc:SetHighlightTexture(nil)
-                        CdbSearchGui[searchType].buttons[searchCount].lootNpc.icon = CdbSearchGui[searchType].buttons[searchCount].lootNpc:CreateTexture(nil,"BACKGROUND")
-                        CdbSearchGui[searchType].buttons[searchCount].lootNpc.icon:SetTexture("Interface\\AddOns\\ClassicDB\\symbols\\icon_npc")
-                        CdbSearchGui[searchType].buttons[searchCount].lootNpc.icon:SetAllPoints(CdbSearchGui[searchType].buttons[searchCount].lootNpc)
-                        CdbSearchGui[searchType].buttons[searchCount].lootNpc:SetScript("OnClick", function(self)
-                            CdbMapNotes = {};
-                            CdbPrepareItemNotes(this:GetParent().id, "Location for: "..this:GetParent().name, "Drops item: "..this:GetParent().name, cMark, {DB_NPC});
-                            CdbNextMark();
-                            CdbDrawNotesAndShowMap();
-                        end)
-                    end
-                    -- show object button
-                    if CdbGetTableLength(dbEntry[DB_OBJ]) ~= 0 then
-                        CdbSearchGui[searchType].buttons[searchCount].lootObj = CreateFrame("Button","mybutton",CdbSearchGui[searchType].buttons[searchCount],"UIPanelButtonTemplate")
-                        if CdbSearchGui[searchType].buttons[searchCount].lootNpc then
-                            CdbSearchGui[searchType].buttons[searchCount].lootObj:SetPoint("RIGHT", -30, 0)
-                        else
-                            CdbSearchGui[searchType].buttons[searchCount].lootObj:SetPoint("RIGHT", -5, 0)
-                        end
-                        CdbSearchGui[searchType].buttons[searchCount].lootObj:SetWidth(20)
-                        CdbSearchGui[searchType].buttons[searchCount].lootObj:SetHeight(20)
-                        CdbSearchGui[searchType].buttons[searchCount].lootObj:SetNormalTexture(nil)
-                        CdbSearchGui[searchType].buttons[searchCount].lootObj:SetPushedTexture(nil)
-                        CdbSearchGui[searchType].buttons[searchCount].lootObj:SetHighlightTexture(nil)
-                        CdbSearchGui[searchType].buttons[searchCount].lootObj.icon = CdbSearchGui[searchType].buttons[searchCount].lootObj:CreateTexture(nil,"BACKGROUND")
-                        CdbSearchGui[searchType].buttons[searchCount].lootObj.icon:SetTexture("Interface\\AddOns\\ClassicDB\\symbols\\icon_object")
-                        CdbSearchGui[searchType].buttons[searchCount].lootObj.icon:SetAllPoints(CdbSearchGui[searchType].buttons[searchCount].lootObj)
-                        CdbSearchGui[searchType].buttons[searchCount].lootObj:SetScript("OnClick", function(self)
-                            CdbMapNotes = {};
-                            CdbPrepareItemNotes(this:GetParent().id, "Location for: "..this:GetParent().name, "Contains item: "..this:GetParent().name, "CdbObject", {DB_OBJ});
-                            CdbNextMark();
-                            CdbDrawNotesAndShowMap();
-                        end)
-                    end
-                    -- show vendor button
-                    if CdbGetTableLength(dbEntry[DB_VENDOR]) ~= 0 then
-                        CdbSearchGui[searchType].buttons[searchCount].vendor = CreateFrame("Button","mybutton",CdbSearchGui[searchType].buttons[searchCount],"UIPanelButtonTemplate")
-                        if CdbSearchGui[searchType].buttons[searchCount].lootNpc and CdbSearchGui[searchType].buttons[searchCount].lootObj then
-                            CdbSearchGui[searchType].buttons[searchCount].vendor:SetPoint("RIGHT", -55, 0)
-                        elseif CdbSearchGui[searchType].buttons[searchCount].lootNpc or CdbSearchGui[searchType].buttons[searchCount].lootObj then
-                            CdbSearchGui[searchType].buttons[searchCount].vendor:SetPoint("RIGHT", -30, 0)
-                        else
-                            CdbSearchGui[searchType].buttons[searchCount].vendor:SetPoint("RIGHT", -5, 0)
-                        end
-                        CdbSearchGui[searchType].buttons[searchCount].vendor:SetWidth(20)
-                        CdbSearchGui[searchType].buttons[searchCount].vendor:SetHeight(20)
-                        CdbSearchGui[searchType].buttons[searchCount].vendor:SetNormalTexture(nil)
-                        CdbSearchGui[searchType].buttons[searchCount].vendor:SetPushedTexture(nil)
-                        CdbSearchGui[searchType].buttons[searchCount].vendor:SetHighlightTexture(nil)
-                        CdbSearchGui[searchType].buttons[searchCount].vendor.icon = CdbSearchGui[searchType].buttons[searchCount].vendor:CreateTexture(nil,"BACKGROUND")
-                        CdbSearchGui[searchType].buttons[searchCount].vendor.icon:SetTexture("Interface\\AddOns\\ClassicDB\\symbols\\icon_vendor")
-                        CdbSearchGui[searchType].buttons[searchCount].vendor.icon:SetAllPoints(CdbSearchGui[searchType].buttons[searchCount].vendor)
-                        CdbSearchGui[searchType].buttons[searchCount].vendor:SetScript("OnClick", function(self)
-                            CdbMapNotes = {};
-                            CdbPrepareItemNotes(this:GetParent().id, "Location for: "..this:GetParent().name, "Sells item: "..this:GetParent().name, "CdbVendor", {DB_VENDOR});
-                            CdbNextMark();
-                            CdbDrawNotesAndShowMap();
-                        end)
-                    end
-                elseif searchType == "quest" then
-                    if dbEntry[DB_OBJECTIVES] then
-                        CdbSearchGui[searchType].buttons[searchCount].questObjectives = dbEntry[DB_OBJECTIVES];
-                    end
-                    CdbSearchGui[searchType].buttons[searchCount]:SetText("|cffffcc00["..dbEntry[DB_LEVEL].."] |Hquest:0:0:0:0|h["..name.."]|h|r|r (ID:"..id..")")
-                    CdbSearchGui[searchType].buttons[searchCount]:SetScript("OnClick", function(self)
-                        if IsShiftKeyDown() then
-                            if not ChatFrameEditBox:IsVisible() then
-                                ChatFrameEditBox:Show()
-                            end
-                            ChatFrameEditBox:Insert("|cffffff00|Hquest:0:0:0:0|h["..this.name.."]|h|r")
-                        else
-                            CdbMapNotes = {};
-                            CdbGetQuestNotesById(this.id)
-                            CdbNextMark();
-                            CdbDrawNotesAndShowMap();
-                        end
-                    end)
-                    CdbSearchGui[searchType].buttons[searchCount]:SetScript("OnEnter", function(self)
-                        this:SetBackdropColor(1,1,1,.25)
-                        GameTooltip:SetOwner(this, "ANCHOR_TOPLEFT");
-                        GameTooltip:ClearLines();
-                        GameTooltip:AddLine(this:GetText())
-                        GameTooltip:AddLine("\n")
-                        if this.questObjectives then
-                            GameTooltip:AddLine("|cffffffffObjectives: |r"..this.questObjectives, 0.7, 0.7, 0.7, true)
-                        end
-                        GameTooltip:AddLine("|cffffffffMinLevel: |r"..qData[this.id][DB_MIN_LEVEL], 0.7, 0.7, 0.7)
-                        GameTooltip:Show();
-                    end)
-                    -- show quest finished check-button
-                    CdbSearchGui[searchType].buttons[searchCount].finished = CreateFrame("CheckButton","mycheckbutton",CdbSearchGui[searchType].buttons[searchCount],"UICheckButtonTemplate")
-                    CdbSearchGui[searchType].buttons[searchCount].finished.id = CdbSearchGui[searchType].buttons[searchCount].id;
-                    CdbSearchGui[searchType].buttons[searchCount].finished:SetPoint("RIGHT", -25, 0)
-                    CdbSearchGui[searchType].buttons[searchCount].finished:SetWidth(20)
-                    CdbSearchGui[searchType].buttons[searchCount].finished:SetHeight(20)
-                    if (CdbFinishedQuests[id] ~= true) then
-                        CdbSearchGui[searchType].buttons[searchCount].finished:SetChecked(false);
-                    else
-                        CdbSearchGui[searchType].buttons[searchCount].finished:SetChecked(true);
-                    end
-                end
-                -- Common setup. Spawns and objects are missing a tooltip.
-                if searchType == "spawn" or searchType == "object" then
-                    CdbSearchGui[searchType].buttons[searchCount]:SetScript("OnEnter", function(self)
-                        this:SetBackdropColor(1,1,1,.25)
-                    end)
-                end
-                CdbSearchGui[searchType].buttons[searchCount]:SetScript("OnLeave", function(self)
-                    if this.even == true then
-                        this:SetBackdropColor(1,1,1,.05)
-                    else
-                        this:SetBackdropColor(1,1,1,.10)
-                    end
-                    GameTooltip:Hide();
-                end)
-                --[[
-                -- type specific
-                -- show faction icons (deactivated until faction is added to NPC data)
-                local faction = "HA" --spawnDB[CdbSearchGui[searchType].buttons[searchCount].name]['faction']
-                if strfind(faction, "H") and faction ~= "HA" then
-                    CdbSearchGui[searchType].buttons[searchCount].horde = CreateFrame("Frame", nil, CdbSearchGui[searchType].buttons[searchCount])
-                    CdbSearchGui[searchType].buttons[searchCount].horde:SetPoint("RIGHT", -5, 0)
-                    CdbSearchGui[searchType].buttons[searchCount].horde:SetWidth(20)
-                    CdbSearchGui[searchType].buttons[searchCount].horde:SetHeight(20)
-                    CdbSearchGui[searchType].buttons[searchCount].horde.icon = CdbSearchGui[searchType].buttons[searchCount].horde:CreateTexture(nil,"BACKGROUND")
-                    CdbSearchGui[searchType].buttons[searchCount].horde.icon:SetTexture("Interface\\AddOns\\ClassicDB\\symbols\\icon_horde")
-                    CdbSearchGui[searchType].buttons[searchCount].horde.icon:SetAllPoints(CdbSearchGui[searchType].buttons[searchCount].horde)
-                end
-                if strfind(faction, "A") and faction ~= "HA" then
-                    CdbSearchGui[searchType].buttons[searchCount].alliance = CreateFrame("Frame", nil, CdbSearchGui[searchType].buttons[searchCount])
-                    if CdbSearchGui[searchType].buttons[searchCount].horde then
-                        CdbSearchGui[searchType].buttons[searchCount].alliance:SetPoint("RIGHT", -30, 0)
-                    else
-                        CdbSearchGui[searchType].buttons[searchCount].alliance:SetPoint("RIGHT", -5, 0)
-                    end
-                    CdbSearchGui[searchType].buttons[searchCount].alliance:SetWidth(20)
-                    CdbSearchGui[searchType].buttons[searchCount].alliance:SetHeight(20)
-                    CdbSearchGui[searchType].buttons[searchCount].alliance.icon = CdbSearchGui[searchType].buttons[searchCount].alliance:CreateTexture(nil,"BACKGROUND")
-                    CdbSearchGui[searchType].buttons[searchCount].alliance.icon:SetTexture("Interface\\AddOns\\ClassicDB\\symbols\\icon_alliance")
-                    CdbSearchGui[searchType].buttons[searchCount].alliance.icon:SetAllPoints(CdbSearchGui[searchType].buttons[searchCount].alliance)
-                end
-                --]]
-                -- Show favourite button
-                CdbSearchGui[searchType].buttons[searchCount].fav = CreateFrame("Button","mybutton",CdbSearchGui[searchType].buttons[searchCount],"UIPanelButtonTemplate")
-                CdbSearchGui[searchType].buttons[searchCount].fav:SetPoint("LEFT", 5, 0)
-                CdbSearchGui[searchType].buttons[searchCount].fav:SetWidth(20)
-                CdbSearchGui[searchType].buttons[searchCount].fav:SetHeight(20)
-                CdbSearchGui[searchType].buttons[searchCount].fav:SetNormalTexture(nil)
-                CdbSearchGui[searchType].buttons[searchCount].fav:SetPushedTexture(nil)
-                CdbSearchGui[searchType].buttons[searchCount].fav:SetHighlightTexture(nil)
-                CdbSearchGui[searchType].buttons[searchCount].fav.icon = CdbSearchGui[searchType].buttons[searchCount].fav:CreateTexture(nil,"BACKGROUND")
-                CdbSearchGui[searchType].buttons[searchCount].fav.icon:SetTexture("Interface\\AddOns\\ClassicDB\\img\\fav")
-                if CdbFavourites[searchType][id] then
-                    CdbSearchGui[searchType].buttons[searchCount].fav.icon:SetVertexColor(1,1,1,1)
-                else
-                    CdbSearchGui[searchType].buttons[searchCount].fav.icon:SetVertexColor(0,0,0,1)
-                end
-                CdbSearchGui[searchType].buttons[searchCount].fav.icon:SetAllPoints(CdbSearchGui[searchType].buttons[searchCount].fav)
-                CdbSearchGui[searchType].buttons[searchCount].fav:SetScript("OnClick", function(self)
-                    if CdbFavourites[searchType][this:GetParent().id] then
-                        CdbFavourites[searchType][this:GetParent().id] = nil
-                        this.icon:SetVertexColor(0,0,0,1)
-                        CdbSearchGui.inputField:updateSearch()
-                    else
-                        CdbFavourites[searchType][this:GetParent().id] = true
-                        this.icon:SetVertexColor(1,1,1,1)
-                    end
-                end)
-            end
+        -- This condition does the actual comparison for the search
+        if  (dbEntry ~= nil)
+            and
+            (
+                ( -- text search
+                    (tonumber(query) == nil)
+                    and
+                    (
+                        (strlen(query) < CDB_MIN_SEARCH_CHARS) -- Too short, display favourites
+                        or
+                        (strfind(strlower(dbEntry[NAME_KEY]), strlower(query))) -- Perform search
+                    )
+                )
+                or
+                ( -- id search
+                    (tonumber(query) ~= nil)
+                    and
+                    (
+                        (strlen(query) < CDB_MIN_SEARCH_INTS) -- Too short, display favourites
+                        or
+                        (strfind(tostring(id), query)) -- Perform search
+                    )
+                )
+            )
+        then -- We have a search result or a favourite to display
             searchCount = searchCount + 1;
             CdbLastSearchResults[searchType][id] = true;
+        else -- This entry doesn't meet the search criteria, removed from the last results
+            CdbLastSearchResults[searchType][id] = nil;
         end
     end
-    searchCount = searchCount - 1; -- Needed to represent actual amount, since we started at 1, not 0.
+    -- Reset scroll bar
+    CdbSearchGui[searchType].scrollBar:SetValue(1);
+    CdbSearchGui[searchType].scrollBar:Hide();
+    -- Update tab button text
     if searchCount == 0 then
         if searchType == "spawn" then
             CdbSearchGui.buttonSpawn.text:SetText("Mobs")
@@ -962,7 +1063,16 @@ function CdbSearchGui:Search(query, searchType)
         elseif searchType == "quest" then
             CdbSearchGui.buttonQuest.text:SetText("Quests |cffaaaaaa(" .. searchCount .. ")")
         end
+        -- Set max scroll value
+        local max = math.ceil(searchCount/CDB_MAX_SEARCH_PAGE_LINES);
+        CdbSearchGui[searchType].scrollBar:SetMinMaxValues(1, max);
+        -- Show scroll bar if needed
+        if max > 1 then
+            CdbSearchGui[searchType].scrollBar:Show();
+        end
     end
+    -- Update the displayed buttons
+    CdbUpdateResultButtons(searchType, query);
 end
 
 ------------------------------
