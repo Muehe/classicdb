@@ -326,7 +326,12 @@ function Cartographer_LookNFeel:OnEnable()
             -- Resize notes and player arrow
             local size = 1/scale;
             Cartographer_Notes:SetIconSize(size);
-            if size >= 2.5 then size = 2.5 end
+            if self.db.profile.largePlayer then
+                size = size*1.5;
+            end
+            if size > 2.5 then
+                size = 2.5;
+            end
             self.playerModel:SetModelScale(size);
         -- Change transparency
         elseif IsShiftKeyDown() then
