@@ -1146,8 +1146,8 @@ CdbControlGui.buttonValues.CleanMap = {
     end,
 }
 CdbControlGui.buttonValues.ShowAllQuests = {
-    position = 1,
-    textureFile = "Interface\\Addons\\ClassicDB\\symbols\\MarkMap",
+    position = 2,
+    textureFile = "Interface\\Addons\\ClassicDB\\symbols\\MapMarkAll",
     OnEnterFunctionTitle = "Show all current quests",
     OnEnterFunctionString = "\n|cffffffffPlot notes on the map for all quest currently in the quest log. This draws notes only once, for automatic updates enable the corresponding option at the bottom of the control GUI.|r",
     OnClickFunction = function(self)
@@ -1156,7 +1156,7 @@ CdbControlGui.buttonValues.ShowAllQuests = {
     end,
 }
 CdbControlGui.buttonValues.CycleMap = {
-    position = 2,
+    position = 3,
     textureFile = "Interface\\Addons\\ClassicDB\\symbols\\MapCycle",
     OnEnterFunctionTitle = "Cycle zones",
     OnEnterFunctionString = "\nLeftClick|cffffffff to cycle through the currently marked zones.|r RightClick|cffffffff to cycle backwards.",
@@ -1169,8 +1169,8 @@ CdbControlGui.buttonValues.CycleMap = {
     end,
 }
 CdbControlGui.buttonValues.ShowSelectedQuest = {
-    position = 3,
-    textureFile = "Interface\\Addons\\ClassicDB\\symbols\\Log",
+    position = 1,
+    textureFile = "Interface\\Addons\\ClassicDB\\symbols\\MapMarkOne",
     OnEnterFunctionTitle = "Show currently selected quest",
     OnEnterFunctionString = "\n|cffffffffPlot notes on the map for the quest currently selected in the quest log.|r",
     OnClickFunction = function(self)
