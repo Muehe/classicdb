@@ -293,12 +293,15 @@ function Cartographer_LookNFeel:OnEnable()
     end)
     WorldMapFrame:SetScript("OnMouseWheel", function()
         local up = (arg1 == 1)
+        -- Change map, note and player arrow size
+        -- When map gets larger, notes and arrow get smaller. And vice versa.
         if IsControlKeyDown() and not IsAltKeyDown() then
+            -- Calculate new scale
             local scale = self:GetScale()
             if up then
                 scale = scale + 0.1
-                if scale > 10 then  -- WHDB related, was 1
-                    scale = 10;  -- was 1
+                if scale > 7 then -- was 1
+                    scale = 7; -- was 1
                 end
             else
                 scale = scale - 0.1
@@ -306,7 +309,26 @@ function Cartographer_LookNFeel:OnEnable()
                     scale = 0.2
                 end
             end
+            -- Save cursor coordinates
+            local x, y = GetCursorPosition();
+            local _, _, cx, cy = string.find(Cartographer_Coordinates.frame.cursorCoords:GetText(), ".+ (.+), (.+)")
+            cx = tonumber(cx);
+            cy = tonumber(cy);
+            -- Set new world map scale
             self:SetScale(scale)
+            -- Calculate offsets relative to new size
+            local width, height = WorldMapDetailFrame:GetWidth(), WorldMapDetailFrame:GetHeight()
+            local newX = x/scale-10-((cx/100)*width); -- 10 is the offset between WorldMapFrame and WorldMapDetailFrame
+            local newY = y/scale+69+((cy/100)*height); -- 69 is the offset ...
+            -- Set new position
+            WorldMapFrame:ClearAllPoints();
+            WorldMapFrame:SetPoint("TOPLEFT", "UIParent", "BOTTOMLEFT", newX, newY);
+            -- Resize notes and player arrow
+            local size = 1/scale;
+            Cartographer_Notes:SetIconSize(size);
+            if size >= 2.5 then size = 2.5 end
+            self.playerModel:SetModelScale(size);
+        -- Change transparency
         elseif IsShiftKeyDown() then
             local alpha = self:GetAlpha()
             if up then
@@ -321,7 +343,8 @@ function Cartographer_LookNFeel:OnEnable()
                 end
             end
             self:SetAlpha(alpha)
-        elseif IsAltKeyDown() and IsControlKeyDown() then -- WHDB related.
+        -- Change note and player arrow size
+        elseif IsAltKeyDown() and IsControlKeyDown() then
             local size = Cartographer_Notes:GetIconSize()
             if up then
                 size = size + 0.05

@@ -2086,10 +2086,9 @@ function CdbResetMapAndIconSize()
     end
     Cartographer_LookNFeel.playerModel:SetModelScale(size);
     WorldMapFrame:StartMoving();
+    WorldMapFrame:ClearAllPoints();
     WorldMapFrame:SetPoint("CENTER", 0, 0);
     WorldMapFrame:StopMovingOrSizing();
-    WorldMapFrame:ClearAllPoints();
-    WorldMapFrame:SetAllPoints(UIParent);
 end
 
 function CdbReopenMapIfVisible()
