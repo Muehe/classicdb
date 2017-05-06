@@ -99,10 +99,10 @@ function Cartographer_Coordinates.OnUpdate()
     local cx = (x/scale - left) / width
     local cy = (top - y/scale) / height
 
-    self.frame.cursorCoords:SetText(string.format("%s: %.1f, %.1f", L["Cursor:"], 100 * cx, 100 * cy))
+    self.frame.cursorCoords:SetText(string.format("%s %.1f, %.1f", L["Cursor:"], 100 * cx, 100 * cy))
     if px == 0 or py == 0 or IsInInstance() or Cartographer:GetCurrentInstance() then
         self.frame.playerCoords:SetText("")
     else
-        self.frame.playerCoords:SetText(string.format("%s: %.1f, %.1f", L["Player:"], 100 * px, 100 * py))
+        self.frame.playerCoords:SetText(string.format("%s %.1f, %.1f", L["Player:"], 100 * px, 100 * py))
     end
 end
