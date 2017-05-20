@@ -7,6 +7,7 @@ cMark = "CdbIcon1";
 4 = event debug
 8 = advanced
 16 = other event debug attempt
+Example: "CdbDebug = 6" shows 2 "most function calls" and 4 "event debug"
 --]]
 CdbDebug = 16;
 -- This table is used to prepare new notes.
@@ -26,12 +27,9 @@ CdbMapNotes = {};
 CdbLastNoteCount = 0;
 -- This variable is used to achieve different behaviour for quest start notes.
 CdbInEvent = false;
--- These variables are used to determine types of Quest Log events (accept/abandon/finish).
-CdbQuestLogFootprint = {{},{}};
-CdbQuestAbandon = '';
--- For debugging quest progress events
-CdbWatchUpdate = false;
-CdbWatchUpdateQuestLogId = 0;
+-- These variables are used to determine types of Quest Log events (accept/abandon/finish/progress).
+CdbQuestLogFootprint = {'',{}}; -- Holds a string representing the quest log state and a table of active quests, where the key is the quest id and the value just true
+CdbQuestAbandon = ''; -- In the CdbInit function we hook two buttons to fill this string when a quest is really abandoned, so we know it wasn't finished during the next quest log check
 
 -- DB keys
 DB_NAME, DB_NPC, NOTE_TITLE = 1, 1, 1;
@@ -244,126 +242,149 @@ function CdbOnEvent(self, event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8,
             CdbControlGui:SetPoint("CENTER", 0, 0)
         end
         CdbSearchGui.inputField.updateSearch();
+        CdbInit();
     elseif (event == "WORLD_MAP_UPDATE") and (WorldMapFrame:IsVisible()) and (CdbSettings.questStarts) then
         CdbDebugPrint(4, "    ", zone);
         CdbInEvent = true;
         CdbGetQuestStartNotes();
         CdbInEvent = false;
     elseif (event == "QUEST_LOG_UPDATE") then
-        local footprint = CdbGetQuestLogFootprint(); -- {footprintString, questIdTable}
-        local count = GetNumQuestLogEntries();
-        -- NOTE: maybe CdbCompareTables(CdbQuestLogFootprint[2], footprint[2]) would catch more edge cases, making footprintString obsolete
-        if (CdbQuestLogFootprint[1] ~= footprint[1]) then
-            local added = 0;
-            for k, v in pairs(footprint[2]) do
-                if CdbQuestLogFootprint[2][k] == nil then
-                    added = k;
+        CdbAuxiliaryFrame:UnregisterEvent("QUEST_LOG_UPDATE");
+        CdbHandleUpdateEvent();
+    elseif (event == "UNIT_QUEST_LOG_CHANGED" and arg1 == "player") then
+        CdbAuxiliaryFrame:RegisterEvent("QUEST_LOG_UPDATE");
+    end
+end -- Event(event, arg1)
+
+-- Create a "footprint" of the quest log.
+-- Returns a table with two elements:
+--     1. A string consisting of the names, ids, and some other characters
+--        depending on its current state, for all quest in the quest log.
+--     2. A sub-table of all active quests IDs. If there is more the one ID
+--        returned for a single quest, the string for that quest will say
+--        MULTI_OR_NONE and this table will contain all possible IDs.
+function CdbGetQuestLogFootprint()
+    CdbDebugPrint(4, "GetQuestLogFootprint() called");
+    local oldQuestLogId = GetQuestLogSelection();
+    local questLogID=1;
+    local footprint = '';
+    local ids = {};
+    local registerNextEvent = false;
+    while (GetQuestLogTitle(questLogID) ~= nil) do
+        questLogID = questLogID + 1;
+        local questTitle, level, questTag, isHeader, isCollapsed, isComplete = GetQuestLogTitle(questLogID);
+        if (isHeader == nil) and (questTitle) then
+            CdbDebugPrint(4, "    logID, title, level, tag, isHeader, isComplete =", questLogID, questTitle, level, questTag, isHeader, isComplete);
+            SelectQuestLogEntry(questLogID);
+            local questDescription, questObjectives = GetQuestLogQuestText();
+            local skip = false;
+            if (isComplete == nil) then
+                isComplete = '';
+                CdbDebugPrint(4, "    title", questTitle);
+                local numObjectives = GetNumQuestLeaderBoards(questLogID);
+                if (numObjectives ~= nil) then
+                    for i=1, numObjectives, 1 do
+                        local text, objectiveType, finished = GetQuestLogLeaderBoard(i, arg1);
+                        if not finished then
+                            local i, j, itemName, numItems, numNeeded = strfind(text, "(.*):%s*([%d]+)%s*/%s*([%d]+)");
+                            -- TODO: localized versions of "slain"
+                            if (itemName ~= nil) and ((strlen(itemName) == 1) or (strlen(itemName) == 7 and strfind(itemName, "slain"))) then
+                                skip = true;
+                            end
+                            CdbDebugPrint(4, "    objective, have, need =", itemName, numItems, numNeeded);
+                            if numItems and numNeeded then
+                                isComplete = isComplete..numItems.."/"..numNeeded..";"
+                            elseif itemName == nil then -- escorts, etc.
+                                isComplete = isComplete..objectiveType..";";
+                            end
+                        else
+                            isComplete = isComplete..objectiveType..";";
+                        end
+                    end
                 end
             end
-            if added ~= 0 then
-                CdbDebugPrint(4, "    Quest accepted", added);
-                CdbFinishedQuests[added] = false;
+            --[[
+            Safeguard against incorrect data during UNIT_QUEST_LOG_CHANGED? Not
+            sure which event this was. UQLC event is currently not calling this
+            function anymore, but leaving this here because it does no harm and
+            the function might be called from elsewhere in the future.
+            --]]
+            if isComplete == '' then
+                isComplete = "1";
             end
-            local removed = 0;
-            for k, v in pairs(CdbQuestLogFootprint[2]) do
-                if footprint[2][k] == nil then
-                    removed = k;
-                end
-            end
-            if removed ~= 0 then
-                if CdbFinishedQuests[removed] == false then
-                    CdbDebugPrint(4, "    Quest finished", removed);
-                    CdbFinishedQuests[removed] = true;
+            local qIds = CdbGetQuestIds(questTitle, questObjectives, level);
+            if not skip then
+                local uId;
+                if (type(qIds) == "number") then
+                    uId = qIds;
+                    ids[qIds] = true;
                 else
-                    CdbDebugPrint(4, "    Quest abandoned", removed);
-                    CdbFinishedQuests[removed] = nil;
+                    if type(qIds) == "table" then
+                        for k, qId in pairs(qIds) do
+                            ids[qId] = true;
+                        end
+                    end
+                    uId = "MULTI_OR_NONE"
                 end
-            end
-            if (CdbSettings.questStarts == true) then
-                CdbCleanMap();
-            end
-            if (CdbSettings.auto_plot == true) then
-                CdbInEvent = true;
-                CdbGetAllQuestNotes();
-                CdbInEvent = false;
+                footprint = footprint.."'"..questTitle.."'"..level..";"..uId..";"..isComplete;
+            else
+                CdbDebugPrint(16, "Missing WDB data, register next update event. Quest ID:", qIds);
+                registerNextEvent = true;
             end
         end
-        if CdbWatchUpdate == true then
-            local questTitle, level, questTag, isHeader, isCollapsed, isComplete = GetQuestLogTitle(CdbWatchUpdateQuestLogId);
-            CdbDebugPrint(16, "    title", questTitle);
-            local numObjectives = GetNumQuestLeaderBoards(CdbWatchUpdateQuestLogId);
-            if (numObjectives ~= nil) then
-                for i=1, numObjectives, 1 do
-                    local text, objectiveType, finished = GetQuestLogLeaderBoard(i, CdbWatchUpdateQuestLogId);
-                    local i, j, itemName, numItems, numNeeded = strfind(text, "(.*):%s*([%d]+)%s*/%s*([%d]+)");
-                    CdbDebugPrint(16, "    objective, have, need", itemName, numItems, numNeeded);
+    end
+    if registerNextEvent then
+        CdbAuxiliaryFrame:RegisterEvent("QUEST_LOG_UPDATE");
+    end
+    SelectQuestLogEntry(oldQuestLogId);
+    return {strlower(footprint), ids}
+end
+
+-- Track accepting/finishing/abandoning quests, do automatic update if necessary.
+-- For knowing which quest is abandoned two buttons are hooked in the CdbInit function.
+function CdbHandleUpdateEvent()
+    local footprint = CdbGetQuestLogFootprint(); -- {footprintString, questIdTable}
+    CdbDebugPrint(16, "    footprint", footprint[1]);
+    if (CdbQuestLogFootprint[1] ~= footprint[1]) then
+        for questId, _ in pairs(footprint[2]) do
+            if CdbQuestLogFootprint[2][questId] == nil then
+                CdbDebugPrint(16, "    Quest accepted", questId);
+                CdbFinishedQuests[questId] = false;
+            end
+        end
+        local abandoned = false;
+        for questId, _ in pairs(CdbQuestLogFootprint[2]) do
+            if footprint[2][questId] == nil then
+                if CdbFinishedQuests[questId] == false then
+                    if qData[questId][DB_NAME] == CdbQuestAbandon then
+                        CdbDebugPrint(16, "    Quest abandoned", questId);
+                        CdbFinishedQuests[questId] = nil;
+                        abandoned = true;
+                    else
+                        CdbDebugPrint(16, "    Quest finished", questId);
+                        CdbFinishedQuests[questId] = true;
+                    end
                 end
             end
-            CdbWatchUpdate = false;
-            CdbWatchUpdateQuestLogId = 0;
         end
-    elseif (event == "QUEST_WATCH_UPDATE") then
+        if abandoned then
+            CdbQuestAbandon = '';
+        end
+        if (CdbSettings.questStarts == true) then
+            CdbCleanMap();
+            CdbReopenMapIfVisible();
+        end
         if (CdbSettings.auto_plot == true) then
             CdbInEvent = true;
             CdbGetAllQuestNotes();
             CdbInEvent = false;
         end
-        local questTitle, level, questTag, isHeader, isCollapsed, isComplete = GetQuestLogTitle(arg1);
-        CdbDebugPrint(16, "    title", questTitle);
-        local numObjectives = GetNumQuestLeaderBoards(arg1);
-        if (numObjectives ~= nil) then
-            for i=1, numObjectives, 1 do
-                local text, objectiveType, finished = GetQuestLogLeaderBoard(i, arg1);
-                local i, j, itemName, numItems, numNeeded = strfind(text, "(.*):%s*([%d]+)%s*/%s*([%d]+)");
-                CdbDebugPrint(16, "    objective, have, need =", itemName, numItems, numNeeded);
-            end
-        end
-        CdbWatchUpdate = true;
-        CdbWatchUpdateQuestLogId = arg1;
-    elseif (event == "QUEST_PROGRESS") then
-        local footprint = CdbGetQuestLogFootprint();
-        local count = GetNumQuestLogEntries();
-        CdbDebugPrint(4, "    footprint", {footprint, count});
-        CdbQuestLogFootprint = footprint;
-    elseif (event == "UNIT_QUEST_LOG_CHANGED") then
-        local footprint = CdbGetQuestLogFootprint();
-        local count = GetNumQuestLogEntries();
-        CdbDebugPrint(4, "    footprint", {CdbQuestLogFootprint, count});
-        if ((CdbSettings.auto_plot) and (CdbQuestLogFootprint[1] ~= footprint[1])) then
-            CdbInEvent = true;
-            CdbGetAllQuestNotes();
-            CdbInEvent = false;
-        end
-        CdbQuestLogFootprint = footprint;
-        if CdbWatchUpdate == true then
-            local questTitle, level, questTag, isHeader, isCollapsed, isComplete = GetQuestLogTitle(CdbWatchUpdateQuestLogId);
-            CdbDebugPrint(16, "    title", questTitle);
-            local numObjectives = GetNumQuestLeaderBoards(CdbWatchUpdateQuestLogId);
-            if (numObjectives ~= nil) then
-                for i=1, numObjectives, 1 do
-                    local text, objectiveType, finished = GetQuestLogLeaderBoard(i, CdbWatchUpdateQuestLogId);
-                    local i, j, itemName, numItems, numNeeded = strfind(text, "(.*):%s*([%d]+)%s*/%s*([%d]+)");
-                    CdbDebugPrint(16, "    objective, have, need", itemName, numItems, numNeeded);
-                end
-            end
-        end
-    elseif (event == "QUEST_FINISHED") then
-        local footprint = CdbGetQuestLogFootprint();
-        local count = GetNumQuestLogEntries();
-        CdbDebugPrint(4, "    footprint", {footprint, count});
-        local count = GetNumQuestLogEntries();
-        local questLogId = 1;
-        local finishingTitle = GetTitleText()
-        for i in range(1, count) do
-            local questLogTitle, _ = GetQuestLogTitle(i)
-            if questLogTitle == finishingTitle then
-                questLogId = i;
-                break;
-            end
-        end
-        CdbDebugPrint(4, "    ", questLogId);
+    else
+        CdbDebugPrint(16, "No change in quest log, register next update event.")
+        CdbAuxiliaryFrame:RegisterEvent("QUEST_LOG_UPDATE");
     end
-end -- Event(event, arg1)
+    CdbQuestLogFootprint = footprint;
+end
 
 function range(from, to, step)
   step = step or 1
@@ -377,30 +398,31 @@ function range(from, to, step)
   end, nil, from - step
 end
 
- -- Called from xml
-function CdbInit(frame)
+function CdbInit()
     -- Hook buttons for abandoning quests.
     -- Credit for this approach goes to Questie: https://github.com/AeroScripts/QuestieDev
     CdbQuestAbandonOnAccept = StaticPopupDialogs["ABANDON_QUEST"].OnAccept;
     StaticPopupDialogs["ABANDON_QUEST"].OnAccept = function()
         CdbQuestAbandon = GetAbandonQuestName();
-        CdbDebugPrint(4, "Abandon", CdbQuestAbandon);
+        CdbDebugPrint(16, "Abandon", CdbQuestAbandon);
         CdbQuestAbandonOnAccept();
     end
     CdbQuestAbandonWithItemsOnAccept = StaticPopupDialogs["ABANDON_QUEST_WITH_ITEMS"].OnAccept;
     StaticPopupDialogs["ABANDON_QUEST_WITH_ITEMS"].OnAccept = function()
         CdbQuestAbandon = GetAbandonQuestName();
-        CdbDebugPrint(4, "Abandon", CdbQuestAbandon);
-        CdbQuestAbandonOnAccept();
+        CdbDebugPrint(16, "Abandon", CdbQuestAbandon);
+        CdbQuestAbandonWithItemsOnAccept();
     end
 
     -- Create the /classicdb SlashCommand
-    --SLASH_SHAGU1 = "/classicdb";
+    SLASH_CLASSICDB1 = "/classicdb";
+    SLASH_CLASSICDB2 = "/cdb";
     SlashCmdList["CLASSICDB"] = function(input, editbox)
         local params = {};
         if (input == "" or input == "help" or input == nil) then
             CdbPrint("|cff33ff88ClassicDB|cffffffff oooVersionooo |cff00ccff[" .. UnitFactionGroup("player") .. "]|cffaaaaaa [oooLocaleooo]");
             CdbPrint("Available Commands:");
+            CdbPrint("/cdb |cffaaaaaa Alternative slash command for |r /classicdb");
             CdbPrint("/classicdb help |cffaaaaaa This help.");
             CdbPrint("/classicdb spawn <npc name> |cffaaaaaa Show NPC location on map.");
             CdbPrint("/classicdb obj <object name> |cffaaaaaa Show object location on map.");
@@ -967,6 +989,7 @@ function CdbGetAllQuestNotes()
     CdbCleanMap();
     if CdbInEvent == true then
         CdbDrawNotesOnMap();
+        CdbReopenMapIfVisible();
     else
         CdbDrawNotesAndShowMap();
     end
@@ -1221,7 +1244,6 @@ function CdbSwitchSetting(setting, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg
         if CdbSettings.auto_plot then
             CdbGetAllQuestNotes();
         end
-        CdbReopenMapIfVisible();
     end
 end -- SwitchSetting(setting)
 
@@ -1453,17 +1475,17 @@ function CdbGetSpecialNpcNotes(qId, objectiveText, numItems, numNeeded, title)
 end -- GetSpecialNpcNotes(qId, objectiveText, numItems, numNeeded, title)
 
 function CdbGetQuestNotes(questLogID)
-    CdbDebugPrint(2, "GetQuestNotes(", questLogID, ") called");
+    CdbDebugPrint(18, "GetQuestNotes(questLogID) called", questLogID);
     local oldQuestLogId = GetQuestLogSelection();
     local questTitle, level, questTag, isHeader, isCollapsed, isComplete = GetQuestLogTitle(questLogID);
     local showMap = false;
     if (not isHeader and questTitle ~= nil) then
-        CdbDebugPrint(8, "    questTitle = ", questTitle);
+        CdbDebugPrint(24, "    questTitle = ", questTitle);
         CdbDebugPrint(8, "    level = ", level);
-        CdbDebugPrint(8, "    isComplete = ", isComplete);
+        CdbDebugPrint(24, "    isComplete = ", isComplete);
         local numObjectives = GetNumQuestLeaderBoards(questLogID);
         if (numObjectives ~= nil) then
-            CdbDebugPrint(8, "    numObjectives = ", numObjectives);
+            CdbDebugPrint(24, "    numObjectives = ", numObjectives);
         end
         SelectQuestLogEntry(questLogID);
         local questDescription, questObjectives = GetQuestLogQuestText();
@@ -1487,11 +1509,12 @@ function CdbGetQuestNotes(questLogID)
         end
         local itemList = {};
         if (numObjectives ~= nil) and (numObjectives ~= 0) then
+            -- Add objective notes by quest log state
             for i=1, numObjectives, 1 do
                 local text, objectiveType, finished = GetQuestLogLeaderBoard(i, questLogID);
                 local i, j, itemName, numItems, numNeeded = strfind(text, "(.*):%s*([%d]+)%s*/%s*([%d]+)");
                 if itemName then
-                    CdbDebugPrint(8, "    objectiveText = ", itemName);
+                    CdbDebugPrint(24, "    i, j, itemName, numItems, numNeeded = ", i, j, itemName, numItems, numNeeded);
                 end
                 if (not finished) then
                     if (objectiveType == "monster") then
@@ -1500,6 +1523,7 @@ function CdbGetQuestNotes(questLogID)
                         if i == nil then
                             i, j, monsterName = strfind(itemName, "(.*) getötet");
                         end
+                        CdbDebugPrint(16, "    monsterName = ", monsterName);
                         if monsterName then
                             local npcID = CdbGetNpcId(monsterName);
                             if npcID then
@@ -1582,7 +1606,8 @@ function CdbGetQuestNotes(questLogID)
                     end
                 end
             end
-            if ((not isComplete) and (numObjectives ~= 0)) then
+            -- Add additional items not show in the quest log
+            if (not isComplete) then
                 if (type(qIDs) == "number") then
                     CdbDebugPrint(8, "    Quest related drop for: ", qIDs)
                     if qData[qIDs][DB_REQ_NPC_OR_OBJ_OR_ITM][DB_ITM] then
@@ -1614,7 +1639,7 @@ function CdbGetQuestNotes(questLogID)
             CdbGetQuestEndNotes(questLogID);
         end
     end
-    if showMap then
+    if (showMap) and (not isComplete) then
         CdbNextMark();
     end
     SelectQuestLogEntry(oldQuestLogId);
@@ -2023,46 +2048,6 @@ function CdbPrintTable(tab, indent)
         end
     end
 end -- PrintTable(tab, indent)
-
-function CdbGetQuestLogFootprint()
-    CdbDebugPrint(4, "GetQuestLogFootprint() called");
-    local oldQuestLogId = GetQuestLogSelection();
-    local questLogID=1;
-    local footprint = "";
-    local ids = {};
-    while (GetQuestLogTitle(questLogID) ~= nil) do
-        questLogID = questLogID + 1;
-        local questTitle, level, questTag, isHeader, isCollapsed, isComplete = GetQuestLogTitle(questLogID);
-        if (isHeader == nil) and (questTitle) then
-            CdbDebugPrint(4, "    logID, title, level, tag, isHeader, isComplete =", questLogID, questTitle, level, questTag, isHeader, isComplete);
-            SelectQuestLogEntry(questLogID);
-            local questDescription, questObjectives = GetQuestLogQuestText();
-            local qIds = CdbGetQuestIds(questTitle, questObjectives, level);
-            local uId;
-            if (type(qIds) == "number") then
-                uId = qIds;
-                ids[qIds] = true;
-                if (CdbQuestAbandon == questTitle) then
-                    CdbFinishedQuests[qIds] = -1;
-                    CdbQuestAbandon = '';
-                end
-            else
-                if type(qIds) == "table" then
-                    for k, qId in pairs(qIds) do
-                        ids[qId] = true;
-                    end
-                end
-                uId = "MULTI_OR_NONE"
-            end
-            if (isComplete == nil) then
-                isComplete = 'nil';
-            end
-            footprint = footprint.."'"..questTitle.."'"..level.."#"..uId.."#"..isComplete;
-        end
-    end
-    SelectQuestLogEntry(oldQuestLogId);
-    return {strlower(footprint), ids}
-end
 
 function CdbMarkQuestAsFinished(questId)
     if qData[questId] then

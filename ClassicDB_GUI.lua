@@ -41,15 +41,10 @@ CdbLastSearchResults.quest = {}
 -- Auxiliary frame for registering events and initialization
 ------------------------------------------------------------
 CdbAuxiliaryFrame = CreateFrame("Frame", "CdbAuxiliaryFrame", UIParent)
-CdbAuxiliaryFrame:SetScript("OnLoad", function() CdbInit() end)
 CdbAuxiliaryFrame:SetScript("OnEvent", function() CdbOnEvent(self, event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10) end)
--- Register Events (some unused)
 CdbAuxiliaryFrame:RegisterEvent("PLAYER_LOGIN");
 CdbAuxiliaryFrame:RegisterEvent("PLAYER_ENTERING_WORLD");
-CdbAuxiliaryFrame:RegisterEvent("QUEST_WATCH_UPDATE");
 CdbAuxiliaryFrame:RegisterEvent("QUEST_LOG_UPDATE");
-CdbAuxiliaryFrame:RegisterEvent("QUEST_PROGRESS");
-CdbAuxiliaryFrame:RegisterEvent("QUEST_FINISHED");
 CdbAuxiliaryFrame:RegisterEvent("UNIT_QUEST_LOG_CHANGED");
 CdbAuxiliaryFrame:RegisterEvent("WORLD_MAP_UPDATE");
 
@@ -862,6 +857,13 @@ function CdbCreateResultButtons(searchType, searchCount, dbEntry, id, NAME_KEY)
         else
             CdbSearchGui[searchType].buttons[searchCount].finished:SetChecked(true);
         end
+        CdbSearchGui[searchType].buttons[searchCount].finished:SetScript("OnClick", function()
+            if this:GetChecked() then
+                CdbFinishedQuests[this.id] = true;
+            else
+                CdbFinishedQuests[this.id] = nil;
+            end
+        end)
     end
     -- Common setup. Spawns and objects are missing a tooltip.
     if searchType == "spawn" or searchType == "object" then
