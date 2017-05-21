@@ -260,9 +260,10 @@ end -- Event(event, arg1)
 -- Returns a table with two elements:
 --     1. A string consisting of the names, ids, and some other characters
 --        depending on its current state, for all quest in the quest log.
---     2. A sub-table of all active quests IDs. If there is more the one ID
---        returned for a single quest, the string for that quest will say
---        MULTI_OR_NONE and this table will contain all possible IDs.
+--     2. A sub-table of all those quests IDs. e.g. {[123] = true, [456] = true}
+-- If there is more than one ID returned for a single quest, the string part for
+-- that quest will say "MULTI_OR_NONE" and the ID table will contain all the
+-- possible quest IDs.
 function CdbGetQuestLogFootprint()
     CdbDebugPrint(4, "GetQuestLogFootprint() called");
     local oldQuestLogId = GetQuestLogSelection();
@@ -287,8 +288,7 @@ function CdbGetQuestLogFootprint()
                         local text, objectiveType, finished = GetQuestLogLeaderBoard(i, arg1);
                         if not finished then
                             local i, j, itemName, numItems, numNeeded = strfind(text, "(.*):%s*([%d]+)%s*/%s*([%d]+)");
-                            -- TODO: localized versions of "slain"
-                            if (itemName ~= nil) and ((strlen(itemName) == 1) or (strlen(itemName) == 7 and strfind(itemName, "slain"))) then
+                            if (itemName ~= nil) and ((strlen(itemName) == 1) or ((strlen(itemName) == 7 and strfind(itemName, "slain")) or (strlen(itemName) == 9 and strfind(itemName, "getötet")))) then
                                 skip = true;
                             end
                             CdbDebugPrint(4, "    objective, have, need =", itemName, numItems, numNeeded);
