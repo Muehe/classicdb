@@ -41,7 +41,6 @@ else:
     shutil.copy2('ClassicDB.toc', enPath+'ClassicDB')
     subprocess.run(['sed',  '-i', 's/oooVersionooo/'+version+'/g', enPath+'ClassicDB/ClassicDB.toc'])
     subprocess.run(['sed',  '-i', 's/oooLocaleooo/enGB/g', enPath+'ClassicDB/ClassicDB.toc'])
-    shutil.copy2('ClassicDB.xml', enPath+'ClassicDB')
 
     shutil.copy2('resources/itemDB.lua_enGB', enPath+'ClassicDB/db/itemDB.lua')
     shutil.copy2('resources/objectDB.lua_enGB', enPath+'ClassicDB/db/objectDB.lua')
@@ -73,7 +72,6 @@ else:
     shutil.copy2('ClassicDB.toc', dePath+'ClassicDB')
     subprocess.run(['sed',  '-i', 's/oooVersionooo/'+version+'/g', dePath+'ClassicDB/ClassicDB.toc'])
     subprocess.run(['sed',  '-i', 's/oooLocaleooo/deDE/g', dePath+'ClassicDB/ClassicDB.toc'])
-    shutil.copy2('ClassicDB.xml', dePath+'ClassicDB')
 
     shutil.copy2('resources/itemDB.lua_deDE', dePath+'ClassicDB/db/itemDB.lua')
     shutil.copy2('resources/objectDB.lua_deDE', dePath+'ClassicDB/db/objectDB.lua')
