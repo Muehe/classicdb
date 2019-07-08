@@ -1,3 +1,9 @@
+# NOT IN DEVELOPMENT ANYMORE
+
+**This project is not developed anymore and just left here for archival purposes.**
+
+**If you need a quest addon for 1.12 take a look at [pfQuest](https://gitlab.com/shagu/pfQuest).**
+
 # ClassicDB
 ClassicDB is an addon for World of Warcraft (1.12.1), which helps you to find ingame stuff and getting your quests done. It draws spawn information of gameobjects and NPCs on your map. Also it allows you to search for quests, items and much more. Cartographer is required and an enhanced version is included in the download.
 
